@@ -11,8 +11,9 @@ from .artifacts import Artifacts
 from .broker import PRBroker, changes_checked
 from .ci import inspect_ci
 from .config import config_digest
-from .delivery_workers import CheckoutProtocolError, NativeJobs
+from .delivery_workers import CheckoutProtocolError, NativeJobs, validation_commands
 from .domain import PolicyError, Task, digest, select_model
+from .effort import runtime_evidence, tool_result
 from .quality import verify_pr
 from .service_test import candidate_gate, failure_evidence
 
@@ -61,6 +62,131 @@ class Delivery:
             "SELECT document FROM deliveries WHERE run_id=?", (run_id,)
         ).fetchone()
         return json.loads(row[0]) if row else None
+
+    def reconfigure_validation(self, run_id, previous_config, reason):
+        """Explicit operator correction after a definitively completed invalid validation.
+
+        Preserve the admission, PR, candidate and old packet. Only validation argv and
+        its token allowance may change; uncertain launches can never enter this path.
+        The caller holds serial_lock, and supplies the new, validated configuration.
+        """
+        if not isinstance(reason, str) or not reason.strip():
+            raise PolicyError("Validation reconfiguration needs an explicit reason")
+        changed = {
+            k
+            for k in self.config.keys() | previous_config.keys()
+            if self.config.get(k) != previous_config.get(k)
+        }
+        allowed = {"validation_commands", "repair_validation_commands", "max_total_tokens"}
+        doc, run = self._load(run_id), self.journal.get(run_id)
+        if (
+            not changed
+            or changed - allowed
+            or run["config_digest"] != config_digest(previous_config)
+            or run["state"] != "planning"
+            or run["pending_intent"]
+            or not doc
+            or doc["state"] != "validating"
+            or doc.get("protocol_failures", 0) >= self.config["max_repair_attempts"]
+            or validation_commands(previous_config, repaired=bool(doc.get("service_red")))
+            == validation_commands(self.config, repaired=bool(doc.get("service_red")))
+        ):
+            raise PolicyError("Only a recorded validation failure permits this correction")
+        key = f"{doc['cycle']}:validating:{doc['plan_attempt']}"
+        rows = self.journal.connection.execute(
+            "SELECT id FROM runs WHERE source_id=? AND repository=?",
+            (run_id + ":" + key, self.config["repository"]),
+        ).fetchall()
+        if len(rows) != 1 or key in doc["used_jobs"]:
+            raise PolicyError("Validation has no single unaccepted worker")
+        job = rows[0]["id"]
+        child = self.journal.get(job)
+        events = self.journal.events(job)
+        observations = [e for e in events if e["kind"] == "delivery_observation"]
+        launches = [e for e in events if e["kind"] == "launched"]
+        if child["state"] != "planning" or len(launches) != 1 or not observations:
+            raise PolicyError("Validation launch is not definitively observable")
+        observed = self.artifacts.get(observations[-1]["data"]["artifact_digest"])
+        if observed["turn"]["status"] != "completed" or observed["turn"].get("error"):
+            raise PolicyError("An unfinished or failed turn cannot be replaced")
+        started = next(e for e in events if e["kind"] == "job_started")
+        packet = self.artifacts.get(started["data"]["packet_digest"])
+        binding = NativeJobs(previous_config, self.journal, None, self.artifacts).binding(
+            select_model("executor", profile=previous_config.get("model_policy", "codex"))
+        )
+        runtime_evidence(
+            observed, binding, **{k: launches[0]["data"][k] for k in ("session_id", "turn_id")}
+        )
+        _, checked = tool_result(
+            observed, packet["checkout_command"], index=1, harness=binding.harness
+        )
+        markers = [
+            s for s in checked.get("output", "").splitlines() if s.startswith("COLLEGIUM_CHECKOUT=")
+        ]
+        if len(markers) != 1:
+            raise PolicyError("Original validation lacks pinned command evidence")
+        checkout = json.loads(markers[0].split("=", 1)[1])
+        commands = checkout.get("results", [])
+        if (
+            checkout.get("head") != doc["head"]
+            or [r.get("argv") for r in commands]
+            != validation_commands(previous_config, repaired=bool(doc.get("service_red")))
+            or not commands
+            or any(type(r.get("exit_code")) is not int for r in commands)
+            or not any(r["exit_code"] != 0 for r in commands)
+        ):
+            raise PolicyError("Only an actual nonzero validation command can be corrected")
+        idle = [e for e in observed["events"] if e.get("type") == "session.status_idle"]
+        if not idle:
+            raise PolicyError("Rejected validation usage is not settled")
+        tokens = sum(
+            v
+            for k, v in idle[-1].get("usage", {}).items()
+            if k.endswith("tokens") and type(v) is int and v >= 0
+        )
+        doc["tokens"] += tokens
+        doc["used_jobs"].append(key)
+        doc["protocol_failures"] = doc.get("protocol_failures", 0) + 1
+        doc["plan_attempt"] += 1
+        doc.update(
+            validation=None,
+            review=None,
+            feedback={
+                "kind": "validation_reconfigured",
+                "reason": reason,
+                "previous_commands": commands,
+            },
+        )
+        receipt = {
+            "reason": reason,
+            "job": job,
+            "key": key,
+            "head": doc["head"],
+            "observation_digest": observations[-1]["data"]["artifact_digest"],
+            "rejected_tokens": tokens,
+            "previous_config": self.artifacts.put(previous_config),
+            "new_config": self.artifacts.put(self.config),
+            "previous_config_digest": config_digest(previous_config),
+            "new_config_digest": config_digest(self.config),
+        }
+        with self.journal.transaction():
+            current = self.journal.get(run_id)
+            if current["version"] != run["version"] or self.journal.get(job) != child:
+                raise PolicyError("Validation correction raced another coordinator")
+            self.journal.connection.execute(
+                "UPDATE runs SET state='failed',pending_intent=NULL,version=version+1 WHERE id=?",
+                (job,),
+            )
+            self.journal._event(job, "validation_rejected", receipt)
+            self.journal.connection.execute(
+                "UPDATE runs SET config_digest=?,version=version+1 WHERE id=?",
+                (config_digest(self.config), run_id),
+            )
+            self.journal.connection.execute(
+                "UPDATE deliveries SET document=? WHERE run_id=?", (json.dumps(doc), run_id)
+            )
+            self.journal._event(run_id, "delivery_validation_reconfigured", receipt)
+        return {"run_id": run_id, **doc}
 
     def _worker(self, run_id, doc, stage, selection=None):
         key = f"{doc['cycle']}:{stage}:{doc['plan_attempt']}"

@@ -173,3 +173,19 @@ After the GitHub probe advances the diagnostic checkpoint, use `github-recover` 
 head. Native `inspect` still selects its own original admission; native `recover` refuses a
 broker checkpoint rather than importing it without a GitHub observer. Production checkpoints
 remain in their separate delivery namespace.
+
+## Correcting a failed validation command
+
+The service repair command uses `env PYTHONPATH=src python3 -m unittest discover -s tests -v`
+so a fresh source checkout can import this repository's package. A worker's `pass` cannot
+override a nonzero exit code from the pinned command.
+
+For an existing local run stopped at validation, `reconfigure-validation --apply` accepts
+`--previous-config`, `--config`, `--journal`, `--artifacts`, `--run-id` and `--reason`.
+It requires the original completed turn, verified runtime and pinned nonzero command
+evidence. Only validation argv and token allowance may change. It preserves the failed
+packet and configuration artifacts, accounts rejected usage, and atomically records the
+correction before admitting a fresh validation attempt on the same candidate and PR.
+Running, unknown or unobserved launches cannot be replaced. Task, scope, worker bindings,
+credentials and CI requirements cannot change through this command. This is an explicit
+operator correction, not automatic acceptance or an automatic budget increase.

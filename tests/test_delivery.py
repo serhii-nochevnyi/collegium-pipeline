@@ -430,6 +430,97 @@ class DeliveryTests(unittest.TestCase):
         self.assertEqual(self.http.created, 4)
         self.assertEqual(self.github.writes, [])
 
+    def rejected_validation(self):
+        self.until("validating")
+
+        def mutate(packet, obs):
+            if packet["stage"] == "validating":
+                checkout = json.loads(obs["events"][4]["output"].split("=", 1)[1])
+                checkout["results"][0]["exit_code"] = 1
+                obs["events"][4]["output"] = "COLLEGIUM_CHECKOUT=" + json.dumps(checkout)
+
+        self.http.mutate = mutate
+        self.driver.step(self.run)
+        with self.assertRaisesRegex(PolicyError, "contradicts actual"):
+            self.driver.step(self.run)
+
+    def test_explicit_validation_correction_preserves_candidate_and_failed_evidence(self):
+        self.rejected_validation()
+        before = self.driver._load(self.run)
+        old = copy.deepcopy(self.config)
+        self.config["validation_commands"] = [["python3", "-m", "unittest", "-v"]]
+        result = self.driver.reconfigure_validation(self.run, old, "Correct test environment")
+        self.assertEqual(result["head"], before["head"])
+        self.assertEqual(result["branch"], before["branch"])
+        self.assertEqual(result["plan_attempt"], 1)
+        self.assertEqual(result["tokens"], before["tokens"] + 20)
+        self.assertEqual(self.journal.get(self.run)["config_digest"], config_digest(self.config))
+        events = self.journal.events(self.run)
+        correction = next(e for e in events if e["kind"] == "delivery_validation_reconfigured")
+        child = self.journal.get(correction["data"]["job"])
+        self.assertEqual(child["state"], "failed")
+        self.assertIsNone(child["pending_intent"])
+        self.assertEqual(self.driver.artifacts.get(correction["data"]["previous_config"]), old)
+
+        def mutate(packet, obs):
+            if packet["stage"] == "validating":
+                checkout = json.loads(obs["events"][4]["output"].split("=", 1)[1])
+                checkout["results"][0]["argv"] = self.config["validation_commands"][0]
+                obs["events"][4]["output"] = "COLLEGIUM_CHECKOUT=" + json.dumps(checkout)
+
+        self.http.mutate = mutate
+        created = self.http.created
+        self.restart_controller()
+        self.driver.step(self.run)
+        self.assertEqual(self.http.created, created + 1)
+        self.assertEqual(self.driver.step(self.run)["state"], "reviewing")
+        with self.assertRaises(PolicyError):
+            self.driver.reconfigure_validation(self.run, old, "Repeat must not duplicate")
+
+    def test_validation_correction_refuses_scope_change_or_uncertain_launch(self):
+        self.until("validating")
+        self.driver.step(self.run)
+        old = copy.deepcopy(self.config)
+        self.config["validation_commands"] = [["python3", "-m", "unittest", "-v"]]
+        with self.assertRaises(PolicyError):
+            self.driver.reconfigure_validation(self.run, old, "Still running, no observation")
+        self.config["allowed_paths"] = ["/"]
+        with self.assertRaises(PolicyError):
+            self.driver.reconfigure_validation(self.run, old, "Scope must stay frozen")
+        self.assertEqual(self.journal.get(self.run)["config_digest"], config_digest(old))
+
+    def test_validation_correction_cli_does_not_fall_through_to_github(self):
+        from collegium_pipeline.cli import main
+
+        self.rejected_validation()
+        old = copy.deepcopy(self.config)
+        self.config["validation_commands"] = [["python3", "-m", "unittest", "-v"]]
+        with (
+            patch("collegium_pipeline.cli.load_config", side_effect=[self.config, old]),
+            patch("builtins.print"),
+            patch("collegium_pipeline.cli.Github") as github,
+        ):
+            code = main(
+                [
+                    "reconfigure-validation",
+                    "--config",
+                    "new.json",
+                    "--previous-config",
+                    "old.json",
+                    "--journal",
+                    str(self.path / "journal.sqlite3"),
+                    "--artifacts",
+                    str(self.path / "artifacts"),
+                    "--run-id",
+                    self.run,
+                    "--reason",
+                    "Correct environment",
+                    "--apply",
+                ]
+            )
+        self.assertEqual(code, 0)
+        github.assert_not_called()
+
     def restart_controller(self):
         self.journal.close()
         self.journal = Journal(self.path / "journal.sqlite3")

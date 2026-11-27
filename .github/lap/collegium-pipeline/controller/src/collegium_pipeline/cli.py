@@ -52,6 +52,14 @@ def main(argv=None, *, recovery=None):
     delivery.add_argument("--once", action="store_true")
     delivery.add_argument("--timeout", type=int, default=3600)
     delivery.add_argument("--live", action="store_true")
+    correction = commands.add_parser("reconfigure-validation")
+    correction.add_argument("--config", required=True)
+    correction.add_argument("--previous-config", required=True)
+    correction.add_argument("--journal", required=True)
+    correction.add_argument("--artifacts", required=True)
+    correction.add_argument("--run-id", required=True)
+    correction.add_argument("--reason", required=True)
+    correction.add_argument("--apply", action="store_true")
     args = parser.parse_args(argv)
     try:
         if args.command == "explain-route":
@@ -62,7 +70,24 @@ def main(argv=None, *, recovery=None):
             )
         else:
             config = load_config(args.config)
-            if args.command == "deliver":
+            if args.command == "reconfigure-validation":
+                from .delivery import Delivery, serial_lock
+
+                if not args.apply or not Path(args.journal).is_file():
+                    raise ValueError("Validation correction needs --apply and an existing journal")
+                with serial_lock(args.journal):
+                    journal = Journal(args.journal)
+                    try:
+                        result = Delivery(
+                            config, journal, None, None, args.artifacts
+                        ).reconfigure_validation(
+                            args.run_id, load_config(args.previous_config), args.reason
+                        )
+                    finally:
+                        journal.close()
+                print(json.dumps(result, indent=2))
+                return 0
+            elif args.command == "deliver":
                 from .credentials import local_platform
                 from .delivery import Delivery, serial_lock
                 from .native_broker import github_broker

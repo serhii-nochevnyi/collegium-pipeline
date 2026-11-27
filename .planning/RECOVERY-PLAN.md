@@ -42,3 +42,23 @@ then deliberately withhold the returned result and hold before PRBroker records 
 Cancel the controller after its ready signal, restore from the independent checkpoint,
 then run the exact same modes twice. Observe one commit by base comparison/branch SHA,
 and one PR including closed PRs by exact branch. Leave both source/service PRs unmerged.
+
+## Live CI repair acceptance
+
+Run existing Delivery engine under a local manual supervisor with native private-Claude workers
+and App-only writes. Freeze a fresh service config/task; do not rebind historical admissions.
+Initial exact red fixture compiles locally and must fail the actual PR quality job with the
+expected assertion. Only this evidence admits the native fixer; repaired exact green fixture
+needs full validation, independent revision-bound review and actual same-PR green CI.
+Keep every automation paused; no source/product pilot or merge.
+
+
+Live CI repair found a misconfigured src-layout test command. The controller correctly
+refused a worker pass contradicting actual exit1. Add an explicit audited validation-only
+configuration correction: require original completed/pinned runtime evidence, preserve failed
+job and both configs, account all usage, atomically amend the parent configuration and
+start a fresh attempt at the same head. Never replace an uncertain launch or allow changes
+to scope/models/CI gates through this operation. Correct service argv with PYTHONPATH=src;
+retain the complete test discovery. Explicit manual budget amendment records1m->1.5m.
+The real diagnostic then completed: PR3, initial red46073983075, repaired green46074131032;
+native fixer and fresh independent reviewer, main unchanged, all automations paused.
