@@ -1,0 +1,91 @@
+{
+  "schema_version": "delivery-verification/v1",
+  "date": "2026-11-27",
+  "evidence_kind": "local_contract_tests_plus_native_read_only_checkout",
+  "checks": {
+    "ruff": "pass",
+    "format": "pass",
+    "compile": "pass",
+    "local_tests": 68,
+    "delivery_tests": 29
+  },
+  "delivery_fixture": {
+    "red_to_green": "pass",
+    "lost_pr_response_no_duplicate": "pass",
+    "lost_commit_response_no_duplicate": "pass",
+    "effort_ladder": [
+      "low",
+      "high",
+      "xhigh"
+    ],
+    "candidate_validation_and_independent_review": "pass",
+    "exact_tree_reconciliation": "pass",
+    "native_github_write_or_ci": false
+  },
+  "native_checkout": {
+    "receipt": "reports/delivery-checkout.json",
+    "verdict": "pass",
+    "session_id": "ses_4b6612872c61470697fcc245781c4bb5",
+    "head": "dd3c5a022c46d749e146776f43c5266a512011c4",
+    "model": "gpt-6.2-sol",
+    "effort": "high"
+  },
+  "provisioned_variants": [
+    "planner",
+    "plan_reviewer",
+    "executor",
+    "code_reviewer",
+    "fixer",
+    "sentinel",
+    "fixer:high",
+    "fixer:xhigh"
+  ],
+  "delivery_enabled": false,
+  "broker_installation_credential_configured": false,
+  "target_repository_modified": false,
+  "product_task_selected": false,
+  "product_pr_created": false,
+  "limitations": [
+    "Native broker writes and red-to-green GitHub CI not run",
+    "High/xhigh fixer dispatch tested with fixtures; native effort proof pending",
+    "GitHub App installation token issuance/refresh not integrated",
+    "Serial local SQLite only; no cloud or distributed scheduler",
+    "USD ceiling is not enforced; token budget is admission-only"
+  ],
+  "source_sha256": {
+    "scripts/calibrate_worker.py": "9f92a050810923fc905f85661d2462fe08cd0510853bdb110964e9bb1a5b6cf4",
+    "scripts/check_codex_mcp.py": "c64d5a6a15cb22d2ea45c8b6870c582631284273462fb25a811476a31af0235c",
+    "scripts/check_delivery_checkout.py": "eaa1415e112ae6c88bdc579b77553d6ce3f61e6e75eff299d4914467f4436022",
+    "scripts/lap_mcp_headers.py": "ad46ccd79ff8eb6e8a04cf7cad1c8aab619c815d089f755c7dd658f11cf53573",
+    "scripts/provision_workers.py": "267cef2d08886216d742fcc7d36dbff29d459a3513d558006c5586182547d66b",
+    "scripts/publish_readiness.py": "fb39d66277cfd26918a54d8f591ec69fa368096b731cda7aae1c877ecf19f8ee",
+    "src/collegium_pipeline/__init__.py": "d84aa4bfbb997b05b1e5f41924520a394cbda1c0732b45534c3a7c25274a55ba",
+    "src/collegium_pipeline/__main__.py": "935a1c1166b0c1ea35a82256345000bf2c73ded718d77773bc27a71ecce28f7d",
+    "src/collegium_pipeline/adapters.py": "333b0e437ade636083813fc1c239d56d0fcdae0bb65324fd7c061a42cb69c9b9",
+    "src/collegium_pipeline/artifacts.py": "d541c521af1308234b91abb26f2ad52d23aaa5ec85ffea286275b998392ed7ed",
+    "src/collegium_pipeline/broker.py": "1dbb6ed0898e5407aea5450f9ec451bb9aa03685237b8cc1f7db186cf0040009",
+    "src/collegium_pipeline/ci.py": "375c2789c1dea6e073ce269d80d1d7bb80b2092b537aba74d3fae866b38e2ef8",
+    "src/collegium_pipeline/cli.py": "c1df23a13600526eab44119fe4fb6506528fb5f674ca1fdf094c8aa0951d4bd4",
+    "src/collegium_pipeline/config.py": "2a7a5f2f7a045b0891ea6a458a2594b13223dbd2756c1bcdf3c3ceabfb6d4d05",
+    "src/collegium_pipeline/controller.py": "1dce4e845a7b349db27937f5062ccb52af9695537146c1b32d108caa66dd6a06",
+    "src/collegium_pipeline/credentials.py": "1e9f299298aef69a512b3a22feee9517f97db3390b032503b8bbdf374bde4bf7",
+    "src/collegium_pipeline/delivery.py": "32621e74304206ae37e0df33fd58453ad5dcc5904b100885421929baf3951f68",
+    "src/collegium_pipeline/delivery_workers.py": "0b26b05de349b133bbeebd25cd857355e9a3f185f9a7606a3b3b3f3bdb442a0f",
+    "src/collegium_pipeline/doctor.py": "494c39f7ff9b8abfff57b83b10b97a6dcf9a9ac4a3f8e357e4ba2a1a2de43e16",
+    "src/collegium_pipeline/domain.py": "36a5ee81aa7707392ffdfd5acd047e52f173fa6f378f89aeb29032dce7b90a99",
+    "src/collegium_pipeline/effort.py": "35f92846941cb88738b39d1033924a3a7630882309c362690f1edffe57845ae2",
+    "src/collegium_pipeline/packets.py": "d1a1ac506b8d2a2075093ba46b20e653707110e4ed0642bc92cd8fcc27b6f838",
+    "src/collegium_pipeline/platform.py": "d75912e611e8a7cea92180aaa10e35192b8d293ba9f98af20646b1211053fbb9",
+    "src/collegium_pipeline/quality.py": "1446d35b6a323b9d6865e8bbcc5e491e21d1ec1cc2b2aa7f6a669850fd813185",
+    "src/collegium_pipeline/readiness.py": "909188dd6ecc3b47178bc332ede5514e19b411417b6781fe8c939015a82137f4",
+    "src/collegium_pipeline/runner.py": "2808c342a2f3bc703183fbdde28b8feea3f84b4cb1a80a456abde2b638aa0f61",
+    "src/collegium_pipeline/store.py": "f0a5c2623e61cfe63b524370ce54031d5cefb71fe76928c185e9180ac9a4b273",
+    "src/collegium_pipeline/transport.py": "498bcb196646357a1641c597321b8314bcaff62e2e37bdf3b11a1cadce4e0df2",
+    "tests/test_config_cli_transport.py": "cf744acff264cbfc4d514714345faeb7cbd541fea706868006dcd0d03b496e08",
+    "tests/test_delivery.py": "1d82070d9aad30851bd6921f712e33bbedd04affa1926f2584b05b9afe4559fe",
+    "tests/test_journal_controller.py": "9edb546a2d32b049615418ba22731da0e0aa06b85d85ccf12d46919ac5752d8c",
+    "tests/test_platform.py": "fb7d3ac61b958d7fa997535103502310b98e1dfa7a8c5e6cf4aac8e553556773",
+    "tests/test_policy_quality.py": "c2116c25f5bbb5d2cd816ab4b70cdfc5397c15e76a206759bf7f113f4f3a7832",
+    "tests/test_runner.py": "e7481405bf2537c86e47c65444c2e18669dc7d92bf39233b88af72f1c420be93"
+  }
+}

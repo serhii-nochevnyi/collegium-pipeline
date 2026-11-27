@@ -1,0 +1,53 @@
+{
+  "schema_version": "github-app-live-test/v1",
+  "date": "2026-11-27",
+  "state": "blocked_before_session",
+  "requested_scope": "service_only_pr_and_red_to_green_ci",
+  "connection": {
+    "id": "ghc_73f2cf589000496f88519d531e798f23",
+    "kind": "github_app",
+    "repository": "airslate-common/agents-knowledge",
+    "repository_id": 1345007429,
+    "access": "contributor"
+  },
+  "actual_admission": {
+    "state": "rejected",
+    "status": 400,
+    "detail": {
+      "error": {
+        "code": "repository_not_given",
+        "message": "https://github.com/airslate-common/agents-knowledge cannot be given to this session: https://github.com/airslate-common/agents-knowledge: no write token is given, because no active rule on main that the App's write token cannot bypass requires a pull request, nor one that requires at least one approving review, nor one that requires a code owner's review, nor one that dismisses approvals on a new push or requires approval of the last push, nor one that forbids deleting it, nor one that forbids a force push",
+        "type": "gateway_error"
+      }
+    }
+  },
+  "user_github_permissions": {
+    "push": true,
+    "maintain": false,
+    "admin": false
+  },
+  "existing_main_ruleset": {
+    "id": 26681051,
+    "source": "Organization",
+    "enforcement": "active",
+    "all_required_branch_rule_types_present": true,
+    "observed_person_can_bypass": "never",
+    "app_bypass_actors_read": false
+  },
+  "session_created": false,
+  "model_turn_started": false,
+  "pr_created": false,
+  "repository_modified": false,
+  "protections_changed": false,
+  "service_fixture": {
+    "path": "bundles/ak-team/dispatcher/test_collegium_pipeline_service.py",
+    "local_initial_assertion": "expected_failure",
+    "local_single_constant_fix": "pass",
+    "sha256": "f8b5883ebb796ab8af575ecd2ff4c98b3b322b646fd683ace356a3aba958fabb"
+  },
+  "native_ci_executed": false,
+  "installation_token_export_supported": false,
+  "runtime_broker_integration_complete": false,
+  "product_pilot_selected": false,
+  "required_external_action": "Administrator must ensure App eligibility for non-bypassable main and release-tag protections, or supply an already eligible connected service repository"
+}

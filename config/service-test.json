@@ -1,0 +1,152 @@
+{
+  "schema_version": "pilot/v1",
+  "mode": "local_serial_prototype",
+  "server": "https://agentic-platform.infrateam.xyz",
+  "mcp_endpoint": "https://agentic-platform-mcp.infrateam.xyz/mcp",
+  "space_id": "spc_abd49a5569154751a43c006659d9f535",
+  "project_id": "prj_7e76b4e4920141a2abbedd46ccb713da",
+  "github_connection_id": "ghc_73f2cf589000496f88519d531e798f23",
+  "repository": "airslate-common/agents-knowledge",
+  "repository_id": 1345007429,
+  "base_branch": "main",
+  "required_checks": [
+    "gate",
+    "dispatcher / test"
+  ],
+  "workers": {
+    "planner": {
+      "agent_id": "agent_75df2208ac524fc292399f09c10e0b27",
+      "project_id": "prj_7e76b4e4920141a2abbedd46ccb713da",
+      "runtime": "aranarium-aws",
+      "environment_id": "base",
+      "api_model": "openai/gpt-6.2-sol",
+      "selection": {
+        "role": "planner",
+        "model": "gpt-6.2-sol",
+        "effort": "high",
+        "reason": "base"
+      },
+      "approved_agent_digest": "b683f49f5854573cd5d7a6e1da4123c6f265a3192194568230071eca7c87e826"
+    },
+    "plan_reviewer": {
+      "agent_id": "agent_478a1f79eeac45cab06d8903b8c6176a",
+      "project_id": "prj_7e76b4e4920141a2abbedd46ccb713da",
+      "runtime": "aranarium-aws",
+      "environment_id": "base",
+      "api_model": "openai/gpt-6.2-sol",
+      "selection": {
+        "role": "plan_reviewer",
+        "model": "gpt-6.2-sol",
+        "effort": "high",
+        "reason": "base"
+      },
+      "approved_agent_digest": "3d5a4b681b6bb27a19b0761c492df38827b2cae4858a3a152a5970e36f37f866"
+    },
+    "executor": {
+      "agent_id": "agent_32f7c368986c4cdcbf21b0a78b6f2d64",
+      "project_id": "prj_7e76b4e4920141a2abbedd46ccb713da",
+      "runtime": "aranarium-aws",
+      "environment_id": "base",
+      "api_model": "openai/gpt-6.2-sol",
+      "selection": {
+        "role": "executor",
+        "model": "gpt-6.2-sol",
+        "effort": "low",
+        "reason": "base"
+      },
+      "approved_agent_digest": "70257136c46ad572ad42e7e82bd5fc25f97f38f20d6de25be35edacd4158c658"
+    },
+    "code_reviewer": {
+      "agent_id": "agent_cde310c6c6d246548bcfa57d3a88c393",
+      "project_id": "prj_7e76b4e4920141a2abbedd46ccb713da",
+      "runtime": "aranarium-aws",
+      "environment_id": "base",
+      "api_model": "openai/gpt-6.2-sol",
+      "selection": {
+        "role": "code_reviewer",
+        "model": "gpt-6.2-sol",
+        "effort": "high",
+        "reason": "base"
+      },
+      "approved_agent_digest": "880e302bb7b7cfdd010165f9066876929a7e9f65f7548c9a6483d90edb1b0d44"
+    },
+    "fixer": {
+      "agent_id": "agent_2747e69af9e84e728f94c8c6c291b885",
+      "project_id": "prj_7e76b4e4920141a2abbedd46ccb713da",
+      "runtime": "aranarium-aws",
+      "environment_id": "base",
+      "api_model": "openai/gpt-6.2-sol",
+      "selection": {
+        "role": "fixer",
+        "model": "gpt-6.2-sol",
+        "effort": "low",
+        "reason": "base"
+      },
+      "approved_agent_digest": "d144e4b663ee4b0d0c2d959ea2127abd983acc7817ce7fa324833e57bcda9a14"
+    },
+    "sentinel": {
+      "agent_id": "agent_ec79c5647baf4ad3bb1afc032f921ec6",
+      "project_id": "prj_7e76b4e4920141a2abbedd46ccb713da",
+      "runtime": "aranarium-aws",
+      "environment_id": "base",
+      "api_model": "openai/gpt-6-luna",
+      "selection": {
+        "role": "sentinel",
+        "model": "gpt-6-luna",
+        "effort": "medium",
+        "reason": "base"
+      },
+      "approved_agent_digest": "324208ccfce69889fe72ef0ed8d2ba495b94282ba784b436b4101d0e01804dbb"
+    },
+    "fixer:high": {
+      "agent_id": "agent_3add4fe6b8204c438241594f85861592",
+      "project_id": "prj_7e76b4e4920141a2abbedd46ccb713da",
+      "runtime": "aranarium-aws",
+      "environment_id": "base",
+      "api_model": "openai/gpt-6.2-sol",
+      "selection": {
+        "role": "fixer",
+        "model": "gpt-6.2-sol",
+        "effort": "high",
+        "reason": "same_cause_repeat"
+      },
+      "approved_agent_digest": "ea929abdc781492cd2790073be03dc47cf605ac9eb5b74382d48ea4b2647a761"
+    },
+    "fixer:xhigh": {
+      "agent_id": "agent_5601d69b823e4785bbacc793b6937636",
+      "project_id": "prj_7e76b4e4920141a2abbedd46ccb713da",
+      "runtime": "aranarium-aws",
+      "environment_id": "base",
+      "api_model": "openai/gpt-6.2-sol",
+      "selection": {
+        "role": "fixer",
+        "model": "gpt-6.2-sol",
+        "effort": "xhigh",
+        "reason": "repeat_tier_exhausted"
+      },
+      "approved_agent_digest": "b1fbc1ca8960bd7c1f56f6030ad3985c4b11e7d58e9fbc6e666881bd937b4318"
+    }
+  },
+  "execution_enabled": false,
+  "max_cost_usd": 5,
+  "max_repair_attempts": 2,
+  "execution_profile": "delivery",
+  "max_stage_seconds": 300,
+  "max_stage_attempts": 8,
+  "max_total_tokens": 250000,
+  "broker_enabled": false,
+  "allowed_paths": [
+    "bundles/ak-team/dispatcher/test_collegium_pipeline_service.py"
+  ],
+  "validation_commands": [
+    [
+      "python3",
+      "-m",
+      "py_compile",
+      "bundles/ak-team/dispatcher/test_collegium_pipeline_service.py"
+    ]
+  ],
+  "ci_timeout_seconds": 900,
+  "max_delivery_seconds": 3600,
+  "max_worker_jobs": 24
+}

@@ -1,0 +1,28 @@
+{
+  "schema_version": "delivery-checkout/v1",
+  "scope": "native read-only service diagnostic; no product task",
+  "run_id": "32a9b3ee-0995-4e51-a86d-00240ad609de",
+  "head": "dd3c5a022c46d749e146776f43c5266a512011c4",
+  "verdict": "pass",
+  "session_id": "ses_4b6612872c61470697fcc245781c4bb5",
+  "runtime_evidence": {
+    "verified_by_platform": true,
+    "harness": "codex",
+    "model": "gpt-6.2-sol",
+    "effort": "high",
+    "session_id": "ses_4b6612872c61470697fcc245781c4bb5",
+    "turn_id": "run_a94d566b489c40fb8a72d7da15dd24b4",
+    "agent_id": "agent_75df2208ac524fc292399f09c10e0b27",
+    "harness_release": "codex-0.153.4-7ccae130",
+    "runtime": "aranarium-aws",
+    "proof_kind": "first_tool_codex_process_arguments",
+    "process_id": 7,
+    "tool_use_id": "call_6856075ad38d4c72a486faa3dcfdc233",
+    "tool_result_event_id": "evt_01M8EW2D7A72ZVFZD5HZEAWX7B",
+    "command_digest": "32414fbfd107aa4bcb320b5c721ecaf418436aa04fa8665b9d2ce73a97001691",
+    "command_normalization": "same_python_ast_and_pinned_shell_frame"
+  },
+  "artifact_digest": "0a64f6b59988a09691b7b62f8c49394af696f414e7dcf98cea7a90faa002b685",
+  "repository_modified": false,
+  "pr_created": false
+}

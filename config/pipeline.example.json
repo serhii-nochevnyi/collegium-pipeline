@@ -1,0 +1,124 @@
+{
+  "schema_version": "0.1-draft",
+  "configuration_status": "example_not_deployable",
+  "pipeline": {
+    "name": "collegium-delivery",
+    "enabled": false,
+    "dry_run": true,
+    "delivery_target": "pr_ready",
+    "config_change_behavior": "new_runs_only"
+  },
+  "collegium": {
+    "server": "https://agentic-platform.infrateam.xyz",
+    "space_id": null,
+    "project_id": null,
+    "runtime_id": null,
+    "environment_id": null,
+    "harness": "codex",
+    "model_connection_ref": null,
+    "require_actual_selection_evidence": true,
+    "agent_variant_bindings": {}
+  },
+  "jira": {
+    "connection_ref": null,
+    "project_allowlist": [],
+    "ready_query": null,
+    "epic_parent_mapping": null,
+    "dependency_link_mapping": null,
+    "status_transition_ids": {},
+    "acceptance_field_mapping": null,
+    "export_decomposition": "explicit_action"
+  },
+  "github": {
+    "connection_ref": null,
+    "repositories": [],
+    "jira_repository_mapping": {},
+    "single_ticket_target": "configured_base",
+    "epic_strategy": "integration_branch",
+    "branch_prefix": "pipeline/",
+    "merge_method": "squash",
+    "merge_authority": "human",
+    "require_branch_protection": true,
+    "allow_force_push_shared_branches": false,
+    "external_reviewers": {
+      "coderabbit": "disabled",
+      "copilot": "disabled"
+    }
+  },
+  "concurrency": {
+    "global_active_turns": 4,
+    "project_active_tickets": 2,
+    "repository_active_tickets": 2,
+    "epic_active_tickets": 2,
+    "repository_integrations": 1,
+    "reserved_quality_turns": 1,
+    "unknown_resource_overlap": "serialize",
+    "queue_policy": "priority_with_aging"
+  },
+  "recovery": {
+    "reconcile_interval_seconds": 60,
+    "claim_lease_seconds": 180,
+    "heartbeat_seconds": 30,
+    "unknown_launch_outcome": "reconcile_without_relaunch",
+    "unconfirmed_cancellation": "quarantine_claim",
+    "transient_retries": 3,
+    "backoff_seconds": [5, 20, 60],
+    "respect_retry_after": true
+  },
+  "models": {
+    "policy_revision": "pipeline-model-policy-v1-draft",
+    "allowed_models": ["gpt-6.2-sol", "gpt-6-luna"],
+    "unavailable_route": "blocked",
+    "routes": {
+      "researcher": {"model": "gpt-6.2-sol", "base_effort": "high", "escalations": [{"signal": "very_complex", "effort": "xhigh"}]},
+      "planner": {"model": "gpt-6.2-sol", "base_effort": "high", "escalations": [{"signal": "critical_or_checkpoint", "effort": "xhigh"}]},
+      "executor": {"model": "gpt-6.2-sol", "base_effort": "low", "escalations": [{"signal": "critical_or_checkpoint", "effort": "high"}]},
+      "architecture_reviewer": {"model": "gpt-6.2-sol", "base_effort": "high", "escalations": [{"signal": "critical_architecture", "effort": "xhigh"}]},
+      "code_reviewer": {"model": "gpt-6.2-sol", "base_effort": "high", "escalations": [{"signal": "critical_or_checkpoint", "effort": "xhigh"}]},
+      "fixer": {"model": "gpt-6.2-sol", "base_effort": "low", "escalations": [{"signal": "same_cause_repeat", "effort": "high"}, {"signal": "repeat_tier_exhausted", "effort": "xhigh"}]},
+      "integrator": {"model": "gpt-6.2-sol", "base_effort": "high", "escalations": [{"signal": "critical_contested_or_checkpoint", "effort": "xhigh"}]},
+      "drift_checker": {"model": "gpt-6.2-sol", "base_effort": "low", "escalations": []},
+      "sentinel": {"model": "gpt-6-luna", "base_effort": "medium", "escalations": []}
+    },
+    "same_cause_failures_before_high": 1,
+    "high_tier_failures_before_xhigh": 1
+  },
+  "quality": {
+    "require_independent_plan_review": true,
+    "require_independent_code_review": true,
+    "require_actual_check_results": true,
+    "invalidate_on_head_change": true,
+    "invalidate_on_relevant_base_change": true,
+    "invalidate_on_acceptance_change": true,
+    "blocking_review_severities": ["critical", "high"],
+    "repository_check_profiles": {},
+    "architecture_review_when": ["public_contract", "cross_component", "persistence", "concurrency"],
+    "security_review_when": ["authentication", "authorization", "secrets", "untrusted_execution"],
+    "waiver_authority": "authenticated_operator",
+    "max_repair_attempts": 3,
+    "max_replan_attempts": 2
+  },
+  "budgets": {
+    "mode": "require_explicit_before_execution",
+    "run_cost_limit": null,
+    "run_token_limit": null,
+    "stage_timeout_seconds": 3600,
+    "run_timeout_seconds": 28800,
+    "reserve_quality_fraction": 0.25,
+    "exhausted": "checkpoint"
+  },
+  "storage": {
+    "backend": "postgresql",
+    "database_secret_ref": null,
+    "artifact_store_ref": null,
+    "artifact_content_hash": "sha256",
+    "retention_days": 90
+  },
+  "operations": {
+    "automations_start_paused": true,
+    "pause_behavior": "drain",
+    "notifications": "meaningful_transitions_only",
+    "notification_destinations": [],
+    "audit_redaction": true
+  }
+}

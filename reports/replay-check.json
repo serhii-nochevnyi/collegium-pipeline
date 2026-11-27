@@ -1,0 +1,8 @@
+{
+  "schema_version": "readiness-replay/v1",
+  "run_id": "d93b0a8a-0084-48ec-b43f-6c3c1a5dadf4",
+  "state": "self_test_passed",
+  "sessions_before": 13,
+  "sessions_after": 13,
+  "new_sessions": 0
+}
