@@ -64,9 +64,9 @@ def main(argv=None):
         else:
             config = load_config(args.config)
             if args.command == "deliver":
-                from .broker import GithubApp
                 from .credentials import local_platform
                 from .delivery import Delivery, serial_lock
+                from .native_broker import github_broker
 
                 if (
                     not args.live
@@ -85,7 +85,7 @@ def main(argv=None):
                         coordinator = Delivery(
                             config,
                             journal,
-                            GithubApp.from_environment(config),
+                            github_broker(config, local_platform(), journal, args.run_id),
                             local_platform(),
                             args.artifacts,
                         )

@@ -1,3 +1,25 @@
+# Current update — Claude bundle and MCP integrations
+
+2026-11-27. The owner clarified that this repository is the **bundle source**. The deterministic controller remains correct and must be packaged with its workers, rules, configuration and script entry points. Do not replace it with a prompt-only orchestrator. No Jira task or product pilot is selected.
+
+The active requested model policy is Claude Code on the owner's existing private project/claude-code-subscription (mcn_699c8e51528e4438a359acfd4dced40f). Eight version-1 role variants passed real runtime calibration, including Opus/max, and a Claude worker passed an exact private-repository checkout. Reports are reports/claude-workers.json and reports/claude-checkout.json. Prior Sol-only/Codex choices below are historical and superseded for new platform workers.
+
+The GitHub App is installed for serhii-nochevnyi/collegium-pipeline, repository 1474663859. Its dedicated project connection is ghc_7de07519a1e3437a95f98edc4545022d. Main has non-bypassable PR/code-owner/approval/quality rules. Baseline CI passed; no merge or protection weakening is authorized.
+
+A real bundle is generated at .github/lap/collegium-pipeline. It contains eight workers, a shared rule, controller code/entry/settings, a native App broker and twelve MCP needs. It passes the platform's real local-folder validator. Both script automations start paused, and packaged execution/writes are disabled. Claims preserve the existing eight agent IDs and broker ID. The manifest's legacy GitHub needs represent personal tokens, so repository grants directly reference the existing App connection instead.
+
+Created project metadata for GitHub MCP and eleven registered-service connections. The requested core is GitHub/Atlassian/Grafana/Langfuse, supplemented by VictoriaMetrics, Backstage and Agents Knowledge; every observability/knowledge service has distinct DEV and PROD needs. No tools are permitted before authenticated read-only discovery. PROD and Atlassian need authentication; four DEV services returned 502. See reports/mcp-connections.json. Desktop connectors do not authenticate Collegium connections.
+
+The cloud controller separately requires a project-scoped PIPELINE_CONTROL_KEY in the Vault; do not copy the host CLI key or the Claude token. Binding refresh/recalibration after an applied install plan and cloud durable-state interruption tests remain activation requirements. A valid bundle is not yet a production-ready cloud deployment.
+
+Local checks: 110 tests, Ruff and compile pass. Service root 281c201a-b129-4a5d-96f8-6a03f1db5286 is blocked after an operator interrupt during the user's bundle clarification. Both native stages completed; no broker mutation or PR occurred. Reconcile the recorded child session/turn before any resume. Earlier Codex root fdc168a6-97a3-48ee-b5dc-bd243854100c is separately superseded; preserve its budget/config history.
+
+Full investigation, epic scheduling, parallel execution and cloud production storage are later slices. The current implementation is a serial prototype. Source packaging and MCP authentication take precedence over choosing a pilot.
+
+---
+
+# Historical progress (superseded where the current update differs)
+
 # Project state
 
 Updated: 2026-11-27

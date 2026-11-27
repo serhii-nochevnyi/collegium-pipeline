@@ -6,6 +6,7 @@ import unittest
 from dataclasses import asdict
 from hashlib import sha1
 from pathlib import Path
+from unittest.mock import patch
 from urllib.parse import unquote
 
 from test_runner import FakeHttp
@@ -305,6 +306,80 @@ class DeliveryTests(unittest.TestCase):
                 return r
         self.fail("Never reached " + target + ": " + r["state"])
 
+    def service_profile(self):
+        self.config["service_test"] = {
+            "initial_changes_digest": digest({"src/app.py": "value = 1\n"}),
+            "repaired_changes_digest": digest({"src/app.py": "value = 2\n"}),
+            "check_name": "test",
+            "failure_signature": "AssertionError",
+            "test_name": "test_service",
+        }
+        self.config["repair_validation_commands"] = [["python3", "-m", "unittest"]]
+        self.run = self.journal.admit(
+            Task("text", "service", "owner/repo", "Service diagnostic", "Red then green"),
+            config_digest(self.config),
+        )
+
+    @staticmethod
+    def service_failure(config, doc, checks, ci):
+        return {
+            "pr_number": doc["pr"]["number"],
+            "head": doc["head"],
+            "run_id": 1,
+            "job_id": 2,
+            "check_id": 3,
+            "logs_digest": digest("observed fixture log"),
+        }
+
+    def test_service_requires_real_red_receipt_before_repair_and_same_pr_green(self):
+        self.service_profile()
+        with patch("collegium_pipeline.delivery.failure_evidence", self.service_failure):
+            result = self.until("ready_for_acceptance")
+        self.assertEqual(result["repairs"], 1)
+        self.assertEqual(result["service_red"]["head"], result["service_initial_head"])
+        self.assertNotEqual(result["head"], result["service_initial_head"])
+        self.assertEqual(result["service_red"]["pr_number"], result["pr"]["number"])
+
+    def test_service_initial_green_blocks_instead_of_claiming_test_success(self):
+        self.service_profile()
+        self.github.ci = "success"
+        result = self.until("blocked")
+        self.assertEqual(result["repairs"], 0)
+        self.assertNotIn("ci_green", result)
+        self.assertEqual([op for op, _ in self.github.writes].count("commit"), 1)
+
+    def test_service_premature_green_candidate_is_rejected_before_any_write(self):
+        self.service_profile()
+
+        def mutate(packet, observed):
+            if packet["stage"] == "implementing":
+                result = json.loads(observed["turn"]["answer"])
+                result["payload"]["changes"]["src/app.py"] = "value = 2\n"
+                observed["turn"]["answer"] = json.dumps(result)
+
+        self.http.mutate = mutate
+        with self.assertRaises(PolicyError):
+            self.until("ready_for_acceptance")
+        self.assertFalse(self.github.writes)
+
+    def test_service_local_failure_does_not_authorize_a_fixer(self):
+        self.service_profile()
+        doc = {"repairs": 0}
+        self.driver._repair(self.run, doc, {"kind": "local_failure"}, "signature")
+        self.assertEqual(doc["state"], "blocked")
+        self.assertEqual(doc["repairs"], 0)
+
+    def test_service_unrelated_red_ci_cannot_launch_a_fixer(self):
+        self.service_profile()
+        self.until("waiting_ci")
+        with patch(
+            "collegium_pipeline.delivery.failure_evidence",
+            side_effect=PolicyError("Wrong assertion"),
+        ):
+            with self.assertRaises(PolicyError):
+                self.driver.step(self.run)
+        self.assertEqual(self.driver._load(self.run)["repairs"], 0)
+
     def test_red_fix_validate_review_green_and_replay(self):
         r = self.until("ready_for_acceptance")
         self.assertTrue(r["ci_green"])
@@ -321,6 +396,39 @@ class DeliveryTests(unittest.TestCase):
         writes = len(self.github.writes)
         self.driver.step(self.run)
         self.assertEqual((self.http.created, len(self.github.writes)), (count, writes))
+
+    def test_keep_ready_mode_repairs_without_graphql_transitions(self):
+        self.config["repair_pr_mode"] = "keep_ready"
+        self.journal.connection.execute(
+            "UPDATE runs SET config_digest=? WHERE id=?", (config_digest(self.config), self.run)
+        )
+        result = self.until("ready_for_acceptance")
+        self.assertEqual(result["repairs"], 1)
+        self.assertFalse(any(op in {"draft", "ready"} for op, _ in self.github.writes))
+
+    def test_completed_checkout_protocol_failure_retries_without_weakening_proof(self):
+        def mutate(packet, obs):
+            if packet["stage"] == "planning" and packet["job_key"].endswith(":0"):
+                obs["events"][3]["input"]["command"] += " && echo changed"
+
+        self.http.mutate = mutate
+        result = self.until("plan_review")
+        self.assertEqual(result["protocol_failures"], 1)
+        self.assertEqual(self.http.created, 2)
+        self.assertEqual(self.github.writes, [])
+        self.assertTrue(
+            any(e["kind"] == "worker_protocol_rejected" for e in self.journal.events(self.run))
+        )
+
+    def test_checkout_protocol_retry_is_bounded(self):
+        def mutate(packet, obs):
+            obs["events"][3]["input"]["command"] += " && echo changed"
+
+        self.http.mutate = mutate
+        result = self.until("failed")
+        self.assertEqual(result["protocol_failures"], 4)
+        self.assertEqual(self.http.created, 4)
+        self.assertEqual(self.github.writes, [])
 
     def test_lost_pr_response_reconciles_without_second_pr(self):
         self.until("opening_pr")

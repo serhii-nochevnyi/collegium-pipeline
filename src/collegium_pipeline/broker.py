@@ -272,7 +272,7 @@ class PRBroker:
 
         return self.action(run_id, f"commit:{cycle}", "commit", payload, observe)["head"]
 
-    def open_pr(self, run_id, branch, head, base, title):
+    def open_pr(self, run_id, branch, head, base, title, *, description=None):
         marker = f"<!-- collegium-run:{run_id} -->"
 
         def observe():
@@ -304,7 +304,13 @@ class PRBroker:
             {
                 "title": title,
                 "body": marker
-                + "\n\nValidation and independent review receipts are retained by the coordinator.",
+                + "\n\n"
+                + (
+                    description
+                    if description is not None
+                    else "Validation and independent review receipts "
+                    "are retained by the coordinator."
+                ),
                 "head": branch,
                 "base": self.config["base_branch"],
                 "draft": False,

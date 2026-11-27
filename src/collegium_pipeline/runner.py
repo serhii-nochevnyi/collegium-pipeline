@@ -20,8 +20,20 @@ def worker_binding(config, role):
     value = dict(config["workers"][role])
     value["selection"] = Selection(**value["selection"])
     binding = WorkerBinding(**value)
-    if binding.project_id != config["project_id"] or binding.selection != select_model(role):
+    base, sep, effort = role.partition(":")
+    repeats = {"high": 1, "xhigh": 2, "max": 2}.get(effort, 0)
+    expected = select_model(
+        base, same_cause_failures=repeats, profile=config.get("model_policy", "codex")
+    )
+    if (sep and (base != "fixer" or expected.effort != effort)) or (
+        binding.project_id != config["project_id"] or binding.selection != expected
+    ):
         raise PolicyError("Worker binding differs from the admitted project or policy")
+    if config.get("model_policy") == "claude" and (
+        binding.harness != "claude-code"
+        or binding.model_connection_id != config["model_connection_id"]
+    ):
+        raise PolicyError("Worker differs from the admitted private Claude connection")
     return binding
 
 
@@ -124,6 +136,7 @@ class Runner:
                 binding.selection.role,
                 revision,
                 subject=self._subject(run_id, stage),
+                harness=binding.harness,
             )
             packet_digest = self.artifacts.put(json.loads(packet))
             self.journal.record(
@@ -226,7 +239,9 @@ class Runner:
                 )
             if stage == "validating":
                 packet = self.artifacts.get(packet_ref)
-                use, checked = tool_result(observation, packet["validation_command"], index=1)
+                use, checked = tool_result(
+                    observation, packet["validation_command"], index=1, harness=binding.harness
+                )
                 if 'COLLEGIUM_VALIDATION={"passed": true, "cases": 7}' not in checked.get(
                     "output", ""
                 ):

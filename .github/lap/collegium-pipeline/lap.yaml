@@ -1,0 +1,426 @@
+{
+  "apiVersion": "lap.airslate.com/v1alpha1",
+  "kind": "Bundle",
+  "metadata": {
+    "name": "collegium-pipeline",
+    "description": "Claude workers, durable controller and GitHub App PR broker"
+  },
+  "agents": [
+    {
+      "name": "pipeline-claude-planner-high-broker-v1",
+      "system_file": "agents/planner.md",
+      "harness": "claude-code",
+      "model": "opus",
+      "effort": "high",
+      "model_connection": "claude-code-subscription",
+      "max_runtime_minutes": 5,
+      "rules": [
+        "pipeline-quality"
+      ],
+      "repositories": [
+        {
+          "url": "https://github.com/serhii-nochevnyi/collegium-pipeline",
+          "connection": "ghc_7de07519a1e3437a95f98edc4545022d",
+          "access": "read"
+        }
+      ],
+      "mcp_servers": [
+        "pipeline-github",
+        "atlassian-rovo",
+        "ak-prod",
+        "grafana-prod",
+        "grafana-dev",
+        "vmcluster-dev",
+        "vmcluster-prod",
+        "backstage-dev",
+        "backstage-prod",
+        "langfuse-dev",
+        "langfuse-prod",
+        "ak-dev"
+      ]
+    },
+    {
+      "name": "pipeline-claude-plan-reviewer-high-broker-v1",
+      "system_file": "agents/plan_reviewer.md",
+      "harness": "claude-code",
+      "model": "opus",
+      "effort": "high",
+      "model_connection": "claude-code-subscription",
+      "max_runtime_minutes": 5,
+      "rules": [
+        "pipeline-quality"
+      ],
+      "repositories": [
+        {
+          "url": "https://github.com/serhii-nochevnyi/collegium-pipeline",
+          "connection": "ghc_7de07519a1e3437a95f98edc4545022d",
+          "access": "read"
+        }
+      ],
+      "mcp_servers": [
+        "pipeline-github",
+        "atlassian-rovo",
+        "ak-prod",
+        "grafana-prod",
+        "grafana-dev",
+        "vmcluster-dev",
+        "vmcluster-prod",
+        "backstage-dev",
+        "backstage-prod",
+        "langfuse-dev",
+        "langfuse-prod",
+        "ak-dev"
+      ]
+    },
+    {
+      "name": "pipeline-claude-executor-low-broker-v1",
+      "system_file": "agents/executor.md",
+      "harness": "claude-code",
+      "model": "sonnet",
+      "effort": "low",
+      "model_connection": "claude-code-subscription",
+      "max_runtime_minutes": 5,
+      "rules": [
+        "pipeline-quality"
+      ],
+      "repositories": [
+        {
+          "url": "https://github.com/serhii-nochevnyi/collegium-pipeline",
+          "connection": "ghc_7de07519a1e3437a95f98edc4545022d",
+          "access": "read"
+        }
+      ],
+      "mcp_servers": [
+        "pipeline-github",
+        "atlassian-rovo",
+        "ak-prod",
+        "grafana-prod",
+        "grafana-dev",
+        "vmcluster-dev",
+        "vmcluster-prod",
+        "backstage-dev",
+        "backstage-prod",
+        "langfuse-dev",
+        "langfuse-prod",
+        "ak-dev"
+      ]
+    },
+    {
+      "name": "pipeline-claude-code-reviewer-high-broker-v1",
+      "system_file": "agents/code_reviewer.md",
+      "harness": "claude-code",
+      "model": "opus",
+      "effort": "high",
+      "model_connection": "claude-code-subscription",
+      "max_runtime_minutes": 5,
+      "rules": [
+        "pipeline-quality"
+      ],
+      "repositories": [
+        {
+          "url": "https://github.com/serhii-nochevnyi/collegium-pipeline",
+          "connection": "ghc_7de07519a1e3437a95f98edc4545022d",
+          "access": "read"
+        }
+      ],
+      "mcp_servers": [
+        "pipeline-github",
+        "atlassian-rovo",
+        "ak-prod",
+        "grafana-prod",
+        "grafana-dev",
+        "vmcluster-dev",
+        "vmcluster-prod",
+        "backstage-dev",
+        "backstage-prod",
+        "langfuse-dev",
+        "langfuse-prod",
+        "ak-dev"
+      ]
+    },
+    {
+      "name": "pipeline-claude-fixer-low-broker-v1",
+      "system_file": "agents/fixer.md",
+      "harness": "claude-code",
+      "model": "sonnet",
+      "effort": "low",
+      "model_connection": "claude-code-subscription",
+      "max_runtime_minutes": 5,
+      "rules": [
+        "pipeline-quality"
+      ],
+      "repositories": [
+        {
+          "url": "https://github.com/serhii-nochevnyi/collegium-pipeline",
+          "connection": "ghc_7de07519a1e3437a95f98edc4545022d",
+          "access": "read"
+        }
+      ],
+      "mcp_servers": [
+        "pipeline-github",
+        "atlassian-rovo",
+        "ak-prod",
+        "grafana-prod",
+        "grafana-dev",
+        "vmcluster-dev",
+        "vmcluster-prod",
+        "backstage-dev",
+        "backstage-prod",
+        "langfuse-dev",
+        "langfuse-prod",
+        "ak-dev"
+      ]
+    },
+    {
+      "name": "pipeline-claude-sentinel-medium-broker-v1",
+      "system_file": "agents/sentinel.md",
+      "harness": "claude-code",
+      "model": "sonnet",
+      "effort": "medium",
+      "model_connection": "claude-code-subscription",
+      "max_runtime_minutes": 5,
+      "rules": [
+        "pipeline-quality"
+      ],
+      "repositories": [
+        {
+          "url": "https://github.com/serhii-nochevnyi/collegium-pipeline",
+          "connection": "ghc_7de07519a1e3437a95f98edc4545022d",
+          "access": "read"
+        }
+      ],
+      "mcp_servers": [
+        "pipeline-github",
+        "atlassian-rovo",
+        "ak-prod",
+        "grafana-prod",
+        "grafana-dev",
+        "vmcluster-dev",
+        "vmcluster-prod",
+        "backstage-dev",
+        "backstage-prod",
+        "langfuse-dev",
+        "langfuse-prod",
+        "ak-dev"
+      ]
+    },
+    {
+      "name": "pipeline-claude-fixer-high-broker-v1",
+      "system_file": "agents/fixer-high.md",
+      "harness": "claude-code",
+      "model": "sonnet",
+      "effort": "high",
+      "model_connection": "claude-code-subscription",
+      "max_runtime_minutes": 5,
+      "rules": [
+        "pipeline-quality"
+      ],
+      "repositories": [
+        {
+          "url": "https://github.com/serhii-nochevnyi/collegium-pipeline",
+          "connection": "ghc_7de07519a1e3437a95f98edc4545022d",
+          "access": "read"
+        }
+      ],
+      "mcp_servers": [
+        "pipeline-github",
+        "atlassian-rovo",
+        "ak-prod",
+        "grafana-prod",
+        "grafana-dev",
+        "vmcluster-dev",
+        "vmcluster-prod",
+        "backstage-dev",
+        "backstage-prod",
+        "langfuse-dev",
+        "langfuse-prod",
+        "ak-dev"
+      ]
+    },
+    {
+      "name": "pipeline-claude-fixer-max-broker-v1",
+      "system_file": "agents/fixer-max.md",
+      "harness": "claude-code",
+      "model": "opus",
+      "effort": "max",
+      "model_connection": "claude-code-subscription",
+      "max_runtime_minutes": 5,
+      "rules": [
+        "pipeline-quality"
+      ],
+      "repositories": [
+        {
+          "url": "https://github.com/serhii-nochevnyi/collegium-pipeline",
+          "connection": "ghc_7de07519a1e3437a95f98edc4545022d",
+          "access": "read"
+        }
+      ],
+      "mcp_servers": [
+        "pipeline-github",
+        "atlassian-rovo",
+        "ak-prod",
+        "grafana-prod",
+        "grafana-dev",
+        "vmcluster-dev",
+        "vmcluster-prod",
+        "backstage-dev",
+        "backstage-prod",
+        "langfuse-dev",
+        "langfuse-prod",
+        "ak-dev"
+      ]
+    }
+  ],
+  "rules": [
+    {
+      "name": "pipeline-quality",
+      "file": "rules/quality.md"
+    }
+  ],
+  "model_connections": [
+    {
+      "name": "claude-code-subscription",
+      "description": "Owner's private Claude subscription; never the shared gateway"
+    }
+  ],
+  "connections": [
+    {
+      "name": "pipeline-github",
+      "description": "GitHub MCP; read-only tools to be enabled only after authenticated discovery",
+      "url": "https://api.githubcopilot.com/mcp/readonly"
+    },
+    {
+      "name": "atlassian-rovo",
+      "description": "Atlassian Rovo (Jira, Confluence); read-only tools to be enabled only after authenticated discovery",
+      "url": "https://mcp.atlassian.com/v2/mcp"
+    },
+    {
+      "name": "ak-prod",
+      "description": "Agents Knowledge (PROD); read-only tools to be enabled only after authenticated discovery",
+      "url": "https://agents-knowledge.infrateam.xyz/mcp"
+    },
+    {
+      "name": "grafana-prod",
+      "description": "Grafana (PROD); read-only tools to be enabled only after authenticated discovery",
+      "url": "https://toolhive.infrateam.xyz/grafana-prod/mcp"
+    },
+    {
+      "name": "grafana-dev",
+      "description": "Grafana (DEV); read-only tools to be enabled only after authenticated discovery",
+      "url": "https://toolhive.infrateam-dev.xyz/grafana/mcp"
+    },
+    {
+      "name": "vmcluster-dev",
+      "description": "VictoriaMetrics (DEV); read-only tools to be enabled only after authenticated discovery",
+      "url": "https://toolhive.infrateam-dev.xyz/vmcluster-dev/mcp"
+    },
+    {
+      "name": "vmcluster-prod",
+      "description": "VictoriaMetrics (PROD); read-only tools to be enabled only after authenticated discovery",
+      "url": "https://toolhive.infrateam.xyz/vmcluster-prod/mcp"
+    },
+    {
+      "name": "backstage-dev",
+      "description": "Backstage (DEV); read-only tools to be enabled only after authenticated discovery",
+      "url": "https://toolhive.infrateam-dev.xyz/backstage/mcp"
+    },
+    {
+      "name": "backstage-prod",
+      "description": "Backstage (PROD); read-only tools to be enabled only after authenticated discovery",
+      "url": "https://toolhive.infrateam.xyz/backstage-prod/mcp"
+    },
+    {
+      "name": "langfuse-dev",
+      "description": "Langfuse (DEV); read-only tools to be enabled only after authenticated discovery",
+      "url": "https://langfuse.infrateam-dev.xyz/api/public/mcp"
+    },
+    {
+      "name": "langfuse-prod",
+      "description": "Langfuse (PROD); read-only tools to be enabled only after authenticated discovery",
+      "url": "https://langfuse.infrateam.xyz/api/public/mcp"
+    },
+    {
+      "name": "ak-dev",
+      "description": "Agents Knowledge (DEV); read-only tools to be enabled only after authenticated discovery",
+      "url": "https://agents-knowledge.infrateam-dev.xyz/mcp"
+    }
+  ],
+  "secrets": [
+    {
+      "name": "PIPELINE_CONTROL_KEY",
+      "delivery": "env",
+      "description": "Project-scoped Collegium API key for the controller; separate from the Claude key"
+    }
+  ],
+  "automations": [
+    {
+      "name": "pipeline-controller",
+      "start": "paused",
+      "schedule": "*/5 * * * *",
+      "notify": "failures",
+      "script": {
+        "files": [
+          "controller/src/collegium_pipeline/__init__.py",
+          "controller/src/collegium_pipeline/__main__.py",
+          "controller/src/collegium_pipeline/adapters.py",
+          "controller/src/collegium_pipeline/artifacts.py",
+          "controller/src/collegium_pipeline/broker.py",
+          "controller/src/collegium_pipeline/ci.py",
+          "controller/src/collegium_pipeline/cli.py",
+          "controller/src/collegium_pipeline/config.py",
+          "controller/src/collegium_pipeline/controller.py",
+          "controller/src/collegium_pipeline/credentials.py",
+          "controller/src/collegium_pipeline/delivery.py",
+          "controller/src/collegium_pipeline/delivery_workers.py",
+          "controller/src/collegium_pipeline/doctor.py",
+          "controller/src/collegium_pipeline/domain.py",
+          "controller/src/collegium_pipeline/effort.py",
+          "controller/src/collegium_pipeline/native_broker.py",
+          "controller/src/collegium_pipeline/packets.py",
+          "controller/src/collegium_pipeline/platform.py",
+          "controller/src/collegium_pipeline/quality.py",
+          "controller/src/collegium_pipeline/readiness.py",
+          "controller/src/collegium_pipeline/runner.py",
+          "controller/src/collegium_pipeline/service_test.py",
+          "controller/src/collegium_pipeline/store.py",
+          "controller/src/collegium_pipeline/transport.py",
+          "controller/entry.py",
+          "controller/settings.json",
+          "controller/integrations.json"
+        ],
+        "command": "python3 controller/entry.py",
+        "executor": "aranarium",
+        "environment_ref": "custom",
+        "environment": "base",
+        "size": "small",
+        "secrets": [
+          "PIPELINE_CONTROL_KEY"
+        ]
+      }
+    },
+    {
+      "name": "pipeline-native-broker-1474663859-v1",
+      "start": "paused",
+      "schedule": "0 0 1 1 *",
+      "notify": "none",
+      "script": {
+        "files": [
+          "native_github_broker.py",
+          "broker_scope.json"
+        ],
+        "command": "python3 native_github_broker.py",
+        "executor": "aranarium",
+        "environment_ref": "custom",
+        "environment": "base",
+        "size": "small",
+        "repositories": [
+          {
+            "url": "https://github.com/serhii-nochevnyi/collegium-pipeline",
+            "connection": "ghc_7de07519a1e3437a95f98edc4545022d",
+            "access": "contributor"
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -27,9 +27,16 @@ def provision(config_path, readiness=False, version=2, broker_workers=False):
     if broker_workers:
         variants += [("fixer", 1), ("fixer", 2)]
     for role, repeats in variants:
-        selection = select_model(role, same_cause_failures=repeats)
+        claude = config.get("model_policy") == "claude"
+        selection = select_model(
+            role,
+            same_cause_failures=repeats,
+            profile=config.get("model_policy", "codex"),
+        )
         binding_key = role if not repeats else role + ":" + selection.effort
         name = f"pipeline-{role.replace('_', '-')}-{selection.effort}-v{version}"
+        if claude:
+            name = name.replace("pipeline-", "pipeline-claude-", 1)
         if broker_workers:
             name = name.removesuffix(f"-v{version}") + f"-broker-v{version}"
         if readiness and not broker_workers and role in {"executor", "fixer"}:
@@ -41,9 +48,15 @@ def provision(config_path, readiness=False, version=2, broker_workers=False):
             "space_id": config["space_id"],
             "runtime": "aranarium-aws",
             "environment": "penv_abd958a7f24748afbd55ae6580112147",
-            "model": "openai/" + selection.model,
-            "model_connection": "platform/litellm",
-            "system": system + f"\nYour fixed role is {role}.\n",
+            "harness": "claude-code" if claude else "codex",
+            "model": selection.model if claude else "openai/" + selection.model,
+            "model_connection": config["model_connection"] if claude else "platform/litellm",
+            "system": (
+                (Path(__file__).resolve().parents[1] / "agents/claude-worker.md").read_text()
+                if claude
+                else system
+            )
+            + f"\nYour fixed role is {role}.\n",
             "max_runtime_minutes": 5 if broker_workers else 2,
             "config": {
                 "effort": selection.effort,
@@ -83,6 +96,11 @@ def provision(config_path, readiness=False, version=2, broker_workers=False):
             if not row.get("id"):
                 raise PolicyError(f"Worker creation returned no identity for {name}")
             row, _ = http.request("GET", "/api/agents/" + row["id"])
+        if claude and (
+            row.get("model_connection_id") != config["model_connection_id"]
+            or row.get("harness") != "claude-code"
+        ):
+            raise PolicyError("Claude agent did not acknowledge its private connection/harness")
         binding = WorkerBinding(
             row["id"],
             config["project_id"],
@@ -91,6 +109,8 @@ def provision(config_path, readiness=False, version=2, broker_workers=False):
             body["model"],
             selection,
             agent_digest(row),
+            body["harness"],
+            config["model_connection_id"] if claude else None,
         )
         bindings[binding_key] = asdict(binding)
         print(json.dumps({"role": role, "agent_id": row["id"], "effort": selection.effort}))

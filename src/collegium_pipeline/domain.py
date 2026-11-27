@@ -74,6 +74,18 @@ BASE_ROUTES = {
     "sentinel": ("gpt-6-luna", "medium"),
 }
 
+CLAUDE_ROUTES = {
+    role: ("sonnet", "medium" if role == "sentinel" else "low")
+    if role in {"executor", "fixer", "drift_checker", "sentinel"}
+    else ("opus", "high")
+    for role in BASE_ROUTES
+}
+
+
+def selection_harness(selection: Selection) -> str:
+    return "claude-code" if selection.model in {"opus", "sonnet"} else "codex"
+
+
 STAGE_ROLES = {
     "planning": "planner",
     "plan_review": "plan_reviewer",
@@ -85,13 +97,21 @@ STAGE_ROLES = {
 
 
 def select_model(
-    role: str, *, critical=False, checkpoint=False, same_cause_failures=0, very_complex=False
+    role: str,
+    *,
+    critical=False,
+    checkpoint=False,
+    same_cause_failures=0,
+    very_complex=False,
+    profile="codex",
 ) -> Selection:
     if role not in BASE_ROUTES:
         raise PolicyError(f"Unknown role: {role}")
     if type(same_cause_failures) is not int or same_cause_failures < 0:
         raise PolicyError("Failure count must be a nonnegative integer")
-    model, effort = BASE_ROUTES[role]
+    if profile not in {"codex", "claude"}:
+        raise PolicyError("Unknown model policy")
+    model, effort = (CLAUDE_ROUTES if profile == "claude" else BASE_ROUTES)[role]
     reason = "base"
     if role == "fixer" and same_cause_failures:
         effort = "high" if same_cause_failures == 1 else "xhigh"
@@ -103,12 +123,18 @@ def select_model(
             effort, reason = "xhigh", "critical_or_checkpoint"
     elif role == "researcher" and very_complex:
         effort, reason = "xhigh", "very_complex"
+    if profile == "claude" and effort == "xhigh":
+        model, effort = "opus", "max"
     return Selection(role, model, effort, reason)
 
 
 def verify_selection(requested: Selection, actual: dict) -> None:
     """Caller must supply runtime evidence, not a worker's self-report."""
-    expected = {"model": requested.model, "effort": requested.effort, "harness": "codex"}
+    expected = {
+        "model": requested.model,
+        "effort": requested.effort,
+        "harness": selection_harness(requested),
+    }
     if actual.get("verified_by_platform") is not True or not actual.get("session_id"):
         raise PolicyError("Actual runtime selection has not been verified")
     for key, value in expected.items():

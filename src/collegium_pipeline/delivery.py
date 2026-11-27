@@ -11,9 +11,10 @@ from .artifacts import Artifacts
 from .broker import PRBroker, changes_checked
 from .ci import inspect_ci
 from .config import config_digest
-from .delivery_workers import NativeJobs
+from .delivery_workers import CheckoutProtocolError, NativeJobs
 from .domain import PolicyError, Task, digest, select_model
 from .quality import verify_pr
+from .service_test import candidate_gate, failure_evidence
 
 
 @contextmanager
@@ -71,6 +72,8 @@ class Delivery:
             doc["job_keys"].append(key)
             self._save(run_id, doc)
         context = {k: doc[k] for k in ("plan", "candidate", "validation", "feedback")}
+        if self.config.get("service_test"):
+            context["service_red"] = doc.get("service_red")
         result = self.workers.step(run_id, key, stage, doc["head"], doc["base"], context, selection)
         if result is None:
             return None
@@ -85,6 +88,13 @@ class Delivery:
         return result
 
     def _repair(self, run_id, doc, feedback, fingerprint):
+        if self.config.get("service_test") and not doc.get("service_red"):
+            doc.update(
+                state="blocked",
+                reason="Service repair requires an actual initial PR CI failure",
+                feedback=feedback,
+            )
+            return
         if doc["repairs"] >= self.config["max_repair_attempts"]:
             doc.update(state="failed", reason="Repair attempt limit exhausted", feedback=feedback)
             return
@@ -99,7 +109,7 @@ class Delivery:
             cycle=doc["cycle"] + 1,
         )
         # No worker may mutate the PR; convert to draft before publishing repaired code.
-        if doc.get("pr"):
+        if doc.get("pr") and self.config.get("repair_pr_mode", "draft") == "draft":
             pr = doc["pr"]
             self.broker.draft(run_id, pr["number"], pr["node_id"], draft=True, cycle=doc["cycle"])
 
@@ -195,11 +205,43 @@ class Delivery:
             "fixing",
         }:
             selection = (
-                select_model("fixer", same_cause_failures=doc["same_cause"])
+                select_model(
+                    "fixer",
+                    same_cause_failures=doc["same_cause"],
+                    profile=config.get("model_policy", "codex"),
+                )
                 if stage == "fixing"
                 else None
             )
-            result = self._worker(run_id, doc, stage, selection)
+            try:
+                result = self._worker(run_id, doc, stage, selection)
+            except CheckoutProtocolError as exc:
+                count = doc.get("protocol_failures", 0) + 1
+                doc.update(
+                    protocol_failures=count,
+                    feedback={
+                        "kind": "checkout_protocol_rejected",
+                        "reason": str(exc),
+                        "instructions": (
+                            "The previous completed worker changed or failed the pinned checkout. "
+                            "Copy checkout_command VERBATIM as the second tool. Do not "
+                            "regenerate, re-encode or edit its base64/data, repository or head. "
+                            "The packet already contains the correct repository and SHA. This is "
+                            "a bounded retry of a definitive failure, not permission to change "
+                            "scope. "
+                        ),
+                    },
+                )
+                self.journal.record(
+                    run_id,
+                    "worker_protocol_rejected",
+                    {"stage": stage, "count": count, "reason": str(exc)},
+                )
+                if count > config["max_repair_attempts"]:
+                    doc.update(state="failed", reason="Checkout protocol retry limit exhausted")
+                else:
+                    doc["plan_attempt"] += 1
+                return self._save(run_id, doc)
             if result is None:
                 return {"run_id": run_id, **doc, "action": "waiting_worker"}
             if stage in {"plan_review", "reviewing"}:
@@ -233,6 +275,7 @@ class Delivery:
                 doc.update(state="implementing")
             elif stage in {"implementing", "fixing"}:
                 changes_checked(result["payload"].get("changes"), config["allowed_paths"])
+                candidate_gate(config, doc, result["payload"]["changes"])
                 doc.update(candidate=result, validation=None, review=None, state="publishing")
             elif stage == "validating":
                 doc.update(validation=result, state="reviewing")
@@ -251,6 +294,8 @@ class Delivery:
                 doc["candidate"]["payload"]["changes"],
                 doc["cycle"],
             )
+            if config.get("service_test") and doc["cycle"] == 0:
+                doc["service_initial_head"] = doc["head"]
             doc.update(state="validating")
         elif stage == "opening_pr":
             doc["pr"] = self.broker.open_pr(
@@ -259,7 +304,10 @@ class Delivery:
             doc.update(state="waiting_ci", ci_started_at=self.clock())
         elif stage == "readying_pr":
             pr = doc["pr"]
-            self.broker.draft(run_id, pr["number"], pr["node_id"], draft=False, cycle=doc["cycle"])
+            if config.get("repair_pr_mode", "draft") == "draft":
+                self.broker.draft(
+                    run_id, pr["number"], pr["node_id"], draft=False, cycle=doc["cycle"]
+                )
             doc.update(state="waiting_ci", ci_started_at=self.clock())
         elif stage == "waiting_ci":
             pr, checks, statuses = self.github.pr_evidence(doc["pr"]["number"])
@@ -278,6 +326,15 @@ class Delivery:
                 },
             )
             if ci["state"] == "green":
+                if config.get("service_test") and (
+                    not doc.get("service_red")
+                    or doc["service_red"]["pr_number"] != doc["pr"]["number"]
+                    or doc["service_red"]["head"] != doc.get("service_initial_head")
+                    or doc["head"] == doc.get("service_initial_head")
+                    or doc["cycle"] < 1
+                ):
+                    doc.update(state="blocked", reason="Service test never proved red then repair")
+                    return self._save(run_id, doc)
                 if (
                     not doc["validation"]
                     or not doc["review"]
@@ -286,6 +343,12 @@ class Delivery:
                 ):
                     raise PolicyError("Current revision lacks validation and review")
                 if pr["draft"]:
+                    if config.get("repair_pr_mode") == "keep_ready":
+                        doc.update(
+                            state="blocked",
+                            reason="Owner made the PR draft; manual ready transition required",
+                        )
+                        return self._save(run_id, doc)
                     self.broker.draft(
                         run_id, pr["number"], pr["node_id"], draft=False, cycle=doc["cycle"]
                     )
@@ -298,6 +361,12 @@ class Delivery:
                     )
                     doc.update(state="ready_for_acceptance", delivered=False, ci_green=True)
             elif ci["state"] == "red":
+                if config.get("service_test") and doc["cycle"] == 0:
+                    if doc["head"] != doc.get("service_initial_head"):
+                        raise PolicyError("Service initial PR revision changed")
+                    doc["service_red"] = failure_evidence(config, doc, checks, ci)
+                    self.journal.record(run_id, "service_red_verified", doc["service_red"])
+                    ci["service_assertion"] = doc["service_red"]
                 self._repair(run_id, doc, ci, ci["fingerprint"])
             elif ci["state"] == "blocked":
                 doc.update(

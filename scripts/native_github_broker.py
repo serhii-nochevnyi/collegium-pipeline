@@ -7,6 +7,7 @@ import os
 import re
 import subprocess
 import tempfile
+import zlib
 from pathlib import Path
 from urllib.parse import unquote, urlsplit
 
@@ -17,6 +18,46 @@ def identity(value):
     return hashlib.sha256(
         json.dumps(value, sort_keys=True, separators=(",", ":")).encode()
     ).hexdigest()
+
+
+def decode_request(value):
+    if not isinstance(value, dict):
+        raise ValueError("RPC data must be an object")
+    if "encoding" not in value:
+        return value
+    if set(value) != {"encoding", "data", "request_digest"} or value["encoding"] not in {
+        "zlib-base64",
+        "git-text-zlib-base64",
+    }:
+        raise ValueError("Unknown RPC encoding")
+    data = value["data"]
+    if not isinstance(data, str) or len(data) > 256_000:
+        raise ValueError("Compressed RPC exceeds the input limit")
+    try:
+        decoder = zlib.decompressobj()
+        raw = decoder.decompress(base64.b64decode(data, validate=True), 2_000_001)
+        if (
+            len(raw) > 2_000_000
+            or not decoder.eof
+            or decoder.unused_data
+            or decoder.unconsumed_tail
+        ):
+            raise ValueError("RPC exceeds its expansion limit or has trailing data")
+        request = json.loads(raw)
+    except (zlib.error, UnicodeError) as exc:
+        raise ValueError("Invalid compressed RPC") from exc
+    if isinstance(request, dict) and value["encoding"] == "git-text-zlib-base64":
+        if request.get("method") != "GIT_COMMIT":
+            raise ValueError("Text transport is only for Git commits")
+        changes = (request.get("payload") or {}).get("fileChanges", {})
+        for row in changes.get("additions", []):
+            text = row.pop("text")
+            if not isinstance(text, str) or "contents" in row:
+                raise ValueError("Text transport contains an invalid file")
+            row["contents"] = base64.b64encode(text.encode("utf-8")).decode()
+    if not isinstance(request, dict) or identity(request) != value["request_digest"]:
+        raise ValueError("RPC digest differs after decompression")
+    return request
 
 
 def branch_name(value):
@@ -218,8 +259,9 @@ def execute(scope, request):
 def main():
     scope = json.loads(Path("broker_scope.json").read_text())
     event = json.loads(Path("/job/event.json").read_text())
-    request = event["data"]
+    request = None
     try:
+        request = decode_request(event["data"])
         status, body = execute(scope, request)
     except ValueError as exc:
         status, body = 400, {"code": "broker_scope_refused", "message": str(exc)}

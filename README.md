@@ -1,23 +1,28 @@
 # Collegium Delivery Pipeline
 
-Private remote: [serhii-nochevnyi/collegium-pipeline](https://github.com/serhii-nochevnyi/collegium-pipeline). This is the source and service-test repository; no product pilot is selected. Historical readiness profiles/reports still refer to the earlier read-only agents-knowledge connection.
+Source and bundle repository: [serhii-nochevnyi/collegium-pipeline](https://github.com/serhii-nochevnyi/collegium-pipeline). No product pilot or Jira ticket has been selected.
 
-An independent delivery pipeline on Collegium, inspired by Shipyard's delivery and investigation practices.
+The controller coordinates stage workers, model/effort policy, durable receipts, independent review and a separate GitHub App PR broker. It is packaged with its workers as a Collegium **Bundle**, whose source is [.github/lap/collegium-pipeline](.github/lap/collegium-pipeline). The current engine is a serial prototype; investigation, epic scheduling and parallel delivery remain planned slices.
 
-**Status:** six Collegium workers are bound to the local serial controller. A real five-stage readiness run passed with runtime model/effort evidence and seven sandbox checks. PR brokerage and bounded CI repair are implemented and pass local contract tests; native GitHub-write/CI acceptance remains pending. The pilot task is intentionally deferred.
+Eight Claude Code variants use the owner's existing private `project/claude-code-subscription`. All eight passed live model/effort calibration, including Sonnet low/high/medium and Opus high/max; Claude also passed an exact private-repository checkout. Historical Codex profiles and reports are retained separately.
 
-- [Specification](SPEC.md): behavior, architecture, model policy, quality gates and acceptance criteria.
-- [Configuration example](config/pipeline.example.json): proposed pipeline configuration, not Collegium's bundle schema.
-- [Implementation plan](docs/IMPLEMENTATION.md): vertical slices and release gates.
-- [Platform evidence](docs/PLATFORM-EVIDENCE.md): documented capabilities versus assumptions to verify.
-- [Local setup](docs/SETUP.md): installed tools and remaining authentication steps.
-- [Prototype commands and limits](docs/PROTOTYPE.md): runnable commands and remaining integration work.
-- [Project state](.planning/STATE.md): confirmed choices and outstanding decisions.
-- [PR brokerage and repair](docs/DELIVERY.md): resumable delivery command, credentials, quality gates and limits.
-- [Native readiness report](reports/readiness.json): actual sessions, stage receipts and filtered model/effort proofs.
+The bundle contains eight agents, a controller script, the App broker, a shared quality rule and twelve MCP needs: GitHub, Atlassian, plus DEV/PROD pairs of Grafana, Langfuse, VictoriaMetrics, Backstage and Agents Knowledge. Connections were staged in the project with no tools permitted pending authentication and read-only tool discovery. Several PROD services require sign-in; four DEV services currently return gateway errors. Declaring a need does not make it operational.
 
-First version: Jira epics and tickets; GitHub repositories, branches, pull requests and checks. Both epic and single-ticket delivery use the same ticket engine. Collegium supplies agent execution and integrations; the pipeline supplies durable coordination and quality policy.
+Both bundle automations start paused. Packaged execution and writes are disabled. No credential is stored in the bundle: Claude uses a model-connection binding; the cloud controller separately needs a project-scoped `PIPELINE_CONTROL_KEY` in the Vault. Existing agent/broker IDs have a claims map. Applying an installation can change their configuration digests, so activation requires fresh binding validation.
 
-The pilot uses `airslate-common/agents-knowledge` in the owner's personal Collegium space, in the dedicated `collegium-pipeline` project. Current development is ticketless; the prototype accepts a text task without creating a Jira issue. Jira remains part of the broader design. This is a separate project from Remote Sessions.
+```sh
+make check
+uv run python scripts/build_bundle.py
+lap bundle validate .github/lap/collegium-pipeline
+```
 
-Run `make check` for local validation (73 tests). `make doctor-readiness` performs read-only checks and currently passes. `make self-test` resumes the recorded readiness task; a fresh task ID explicitly starts new model calls. `make doctor` checks the separate delivery profile, which stays disabled. `make doctor-delivery` checks the new broker profile; `make test-delivery` verifies the repair scenarios.
+The local suite has 110 tests. The bundle passed the platform's real local-folder validator. The service PR/red-to-green run is paused after planning/review while the bundle and integrations are prepared; no service PR has been created.
+
+- [Specification](SPEC.md) and [implementation slices](docs/IMPLEMENTATION.md).
+- [Claude workers and verified runtime evidence](docs/CLAUDE-WORKERS.md).
+- [Bundle and integration status](docs/BUNDLE.md).
+- [PR brokerage and repair](docs/DELIVERY.md).
+- [Claude calibration report](reports/claude-workers.json), [checkout report](reports/claude-checkout.json), [MCP status](reports/mcp-connections.json).
+- [Current state](.planning/STATE.md).
+
+Remote Sessions is outside this project's scope. No merge, release or deployment is performed by this prototype.

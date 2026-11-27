@@ -7,7 +7,7 @@ No automatic retry creates another session after an ambiguous response.
 from dataclasses import asdict, dataclass
 from urllib.parse import quote
 
-from .domain import PolicyError, Selection, digest
+from .domain import PolicyError, Selection, digest, selection_harness
 from .transport import RemoteError
 
 
@@ -20,6 +20,8 @@ class WorkerBinding:
     api_model: str
     selection: Selection
     approved_agent_digest: str
+    harness: str = "codex"
+    model_connection_id: str | None = None
 
 
 def agent_digest(agent: dict) -> str:
@@ -48,8 +50,15 @@ class Collegium:
         if binding.selection != selection:
             raise PolicyError("Worker variant differs from the requested role/model/effort")
         # API alias mapping is explicit and bounded; no provider fallback.
-        if binding.api_model not in {selection.model, "openai/" + selection.model}:
+        if binding.harness != selection_harness(selection):
+            raise PolicyError("Worker harness differs from the admitted policy")
+        aliases = {selection.model}
+        if binding.harness == "codex":
+            aliases.add("openai/" + selection.model)
+        if binding.api_model not in aliases:
             raise PolicyError("Worker model alias is not approved")
+        if binding.harness == "claude-code" and not binding.model_connection_id:
+            raise PolicyError("Claude workers require an explicit private model connection")
         if not prompt.strip() or not binding.runtime or not binding.environment_id:
             raise PolicyError("Prompt, runtime and environment are required")
         safe_agent = quote(binding.agent_id, safe="")
@@ -65,6 +74,11 @@ class Collegium:
             raise PolicyError("Worker runtime differs from its binding")
         if agent.get("config", {}).get("effort") != selection.effort:
             raise PolicyError("Worker effort must be explicit and match its selected variant")
+        if binding.model_connection_id and (
+            agent.get("model_connection_id") != binding.model_connection_id
+            or agent.get("harness") != binding.harness
+        ):
+            raise PolicyError("Worker private model connection or harness differs")
         run = journal.get(run_id)
         request = {
             "binding": asdict(binding),
@@ -81,7 +95,7 @@ class Collegium:
                     "runtime": binding.runtime,
                     "agent_id": binding.agent_id,
                     "environment_id": binding.environment_id,
-                    "harness": "codex",
+                    "harness": binding.harness,
                 },
             )
             session_id = created.get("id")
