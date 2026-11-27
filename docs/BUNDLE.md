@@ -8,14 +8,14 @@ The repository is the source of an installable bundle; the controller remains a 
 - `controller/src/collegium_pipeline/`: the actual controller modules, not a prompt pretending to orchestrate them.
 - `controller/entry.py`: a script entry with preflight, admission, status and one-step delivery actions. Its SQLite journal and artifacts use `ARANARIUM_STATE_DIR`.
 - A separate deterministic native App broker. Its scope file permits only the configured repository, base and file paths.
-- Twelve MCP entries in the integration catalog with distinct DEV/PROD URLs and explicit connection IDs. Four authenticated entries are emitted as manifest needs and agent grants; eight unresolved entries remain in the catalog.
+- Twelve MCP entries in the integration catalog with distinct DEV/PROD URLs and explicit connection IDs. Six authenticated entries are emitted as manifest needs and agent grants; six unresolved entries remain in the catalog.
 - `claims.json`: claims for the existing eight agents and broker. The controller automation is new. A claim adopts an existing object; it does not duplicate it.
 
 The GitHub repository grants directly reference the dedicated existing **App** connection ID. The platform's `github_connections` manifest needs currently describe personal tokens and reject an `access` level. We do not replace the App with a token just to fit that field. GitHub MCP is a separate read-only connection to the official remote server.
 
 ## Current integration state
 
-`config/integrations.json` and `reports/mcp-connections.json` record project connection identities, authenticated tool discovery and exact tool ceilings. Four connections have completed OAuth and authenticated discovery:
+`config/integrations.json` and `reports/mcp-connections.json` record project connection identities, authenticated tool discovery and exact tool ceilings. Six connections have completed OAuth and authenticated discovery:
 
 | Need | Project connection | Read-only tools |
 |---|---|---:|
@@ -23,12 +23,14 @@ The GitHub repository grants directly reference the dedicated existing **App** c
 | Grafana PROD | mcpc_e33ecc0ae7154059b9b17efe5e967331 | 38 |
 | VictoriaMetrics PROD | mcpc_729b8150e4074b0f9164946e27998b40 | 16 |
 | Backstage PROD | mcpc_948ef97eb40d41f5a0b25f1e0240937b | 2 |
+| Agents Knowledge PROD | mcpc_27eec2a3866b4c26b04bba961bae9159 | 6 |
+| Agents Knowledge DEV | mcpc_b692cbf768e14262a510f49b15337ded | 6 |
 
 These authenticated connections replace the earlier uncredentialed staging IDs. Their platform ceilings and the bundle's `connections[].tools` both name explicit lists. The integration catalog records `tools: []` for unresolved needs. Collegium rejects an empty manifest toolset, while omitting it asks for all tools. The builder therefore emits only authenticated, nonempty explicit toolsets as manifest needs and agent grants; pending services remain outside those grants until discovery and a rebuild. The builder refuses inconsistent or implicit all-tools catalog entries. They are not yet attached to live calibrated agents. Discovery proves authorization and tool availability; successful backend data calls remain to verify after attachment.
 
 GitHub MCP cannot start OAuth: the authorization server does not support dynamic client registration, and the registered server has no `client_id`. A configured OAuth client is required; the dedicated repository GitHub App already works independently. Langfuse requires project-scoped Basic authentication using its public/secret API-key pair; the owner must identify the PROD and DEV projects and enter credentials in the console, never in chat or source. The official [Langfuse MCP documentation](https://langfuse.com/docs/api-and-data-platform/features/mcp-server) describes this authentication.
 
-DEV Grafana, Langfuse, VictoriaMetrics and Backstage return HTTP 502 from Collegium. Agents Knowledge DEV/PROD need owner sign-in; the browser extension currently requires an update before those flows can continue. No DEV service is substituted for PROD. No broader platform connection may replace the recorded project connection during installation.
+DEV Grafana, Langfuse, VictoriaMetrics and Backstage return HTTP 502 from Collegium. Agents Knowledge DEV/PROD have separate authorized grants and identical six-tool read-only ceilings; neither environment substitutes for the other. No DEV service is substituted for PROD. No broader platform connection may replace the recorded project connection during installation.
 
 ## Installation and activation
 

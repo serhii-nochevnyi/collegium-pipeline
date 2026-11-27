@@ -36,10 +36,10 @@
     "controller/src/collegium_pipeline/transport.py": "33c56e666dc263974739c4f7f3e83601e0724898a8c98bedfa95f97709fd816c",
     "controller/entry.py": "a9113b7da7ab262197af3c645046bc1cc068258e4413dd9435839291f735e4a2",
     "controller/settings.json": "8b8dae4d4e1cc66eb17feb854f2a6bc34c00676eae5384381cf6a53721d619cf",
-    "controller/integrations.json": "07db3712d826586ced607818661114c6a7128af12a3ffeacc0526c55bfd02887",
+    "controller/integrations.json": "723d7eade4bfc160185346831493d4622816179c5f87db4ffdc0a17bd98a748c",
     "native_github_broker.py": "33d7a21aa3a7a867c89a4119e3d331577afa0d8c54973d877093e3c9ed38f6ae",
     "broker_scope.json": "678b8d876cee8beed5924e7f2545bd458c8c997c5d471e3d900b7bf68f0f3f08",
-    "lap.yaml": "ad6d38c6961ecc599cc4497fa9b71bbc4ca6557a44d76e8ea35406dd132b1b10",
+    "lap.yaml": "be6d0f73e8678463140684c8d6ed2df79d27f795fa1941378b091ccc51e36e93",
     "claims.json": "ebbddaacc8d0a4cbdafa38176cae0c9b697f35624cd2828695c6d401ed054606"
   },
   "controller_config_digest": "96843746b7e89a5df1aa199aa1979547aa8a2c6b5a03cd35aceb29ba24a9a29b"

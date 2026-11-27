@@ -45,18 +45,24 @@
     {
       "title": "Agents Knowledge (PROD)",
       "server_id": "mcp_8492db3630294a228f9742098bdb88a0",
-      "connection_id": "mcpc_f3e9b56ec005457b810f338290eb3a2d",
+      "connection_id": "mcpc_27eec2a3866b4c26b04bba961bae9159",
       "url": "https://agents-knowledge.infrateam.xyz/mcp",
-      "auth_type": null,
+      "auth_type": "oauth2",
       "need": "ak-prod",
       "environment": "PROD",
-      "state": "needs_auth",
-      "http_status": 424,
-      "allowed_tools": [],
+      "state": "connected",
+      "http_status": 200,
+      "allowed_tools": [
+        "search_docs",
+        "get_document",
+        "list_workspaces",
+        "list_collections",
+        "get_document_tree",
+        "get_related_documents"
+      ],
       "attached_to_live_agents": false,
       "backend_read_verified": false,
-      "authenticated_discovery": false,
-      "reason": "Owner sign-in required in console; Chrome extension requires update before UI flow can continue."
+      "authenticated_discovery": true
     },
     {
       "title": "Grafana (PROD)",
@@ -242,18 +248,24 @@
     {
       "title": "Agents Knowledge (DEV)",
       "server_id": "mcp_bdfecb0459e84bb0b2f0cf87047e484b",
-      "connection_id": "mcpc_ba17c1c2dc3440ea815d7111630c96c0",
+      "connection_id": "mcpc_b692cbf768e14262a510f49b15337ded",
       "url": "https://agents-knowledge.infrateam-dev.xyz/mcp",
-      "auth_type": null,
+      "auth_type": "oauth2",
       "need": "ak-dev",
       "environment": "DEV",
-      "state": "needs_auth",
-      "http_status": 424,
-      "allowed_tools": [],
+      "state": "connected",
+      "http_status": 200,
+      "allowed_tools": [
+        "search_docs",
+        "get_document",
+        "list_workspaces",
+        "list_collections",
+        "get_document_tree",
+        "get_related_documents"
+      ],
       "attached_to_live_agents": false,
       "backend_read_verified": false,
-      "authenticated_discovery": false,
-      "reason": "Owner sign-in required in console; Chrome extension requires update before UI flow can continue."
+      "authenticated_discovery": true
     }
   ],
   "all_operational": false,

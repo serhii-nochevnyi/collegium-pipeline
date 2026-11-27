@@ -26,9 +26,11 @@
       ],
       "mcp_servers": [
         "atlassian-rovo",
+        "ak-prod",
         "grafana-prod",
         "vmcluster-prod",
-        "backstage-prod"
+        "backstage-prod",
+        "ak-dev"
       ]
     },
     {
@@ -51,9 +53,11 @@
       ],
       "mcp_servers": [
         "atlassian-rovo",
+        "ak-prod",
         "grafana-prod",
         "vmcluster-prod",
-        "backstage-prod"
+        "backstage-prod",
+        "ak-dev"
       ]
     },
     {
@@ -76,9 +80,11 @@
       ],
       "mcp_servers": [
         "atlassian-rovo",
+        "ak-prod",
         "grafana-prod",
         "vmcluster-prod",
-        "backstage-prod"
+        "backstage-prod",
+        "ak-dev"
       ]
     },
     {
@@ -101,9 +107,11 @@
       ],
       "mcp_servers": [
         "atlassian-rovo",
+        "ak-prod",
         "grafana-prod",
         "vmcluster-prod",
-        "backstage-prod"
+        "backstage-prod",
+        "ak-dev"
       ]
     },
     {
@@ -126,9 +134,11 @@
       ],
       "mcp_servers": [
         "atlassian-rovo",
+        "ak-prod",
         "grafana-prod",
         "vmcluster-prod",
-        "backstage-prod"
+        "backstage-prod",
+        "ak-dev"
       ]
     },
     {
@@ -151,9 +161,11 @@
       ],
       "mcp_servers": [
         "atlassian-rovo",
+        "ak-prod",
         "grafana-prod",
         "vmcluster-prod",
-        "backstage-prod"
+        "backstage-prod",
+        "ak-dev"
       ]
     },
     {
@@ -176,9 +188,11 @@
       ],
       "mcp_servers": [
         "atlassian-rovo",
+        "ak-prod",
         "grafana-prod",
         "vmcluster-prod",
-        "backstage-prod"
+        "backstage-prod",
+        "ak-dev"
       ]
     },
     {
@@ -201,9 +215,11 @@
       ],
       "mcp_servers": [
         "atlassian-rovo",
+        "ak-prod",
         "grafana-prod",
         "vmcluster-prod",
-        "backstage-prod"
+        "backstage-prod",
+        "ak-dev"
       ]
     }
   ],
@@ -233,6 +249,19 @@
         "listJiraIssueComments",
         "searchJiraIssuesUsingJql",
         "search"
+      ]
+    },
+    {
+      "name": "ak-prod",
+      "description": "Agents Knowledge (PROD); explicit read-only tool ceiling; connected",
+      "url": "https://agents-knowledge.infrateam.xyz/mcp",
+      "tools": [
+        "search_docs",
+        "get_document",
+        "list_workspaces",
+        "list_collections",
+        "get_document_tree",
+        "get_related_documents"
       ]
     },
     {
@@ -310,6 +339,19 @@
       "tools": [
         "get-catalog-entity",
         "validate-entity"
+      ]
+    },
+    {
+      "name": "ak-dev",
+      "description": "Agents Knowledge (DEV); explicit read-only tool ceiling; connected",
+      "url": "https://agents-knowledge.infrateam-dev.xyz/mcp",
+      "tools": [
+        "search_docs",
+        "get_document",
+        "list_workspaces",
+        "list_collections",
+        "get_document_tree",
+        "get_related_documents"
       ]
     }
   ],
