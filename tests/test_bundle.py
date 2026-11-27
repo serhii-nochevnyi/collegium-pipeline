@@ -4,7 +4,10 @@ import contextlib
 import copy
 import io
 import json
+import os
 import runpy
+import subprocess
+import sys
 import tempfile
 import unittest
 from pathlib import Path
@@ -16,7 +19,10 @@ from collegium_pipeline.platform import agent_digest
 ROOT = Path(__file__).resolve().parents[1]
 BUILD = runpy.run_path(str(ROOT / "scripts/build_bundle.py"))["build"]
 VALIDATE = runpy.run_path(str(ROOT / "scripts/build_bundle.py"))["validate_integrations"]
-ENTRY = runpy.run_path(str(ROOT / "scripts/bundle_controller.py"))["main"]
+ENTRY_MODULE = runpy.run_path(str(ROOT / "scripts/bundle_controller.py"))
+ENTRY = ENTRY_MODULE["main"]
+FENCE = ENTRY_MODULE["cloud_fence"]
+SAVE = ENTRY_MODULE["save_receipt"]
 
 
 class BundleTests(unittest.TestCase):
@@ -201,6 +207,183 @@ class BundleTests(unittest.TestCase):
                         environ={"PIPELINE_CONTROL_KEY": "fixture-vault-key"},
                         http=http,
                     )
+
+    def invoke(self, event):
+        with contextlib.redirect_stdout(io.StringIO()) as output:
+            code = ENTRY(
+                event,
+                root=self.path / "controller",
+                environ={"ARANARIUM_STATE_DIR": str(self.path / "state")},
+            )
+        self.assertEqual(code, 0)
+        return json.loads(output.getvalue())
+
+    def test_prepare_reopen_is_idempotent_and_changed_input_is_rejected(self):
+        event = {
+            "action": "prepare",
+            "task_id": "same",
+            "title": "Title",
+            "requirements": "First acceptance",
+        }
+        first = self.invoke(event)
+        self.assertEqual(first, self.invoke(event))
+        status = self.invoke({"action": "status", "run_id": first["run_id"]})
+        self.assertEqual(len(status["events"]), 1)
+        with self.assertRaises(PolicyError):
+            self.invoke({**event, "requirements": "Changed acceptance"})
+        self.assertEqual(self.invoke(event), first)
+        self.assertFalse((self.path / "state/collegium-pipeline/intake-requirements.txt").exists())
+
+    def test_concurrent_processes_admit_one_immutable_task(self):
+        program = (
+            "import runpy; m=runpy.run_path("
+            + repr(str(ROOT / "scripts/bundle_controller.py"))
+            + "); m['main']({'action':'prepare','task_id':'race','title':'Race',"
+            "'requirements':'Same acceptance'},root="
+            + repr(str(self.path / "controller"))
+            + ",environ={'ARANARIUM_STATE_DIR':"
+            + repr(str(self.path / "state"))
+            + "})"
+        )
+        children = [
+            subprocess.Popen(
+                [sys.executable, "-c", program],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                env={**os.environ, "PYTHONPATH": str(ROOT / "src")},
+            )
+            for _ in range(4)
+        ]
+        results = []
+        for child in children:
+            output, error = child.communicate(timeout=20)
+            self.assertEqual(child.returncode, 0, error)
+            results.append(json.loads(output))
+        self.assertEqual(len({r["run_id"] for r in results}), 1)
+        status = self.invoke({"action": "status", "run_id": results[0]["run_id"]})
+        self.assertEqual(len(status["events"]), 1)
+
+    def test_real_process_crash_rolls_back_only_uncommitted_transaction(self):
+        event = {"action": "state-probe", "mode": "commit"}
+        first = self.invoke(event)
+        program = (
+            "import runpy; m=runpy.run_path("
+            + repr(str(ROOT / "scripts/bundle_controller.py"))
+            + "); m['main']({'action':'state-probe','mode':'crash'},root="
+            + repr(str(self.path / "controller"))
+            + ",environ={'ARANARIUM_STATE_DIR':"
+            + repr(str(self.path / "state"))
+            + "})"
+        )
+        result = subprocess.run(
+            [sys.executable, "-c", program],
+            capture_output=True,
+            timeout=20,
+            env={**os.environ, "PYTHONPATH": str(ROOT / "src")},
+        )
+        self.assertEqual(result.returncode, 75, result.stderr)
+        after = self.invoke({"action": "state-probe", "mode": "inspect"})
+        self.assertEqual(after, first)
+        self.assertEqual(after["integrity"], "ok")
+        self.assertEqual(after["effects"], ["committed"])
+        self.assertEqual(after["admissions"], 1)
+        self.assertEqual(self.invoke(event), first)
+
+    def fence_fixture(self, previous=(), *, retry=False, diagnostic=False):
+        event = (
+            {"action": "state-probe", "mode": "fenced-check"}
+            if diagnostic
+            else {"action": "deliver", "live": True, "run_id": "product"}
+        )
+        env = {
+            "LAP_AUTOMATION_ID": "aut_test",
+            "LAP_RUN_ID": "run_now",
+            "LAP_ATTEMPT_ID": "att_now",
+        }
+        now = {
+            "id": "run_now",
+            "automation_id": "aut_test",
+            "status": "running",
+            "item": {"event": {"data": event}},
+            "attempts": [{"id": "att_now", "n": 1, "status": "running"}],
+        }
+        if retry:
+            now["attempts"].insert(0, {"id": "att_lost", "n": 1, "status": "failed"})
+            now["attempts"][-1]["n"] = 2
+        details = {row["id"]: row for row in [now, *previous]}
+
+        class ReadHttp:
+            def request(self, method, path):
+                if method != "GET":
+                    raise AssertionError("Fence cannot mutate the platform")
+                if path.endswith("?limit=100"):
+                    return {"runs": [{"id": r} for r in details]}, {}
+                return details[path.rsplit("/", 1)[-1]], {}
+
+        return event, env, ReadHttp()
+
+    def previous(self, *, action="deliver", status="succeeded"):
+        return {
+            "id": "run_prior",
+            "automation_id": "aut_test",
+            "status": status,
+            "item": {"event": {"data": {"action": action, "mode": "fenced-hold"}}},
+            "attempts": [
+                {
+                    "id": "att_prior",
+                    "n": 1,
+                    "status": "cancelled" if status == "cancelled" else "succeeded",
+                }
+            ],
+        }
+
+    def test_fence_survives_snapshot_loss_and_refuses_effect_replay(self):
+        # External effects may exist although a cancelled sandbox loses every journal write.
+        for status in ("cancelled", "failed", "succeeded"):
+            event, env, http = self.fence_fixture([self.previous(status=status)])
+            with self.subTest(status=status), self.assertRaisesRegex(PolicyError, "Uncheckpointed"):
+                FENCE(event, self.path, env, http)
+        event, env, http = self.fence_fixture(retry=True)
+        with self.assertRaisesRegex(PolicyError, "Uncertain cloud attempt"):
+            FENCE(event, self.path, env, http)
+
+    def test_adopted_checkpoint_allows_next_delivery_but_bad_receipt_does_not(self):
+        prior = self.previous()
+        event, env, http = self.fence_fixture([prior])
+        receipt = {"automation_id": "aut_test", "run_id": "run_prior", "attempt_id": "att_prior"}
+        SAVE(self.path / "cloud-fence.json", receipt)
+        path, value = FENCE(event, self.path, env, http)
+        self.assertEqual(path, self.path / "cloud-fence.json")
+        self.assertEqual(value["run_id"], "run_now")
+        for key, bad in (
+            ("automation_id", "aut_other"),
+            ("attempt_id", "att_other"),
+            ("run_id", "run_missing"),
+        ):
+            SAVE(path, {**receipt, key: bad})
+            with self.subTest(key=key), self.assertRaises(PolicyError):
+                FENCE(event, self.path, env, http)
+
+    def test_fence_refuses_truncated_history_and_separates_diagnostic_namespace(self):
+        previous = [{**self.previous(action="status"), "id": f"run_{n}"} for n in range(99)]
+        event, env, http = self.fence_fixture(previous)
+        with self.assertRaisesRegex(PolicyError, "history window exhausted"):
+            FENCE(event, self.path, env, http)
+        previous = [self.previous(action="state-probe", status="cancelled")]
+        event, env, http = self.fence_fixture(previous)
+        FENCE(event, self.path, env, http)  # Diagnostic cancellation cannot poison product state.
+        event, env, http = self.fence_fixture(previous, diagnostic=True)
+        with self.assertRaisesRegex(PolicyError, "Uncheckpointed"):
+            FENCE(event, self.path, env, http, diagnostic=True)
+
+    def test_diagnostics_cannot_enable_execution_or_accept_arbitrary_commands(self):
+        with self.assertRaises(PolicyError):
+            self.invoke({"action": "state-probe", "mode": "commit", "command": "anything"})
+        config = json.loads((self.path / "controller/settings.json").read_text())
+        config["execution_enabled"] = True
+        (self.path / "controller/settings.json").write_text(json.dumps(config))
+        with self.assertRaises(PolicyError):
+            self.invoke({"action": "state-probe", "mode": "commit"})
 
     def test_bundle_refuses_unrestricted_unverified_or_mismatched_mcp(self):
         baseline = json.loads((ROOT / "config/integrations.json").read_text())

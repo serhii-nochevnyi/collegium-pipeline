@@ -430,11 +430,9 @@ class DeliveryTests(unittest.TestCase):
         self.assertEqual(self.http.created, 4)
         self.assertEqual(self.github.writes, [])
 
-    def test_lost_pr_response_reconciles_without_second_pr(self):
-        self.until("opening_pr")
-        self.github.lose = "pr"
-        with self.assertRaises(RemoteError):
-            self.driver.step(self.run)
+    def restart_controller(self):
+        self.journal.close()
+        self.journal = Journal(self.path / "journal.sqlite3")
         self.driver = Delivery(
             self.config,
             self.journal,
@@ -443,6 +441,13 @@ class DeliveryTests(unittest.TestCase):
             self.path / "artifacts",
             clock=lambda: self.now,
         )
+
+    def test_lost_pr_response_reconciles_without_second_pr(self):
+        self.until("opening_pr")
+        self.github.lose = "pr"
+        with self.assertRaises(RemoteError):
+            self.driver.step(self.run)
+        self.restart_controller()
         self.driver.step(self.run)
         self.assertEqual(sum(op == "pr" for op, _ in self.github.writes), 1)
 
@@ -451,6 +456,7 @@ class DeliveryTests(unittest.TestCase):
         self.github.lose = "commit"
         with self.assertRaises(RemoteError):
             self.driver.step(self.run)
+        self.restart_controller()
         r = self.driver.step(self.run)
         self.assertEqual(r["state"], "validating")
         self.assertEqual(sum(op == "commit" for op, _ in self.github.writes), 1)
@@ -464,6 +470,8 @@ class DeliveryTests(unittest.TestCase):
         self.github.mutate = fail
         with self.assertRaises(RemoteError):
             broker.branch(self.run, BASE)
+        self.restart_controller()
+        broker = self.driver.broker
         with self.assertRaises(PolicyError):
             broker.branch(self.run, BASE)
 

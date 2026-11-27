@@ -58,3 +58,34 @@ The six-MCP bundle was installed from ecb584a with the owner's approved plan. Bo
 A manual `verify-control` event authenticates with only PIPELINE_CONTROL_KEY from the controller's Vault environment, reads the eight pinned worker configurations and native broker metadata, and checks exact project MCP identities/tool ceilings. It accepts no other event parameters and never starts an agent or broker run. `preflight` still checks presence only. An authenticated metadata check does not establish successful backend MCP data reads. Delivery remains disabled until its separate acceptance checks are complete.
 
 A post-install native worker successfully called all six bound MCPs: Atlassian getAccessibleAtlassianResources; AK DEV and PROD list_workspaces; Grafana PROD list_datasources; VictoriaMetrics PROD query(vector(1)); Backstage PROD validate-entity with disposable YAML. No entity was saved. reports/mcp-connections.json records tool/result event identities and an observation digest, not backend data. Worker fingerprints ignore only provenance.commit/version source labels so syncing controller code cannot invalidate unchanged runtime configuration; installation identity, permissions, model, effort and all other fields remain pinned.
+
+
+## Persistence and interrupted attempts
+
+Collegium starts each automation attempt from its last adopted state snapshot. SQLite WAL
+commits survive a normal failed process, but the platform discards the entire attempted
+snapshot on cancellation or executor loss. Therefore local SQLite alone cannot guarantee
+exactly-once external effects. The platform retries a lost executor from the old snapshot.
+
+The cloud delivery entry point checks the platform's independent run history before any
+worker or broker call. Only the first, currently running attempt is eligible. Every earlier
+delivery since the last receipt must be accounted for by a receipt in the adopted snapshot,
+which contains the same journal and artifact directory. A cancelled/lost attempt or missing
+receipt blocks replay for reconciliation. A full history window (100 runs) without an anchor,
+a mismatched automation/attempt, or unavailable history also blocks. This is a safety fence,
+not an automatic external-action recovery mechanism. Never clear its receipt or roll back
+state to bypass it; reconcile known worker sessions and GitHub effects before extending
+recovery. Both execution switches remain disabled and both automations stay paused.
+
+Prepare admits event data directly, with no shared intake file. Repeated identical intake
+returns the same run; changed acceptance/configuration requires explicit replan. Unique
+SQLite keys and transactions also protect concurrent local admissions. Broker reconciliation
+tests reopen the database after lost PR/commit responses and confirm a single external write.
+
+The fixed manual `state-probe` action uses a separate diagnostic database and requires both
+execution switches off. Modes: `commit`/`inspect` test a single admission/effect;
+`crash` exits 75 inside an uncommitted SQLite transaction; `hold` pauses 120 seconds for a
+real platform cancellation. `fenced-hold` and `fenced-check` exercise the same cloud fence in
+a separate receipt namespace without agents or repository writes. Cancel the held run only
+after `probe_ready` appears. A cancelled fenced probe remains intentionally quarantined;
+it does not affect the product journal. No mode accepts arbitrary commands or enables delivery.
