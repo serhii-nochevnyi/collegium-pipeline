@@ -416,6 +416,222 @@ def state_probe(event, state, config, environ, http):
         journal.close()
 
 
+def github_recovery_probe(event, state, config, environ, http):
+    """Fixed App-backed fixture; drop a real mutation reply before its journal receipt."""
+    import time
+
+    from collegium_pipeline.broker import PRBroker
+    from collegium_pipeline.config import config_digest
+    from collegium_pipeline.domain import PolicyError, Task
+    from collegium_pipeline.native_broker import NativeGithubApp
+    from collegium_pipeline.recovery import Checkpoints, WriteAhead, restore_checkpoint
+    from collegium_pipeline.store import Journal
+    from collegium_pipeline.transport import RemoteError
+
+    modes = {"github-prepare", "github-commit", "github-pr", "github-recover", "github-inspect"}
+    if set(event) != {"action", "mode"} or event["mode"] not in modes:
+        raise PolicyError("Unknown fixed GitHub recovery probe")
+    if config["execution_enabled"] or config["broker_enabled"]:
+        raise PolicyError("GitHub probes require disabled production delivery and broker")
+    if config["allowed_paths"] != ["tests/test_live_service.py"]:
+        raise PolicyError("GitHub fixture must match the existing one-file App scope")
+    identity = cloud_identity(environ)
+    if identity["automation_id"] != config["recovery_store"]["owner"]:
+        raise PolicyError("GitHub probe belongs to another controller")
+    current, _ = http.request(
+        "GET", "/api/automations/" + identity["automation_id"] + "/runs/" + identity["run_id"]
+    )
+    if (
+        current["status"] != "running"
+        or current["item"]["event"]["data"] != event
+        or len(current["attempts"]) != 1
+        or current["attempts"][0]["n"] != 1
+        or current["attempts"][0]["id"] != identity["attempt_id"]
+    ):
+        raise PolicyError("GitHub probe cannot replay an uncertain attempt")
+    state.mkdir(mode=0o700, parents=True, exist_ok=True)
+    key = environ.get("PIPELINE_CONTROL_KEY")
+    checkpoints = Checkpoints(config, http, key, namespace="diagnostic")
+    fixture = {
+        "tests/test_live_service.py": (
+            '"""Service-only live GitHub checkpoint recovery fixture."""\n'
+            "import unittest\n\n"
+            "class LiveCheckpointRecoveryTest(unittest.TestCase):\n"
+            "    def test_fixed_fixture(self):\n"
+            '        self.assertEqual("checkpoint-recovery", "checkpoint-recovery")\n'
+        )
+    }
+    title = "[Service diagnostic] GitHub checkpoint recovery"
+    description = (
+        "Service-only commit/PR interruption and duplicate-prevention test. "
+        "One fixed passing fixture; no product pilot, Jira task, merge or deploy."
+    )
+    journal = Journal(state / "journal.sqlite3")
+    try:
+        if event["mode"] == "github-prepare":
+            root = journal.admit(
+                Task(
+                    "text",
+                    "github-recovery-probe-v1",
+                    config["repository"],
+                    title,
+                    "Create one fixed service commit and PR; cancel before "
+                    "each receipt, reconcile, replay without duplicates; never merge.",
+                ),
+                config_digest(config),
+                purpose="readiness",
+            )
+        else:
+            rows = journal.connection.execute(
+                "SELECT id FROM runs WHERE source='text' AND source_id=?",
+                ("github-recovery-probe-v1",),
+            ).fetchall()
+            if len(rows) != 1:
+                raise PolicyError("Prepare the canonical GitHub diagnostic first")
+            root = rows[0][0]
+        if journal.get(root)["config_digest"] != config_digest(config):
+            raise PolicyError("GitHub diagnostic configuration changed")
+        events = journal.events(root)
+
+        def result_for(key):
+            found = [
+                e["data"]["result"]
+                for e in events
+                if e["kind"] == "broker_done" and e["data"]["key"] == key
+            ]
+            if not found:
+                raise PolicyError("Required previous GitHub probe phase has not reconciled")
+            return found[-1]
+
+        if event["mode"] == "github-recover":
+            journal.close()
+            downloaded = checkpoints.get()
+            operation = downloaded[1]["operation"]
+            if (
+                operation["kind"] != "broker"
+                or operation["run_id"] != root
+                or operation["operation"] not in {"commit", "pr"}
+            ):
+                raise PolicyError("Checkpoint is not this GitHub diagnostic's uncertain mutation")
+            scratch = Journal(state / "github-recovery-reads.sqlite3")
+            try:
+                scratch_root = scratch.admit(
+                    Task(
+                        "text",
+                        "github-observations-v1",
+                        config["repository"],
+                        "GitHub recovery observations",
+                        "Read existing effects only",
+                    ),
+                    config_digest(config),
+                )
+                github = NativeGithubApp(config, http, scratch, scratch_root)
+                receipt = restore_checkpoint(
+                    config,
+                    state,
+                    checkpoints,
+                    http,
+                    github,
+                    diagnostic=True,
+                    checkpoint_data=downloaded,
+                )
+            finally:
+                scratch.close()
+            print(json.dumps(receipt))
+            return 0
+        if event["mode"] == "github-inspect":
+            print(
+                json.dumps(
+                    {
+                        "root": root,
+                        "branch": "collegium/" + root,
+                        "integrity": journal.connection.execute(
+                            "PRAGMA integrity_check"
+                        ).fetchone()[0],
+                        "admissions": sum(e["kind"] == "admitted" for e in events),
+                        "done": [e["data"] for e in events if e["kind"] == "broker_done"],
+                        "agent_started": False,
+                    }
+                )
+            )
+            return 0
+        # Only this fixed fixture receives manual service-test write authority.
+        # The original frozen config is checkpointed; production switches stay false.
+        authority = {**config, "execution_enabled": True, "broker_enabled": True}
+        github = NativeGithubApp(authority, http, journal, root)
+        broker = PRBroker(authority, journal, github)
+        journal.before_effect = WriteAhead(
+            config, journal, state / "artifacts", checkpoints, identity
+        ).save
+        if event["mode"] == "github-prepare":
+            done = [
+                e for e in events if e["kind"] == "broker_done" and e["data"]["key"] == "branch"
+            ]
+            base = done[-1]["data"]["result"]["head"] if done else github.ref(config["base_branch"])
+            branch = broker.branch(root, base)
+            print(
+                json.dumps({"root": root, "branch": branch, "base": base, "agent_started": False})
+            )
+            return 0
+        branch = "collegium/" + root
+        base = result_for("branch")["head"]
+        operation = "commit" if event["mode"] == "github-commit" else "pr"
+        original_mutate = github.mutate
+        mutations = []
+
+        def withhold_reply(kind, payload):
+            if kind != operation or mutations:
+                raise PolicyError("Unexpected GitHub diagnostic mutation")
+            mutations.append(kind)
+            original_mutate(kind, payload)
+            # The remote App run has succeeded, but the caller cannot record broker_done.
+            print(
+                json.dumps(
+                    {
+                        "probe_ready": True,
+                        "operation": kind,
+                        "root": root,
+                        "branch": branch,
+                        "response_withheld": True,
+                    }
+                ),
+                flush=True,
+            )
+            time.sleep(120)
+            raise RemoteError("Deliberately withheld service mutation reply", unknown_outcome=True)
+
+        github.mutate = withhold_reply
+        if operation == "commit":
+            result = {"head": broker.commit(root, branch, base, fixture, 0)}
+        else:
+            head = result_for("commit:0")["head"]
+            journal.connection.execute(
+                "CREATE TABLE IF NOT EXISTS deliveries("
+                "run_id TEXT PRIMARY KEY REFERENCES runs(id),document TEXT NOT NULL)"
+            )
+            journal.connection.execute(
+                "INSERT INTO deliveries VALUES(?,?) ON CONFLICT(run_id) "
+                "DO UPDATE SET document=excluded.document",
+                (root, json.dumps({"head": head, "base": base})),
+            )
+            result = broker.open_pr(root, branch, head, base, title, description=description)
+        print(
+            json.dumps(
+                {
+                    "root": root,
+                    "branch": branch,
+                    "operation": operation,
+                    "result": result,
+                    "mutation_calls": len(mutations),
+                    "agent_started": False,
+                }
+            )
+        )
+        return 0
+    finally:
+        journal.close()
+
+
 def recovery_probe(event, state, config, environ, http):
     """One fixed private-Claude diagnostic, in a separate journal; no GitHub mutations."""
     import time
@@ -427,6 +643,8 @@ def recovery_probe(event, state, config, environ, http):
     from collegium_pipeline.recovery import Checkpoints, WriteAhead, restore_checkpoint
     from collegium_pipeline.store import Journal
 
+    if isinstance(event.get("mode"), str) and event["mode"].startswith("github-"):
+        return github_recovery_probe(event, state, config, environ, http)
     if set(event) != {"action", "mode"} or event["mode"] not in {
         "connection",
         "start",
@@ -442,7 +660,9 @@ def recovery_probe(event, state, config, environ, http):
             raise PolicyError("No restored diagnostic journal")
         journal = Journal(state / "journal.sqlite3")
         try:
-            rows = journal.connection.execute("SELECT id FROM runs").fetchall()
+            rows = journal.connection.execute(
+                "SELECT id FROM runs WHERE source_id='native-recovery-probe-v1'"
+            ).fetchall()
             result = {
                 "runs": [r[0] for r in rows],
                 "integrity": journal.connection.execute("PRAGMA integrity_check").fetchone()[0],
@@ -473,8 +693,21 @@ def recovery_probe(event, state, config, environ, http):
         )
         return 0
     if event["mode"] == "recover":
+        downloaded = checkpoints.get()
+        if downloaded[1]["operation"]["kind"] == "broker":
+            raise PolicyError("Use github-recover for the current GitHub diagnostic checkpoint")
         print(
-            json.dumps(restore_checkpoint(config, state, checkpoints, http, None, diagnostic=True))
+            json.dumps(
+                restore_checkpoint(
+                    config,
+                    state,
+                    checkpoints,
+                    http,
+                    None,
+                    diagnostic=True,
+                    checkpoint_data=downloaded,
+                )
+            )
         )
         return 0
     identity = cloud_identity(environ)

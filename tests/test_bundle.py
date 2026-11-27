@@ -80,6 +80,22 @@ class BundleTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertFalse(json.loads(result.stdout)["agent_started"])
 
+    def test_github_probe_rejects_caller_selected_payloads_before_network(self):
+        for event in (
+            {"action": "recovery-probe", "mode": "github-commit", "changes": {"bad": "data"}},
+            {"action": "recovery-probe", "mode": "github-unknown"},
+        ):
+            with self.assertRaises(PolicyError):
+                ENTRY(
+                    event,
+                    root=self.path / "controller",
+                    environ={
+                        "ARANARIUM_STATE_DIR": str(self.path / "state"),
+                        "PIPELINE_CONTROL_KEY": "fixture-key",
+                    },
+                    http=object(),
+                )
+
     def test_packaged_preflight_does_not_dispatch_or_need_a_host_credential(self):
         with contextlib.redirect_stdout(io.StringIO()) as out:
             rc = ENTRY({"action": "preflight"}, root=self.path / "controller", environ={})

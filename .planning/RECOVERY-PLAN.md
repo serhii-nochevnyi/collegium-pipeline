@@ -27,3 +27,18 @@ Implementation:
    missing/ambiguous objects, repeated reconciliation/import and unchanged paused settings.
    Publish into the existing source PR via its scoped App, install reviewed bundle plan,
    and run service-only interruption diagnostics; never choose a product pilot.
+
+## Live GitHub continuation
+
+Add fixed github-* modes to the existing recovery-probe. Reuse the diagnostic namespace
+and its adopted journal, adding one immutable service-only admission. Keep the previous
+native-agent diagnostic intact. The existing App scope already permits only
+`tests/test_live_service.py`; the fixed passing fixture stays in that scope on a new
+run-owned branch. Controller global execution/writes remain disabled. A narrowly derived
+broker authority exists only inside this explicit service diagnostic.
+
+Prepare persists the canonical root/branch. Commit/PR modes call the real App mutation,
+then deliberately withhold the returned result and hold before PRBroker records done.
+Cancel the controller after its ready signal, restore from the independent checkpoint,
+then run the exact same modes twice. Observe one commit by base comparison/branch SHA,
+and one PR including closed PRs by exact branch. Leave both source/service PRs unmerged.

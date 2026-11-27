@@ -149,3 +149,27 @@ checkpoint it, then hold for a real controller cancellation. It refuses a second
 while a diagnostic checkpoint exists. `recover` restores that same session/turn in a separate
 journal, without agents or GitHub writes; repeated recovery/inspect proves idempotence.
 This is a service diagnostic, never a product pilot or acceptance shortcut.
+
+
+## Live GitHub interruption diagnostic
+
+The fixed `recovery-probe` modes `github-prepare`, `github-commit`, `github-pr`,
+`github-recover`, `github-inspect` use the existing diagnostic namespace and preserve the
+native-worker proof. No new connection, secret, automation or widened App scope is needed.
+Production execution/broker switches must be false. The only service write is a fixed
+passing fixture at the existing allowed `tests/test_live_service.py` path, on its canonical
+run branch. No event-selected file, payload, root, repository or endpoint is accepted.
+
+Prepare successfully adopts the fixed task and branch before either fault. Commit/PR mode
+performs the real App mutation, then withholds its reply from PRBroker and emits
+`probe_ready` before holding. Cancel the controller at that signal: GitHub and the independent
+checkpoint survive, while the attempt's local receipt/RPC identities are discarded. Recover
+uses the existing observation-only import, then the identical commit/PR mode can be run
+again; a successful replay reports `mutation_calls: 0`. Inspect counts the service admission
+and exposes its recorded receipts. No code is merged and no worker/pilot is started.
+The service PR remains a reviewable diagnostic artifact.
+
+After the GitHub probe advances the diagnostic checkpoint, use `github-recover` for that
+head. Native `inspect` still selects its own original admission; native `recover` refuses a
+broker checkpoint rather than importing it without a GitHub observer. Production checkpoints
+remain in their separate delivery namespace.

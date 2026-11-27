@@ -1,7 +1,9 @@
 """Lose the whole controller snapshot, retain independent store and external effects."""
 
+import contextlib
 import copy
 import hashlib
+import io
 import json
 import runpy
 import shutil
@@ -10,6 +12,7 @@ import unittest
 import zlib
 from dataclasses import asdict
 from pathlib import Path
+from unittest.mock import patch
 from uuid import uuid4
 
 from test_delivery import BASE, Repository
@@ -559,6 +562,85 @@ class RecoveryTests(unittest.TestCase):
                 self.config, self.journal, self.state / "artifacts", self.store, self.identity
             )
         self.assertEqual(self.http.posts, [])
+
+    def test_fixed_github_probe_cancel_restore_and_same_mode_replay(self):
+        probe = runpy.run_path(str(ROOT / "scripts/bundle_controller.py"))["github_recovery_probe"]
+        self.journal.close()
+        config = {
+            **self.config,
+            "execution_enabled": False,
+            "broker_enabled": False,
+            "allowed_paths": ["tests/test_live_service.py"],
+        }
+        records = {}
+        raw_mutate = self.github.mutate
+        owner = self
+
+        class Cut(BaseException):
+            pass
+
+        class Http:
+            def request(self, method, path):
+                assert method == "GET"
+                return records[path.rsplit("/", 1)[-1]], {}
+
+        def factory(*args):
+            owner.github.mutate = raw_mutate
+            return owner.github
+
+        def call(mode):
+            identity = "run_" + uuid4().hex
+            event = {"action": "recovery-probe", "mode": mode}
+            records[identity] = {
+                "id": identity,
+                "automation_id": "aut_owner",
+                "status": "running",
+                "started_at": len(records) + 1,
+                "item": {"event": {"data": event}},
+                "attempts": [{"id": "att_test", "n": 1, "status": "running"}],
+            }
+            env = {
+                "LAP_AUTOMATION_ID": "aut_owner",
+                "LAP_RUN_ID": identity,
+                "LAP_ATTEMPT_ID": "att_test",
+                "PIPELINE_CONTROL_KEY": self.store.key,
+            }
+            output = io.StringIO()
+            try:
+                with (
+                    patch("collegium_pipeline.recovery.Checkpoints", return_value=self.store),
+                    patch("collegium_pipeline.native_broker.NativeGithubApp", side_effect=factory),
+                    patch("time.sleep", side_effect=Cut),
+                    contextlib.redirect_stdout(output),
+                ):
+                    probe(event, self.state, config, env, Http())
+            except Cut:
+                records[identity]["status"] = "cancelled"
+                records[identity]["attempts"][0]["status"] = "cancelled"
+                self.assertTrue(json.loads(output.getvalue())["response_withheld"])
+                return None
+            records[identity]["status"] = "succeeded"
+            return json.loads(output.getvalue())
+
+        prepared = call("github-prepare")
+        for mode in ("github-commit", "github-pr"):
+            backup = self.path / "adopted"
+            shutil.copytree(self.state, backup)
+            self.assertIsNone(call(mode))
+            shutil.rmtree(self.state)
+            shutil.copytree(backup, self.state)
+            shutil.rmtree(backup)
+            first = call("github-recover")
+            self.assertEqual(first["root"], prepared["root"])
+            self.assertTrue(call("github-recover")["already_imported"])
+            for _ in range(2):
+                result = call(mode)
+                self.assertEqual(result["mutation_calls"], 0)
+        final = call("github-inspect")
+        self.assertEqual(final["admissions"], 1)
+        self.assertEqual(final["integrity"], "ok")
+        self.assertEqual([o for o, _ in self.github.writes].count("commit"), 1)
+        self.assertEqual([o for o, _ in self.github.writes].count("pr"), 1)
 
     def test_config_drift_and_still_running_origin_prevent_import(self):
         self.http.lose = "session"
