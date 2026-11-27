@@ -192,5 +192,10 @@
     ]
   ],
   "broker_reads": "local_gh",
-  "broker_allow_paused_triggers": true
+  "broker_allow_paused_triggers": true,
+  "recovery_store": {
+    "automation_id": "aut_3a938ace3b15451585f1ed87f166625f",
+    "owner": "aut_2ea6d08b772f41d5a9fa236cb19f93d8",
+    "approved_digest": "cd7736107a49d5858c8b7e7e5fb21b1d5d1176d54797cee76bafa62228cf4ed8"
+  }
 }

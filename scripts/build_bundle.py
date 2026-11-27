@@ -199,6 +199,28 @@ def build(config_path, integrations_path, output=DEFAULT_OUTPUT):
             },
         ],
     }
+    if config.get("recovery_store"):
+        recovery = config["recovery_store"]
+        write("recovery_store.py", (ROOT / "scripts/recovery_store.py").read_text())
+        write("recovery_scope.json", json.dumps({"owner": recovery["owner"]}, sort_keys=True))
+        claims["automation/pipeline-recovery-store-v1"] = recovery["automation_id"]
+        manifest["automations"].append(
+            {
+                "name": "pipeline-recovery-store-v1",
+                "start": "paused",
+                "schedule": "0 0 1 1 *",
+                "notify": "none",
+                "script": {
+                    "files": ["recovery_store.py", "recovery_scope.json"],
+                    "command": "python3 recovery_store.py",
+                    "executor": "aranarium",
+                    "environment_ref": "custom",
+                    "environment": "base",
+                    "size": "small",
+                    "secrets": ["PIPELINE_CONTROL_KEY"],
+                },
+            }
+        )
     # JSON is valid YAML; the standard-library serializer keeps this deterministic.
     data("lap.yaml", manifest)
     data("claims.json", claims)
@@ -213,7 +235,7 @@ def build(config_path, integrations_path, output=DEFAULT_OUTPUT):
     return {
         "bundle": str(output),
         "agents": len(workers),
-        "automations": 2,
+        "automations": len(manifest["automations"]),
         "connections": len(connections),
         "pending_connections": len(integrations["connections"]) - len(connections),
         "claimed_existing": len(claims),

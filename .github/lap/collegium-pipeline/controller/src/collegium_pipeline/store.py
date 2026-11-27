@@ -16,6 +16,7 @@ TERMINAL = {"ready_for_acceptance", "failed", "cancelled"}
 
 class Journal:
     def __init__(self, path: str | Path):
+        self.before_effect = None
         self.connection = sqlite3.connect(path, isolation_level=None, timeout=10)
         self.connection.row_factory = sqlite3.Row
         self.connection.execute("PRAGMA foreign_keys=ON")
@@ -49,6 +50,25 @@ class Journal:
                 FOREIGN KEY(run_id) REFERENCES runs(id)
             );
         """)
+
+    def checkpoint(self, operation):
+        if self.before_effect is not None:
+            self.record(operation["run_id"], "effect_attempt", {"operation": operation})
+            try:
+                self.before_effect(operation)
+            except Exception:
+                # The actual external call follows this hook and was never reached.
+                self.record(operation["run_id"], "effect_not_started", {"operation": operation})
+                raise
+
+    def effect_not_started(self, operation):
+        events = [
+            e
+            for e in self.events(operation["run_id"])
+            if e["kind"] in {"effect_attempt", "effect_not_started"}
+            and e["data"]["operation"] == operation
+        ]
+        return bool(events and events[-1]["kind"] == "effect_not_started")
 
     def close(self):
         self.connection.close()

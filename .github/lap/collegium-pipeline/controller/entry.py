@@ -97,7 +97,20 @@ def cloud_delivery(event, state, config, config_path, environ, http, controller)
                 "Bind PIPELINE_CONTROL_KEY in the project Vault before cloud dispatch"
             )
         http = http or JsonHttp(config["server"], {"X-Api-Key": key})
-        receipt_path, receipt = cloud_fence(event, state, environ, http)
+        from collegium_pipeline.recovery import ExternalRecoveryRequired
+
+        try:
+            receipt_path, receipt = cloud_fence(event, state, environ, http)
+        except ExternalRecoveryRequired:
+            if not (
+                event.get("live") is True
+                and config["execution_enabled"]
+                and config.get("recovery_store")
+            ):
+                raise
+            reconcile_controller(config, state, http, key)
+            # Recheck the complete history; recovery never grants a blanket bypass.
+            receipt_path, receipt = cloud_fence(event, state, environ, http)
         if event.get("live") is not True:
             raise PolicyError("Delivery requires explicit live=true")
         if not config["execution_enabled"]:
@@ -118,7 +131,8 @@ def cloud_delivery(event, state, config, config_path, environ, http, controller)
                 str(state / "artifacts"),
                 "--live",
                 "--once",
-            ]
+            ],
+            recovery=(http, key, cloud_identity(environ)),
         )
     finally:
         if receipt is not None:
@@ -140,6 +154,90 @@ def cloud_delivery(event, state, config, config_path, environ, http, controller)
                 )
 
 
+def reconcile_controller(config, state, http, key):
+    from collegium_pipeline.config import config_digest
+    from collegium_pipeline.domain import Task
+    from collegium_pipeline.native_broker import NativeGithubApp
+    from collegium_pipeline.recovery import Checkpoints, reconcile_existing, restore_checkpoint
+    from collegium_pipeline.store import Journal
+
+    state.mkdir(mode=0o700, parents=True, exist_ok=True)
+    scratch = Journal(state / "recovery-reads.sqlite3")
+    try:
+        root = scratch.admit(
+            Task(
+                "text",
+                "recovery-reads-v1",
+                config["repository"],
+                "Recovery observations",
+                "Read existing GitHub objects only",
+            ),
+            config_digest(config),
+        )
+        github = NativeGithubApp(config, http, scratch, root)
+        checkpoints = Checkpoints(config, http, key)
+        head = checkpoints.head()
+        downloaded = checkpoints.get() if head else None
+        fence = (
+            json.loads((state / "cloud-fence.json").read_text())
+            if (state / "cloud-fence.json").exists()
+            else None
+        )
+        if downloaded and (not fence or fence["run_id"] != downloaded[1]["identity"]["run_id"]):
+            # The adopted journal may still contain an older, confirmed pending job.
+            # That does not account for the newer lost attempt: import its checkpoint first.
+            return restore_checkpoint(
+                config, state, checkpoints, http, github, checkpoint_data=downloaded
+            )
+        result = None
+        if (state / "journal.sqlite3").is_file():
+            journal = Journal(state / "journal.sqlite3")
+            try:
+                result = reconcile_existing(config, journal, http, github)
+            finally:
+                journal.close()
+        if result is None:
+            if downloaded:
+                return {"mode": "no_uncertain_actions", "external_mutations": 0}
+            raise ValueError("No independent checkpoint or adopted uncertain action to reconcile")
+        return result
+    finally:
+        scratch.close()
+
+
+def recovered_attempts_accounted(prior, state, automation):
+    from collegium_pipeline.domain import PolicyError
+
+    identity = cloud_identity(
+        {
+            "LAP_AUTOMATION_ID": automation,
+            "LAP_RUN_ID": prior["id"],
+            "LAP_ATTEMPT_ID": prior["attempts"][0]["id"],
+        }
+    )
+    path = state / "reconciled" / (identity["run_id"] + ".json")
+    if not path.exists():
+        return False
+    receipt = json.loads(path.read_text())
+    if (
+        receipt.get("automation_id") != automation
+        or receipt.get("run_id") != prior["id"]
+        or receipt.get("attempt_ids") != [a["id"] for a in prior["attempts"]]
+        or not isinstance(receipt.get("checkpoint"), str)
+        or receipt.get("external_mutations") != 0
+    ):
+        raise PolicyError("Cloud reconciliation receipt identity differs")
+    from collegium_pipeline.recovery import validate_import_receipt
+    from collegium_pipeline.store import Journal
+
+    journal = Journal(state / "journal.sqlite3")
+    try:
+        validate_import_receipt(journal, receipt)
+    finally:
+        journal.close()
+    return True
+
+
 def cloud_fence(event, state, environ, http, *, diagnostic=False):
     """Refuse replay when the platform discarded a previous attempt's journal.
 
@@ -148,6 +246,7 @@ def cloud_fence(event, state, environ, http, *, diagnostic=False):
     A lost/cancelled attempt has no such receipt and must be reconciled, not replayed.
     """
     from collegium_pipeline.domain import PolicyError
+    from collegium_pipeline.recovery import ExternalRecoveryRequired
 
     identity = cloud_identity(environ)
     automation, run, attempt = (identity[k] for k in ("automation_id", "run_id", "attempt_id"))
@@ -200,8 +299,16 @@ def cloud_fence(event, state, environ, http, *, diagnostic=False):
             if diagnostic
             else data.get("action") == "deliver"
         )
-        if unsafe and not (not diagnostic and no_dispatch_accounted(prior, state, automation)):
-            raise PolicyError("Uncheckpointed cloud execution; reconcile before delivery replay")
+        if unsafe and not (
+            not diagnostic
+            and (
+                no_dispatch_accounted(prior, state, automation)
+                or recovered_attempts_accounted(prior, state, automation)
+            )
+        ):
+            raise ExternalRecoveryRequired(
+                "Uncheckpointed cloud execution; reconcile before delivery replay"
+            )
     if (receipt and not anchored) or (not receipt and len(rows) >= 100):
         raise PolicyError("Cloud history window exhausted; reconcile before delivery replay")
     return receipt_path, {"automation_id": automation, "run_id": run, "attempt_id": attempt}
@@ -294,6 +401,127 @@ def state_probe(event, state, config, environ, http):
         journal.close()
 
 
+def recovery_probe(event, state, config, environ, http):
+    """One fixed private-Claude diagnostic, in a separate journal; no GitHub mutations."""
+    import time
+
+    from collegium_pipeline.config import config_digest
+    from collegium_pipeline.domain import PolicyError, Selection, Task
+    from collegium_pipeline.effort import probe_command
+    from collegium_pipeline.platform import Collegium, WorkerBinding
+    from collegium_pipeline.recovery import Checkpoints, WriteAhead, restore_checkpoint
+    from collegium_pipeline.store import Journal
+
+    if set(event) != {"action", "mode"} or event["mode"] not in {
+        "connection",
+        "start",
+        "recover",
+        "inspect",
+    }:
+        raise PolicyError("Unknown fixed recovery probe")
+    if config["execution_enabled"] or config["broker_enabled"]:
+        raise PolicyError("Recovery probes require disabled delivery and broker")
+    state.mkdir(mode=0o700, parents=True, exist_ok=True)
+    if event["mode"] == "inspect":
+        if not (state / "journal.sqlite3").is_file():
+            raise PolicyError("No restored diagnostic journal")
+        journal = Journal(state / "journal.sqlite3")
+        try:
+            rows = journal.connection.execute("SELECT id FROM runs").fetchall()
+            result = {
+                "runs": [r[0] for r in rows],
+                "integrity": journal.connection.execute("PRAGMA integrity_check").fetchone()[0],
+                "launches": [
+                    e["data"] for r in rows for e in journal.events(r[0]) if e["kind"] == "launched"
+                ],
+                "admissions": sum(
+                    e["kind"] == "admitted" for r in rows for e in journal.events(r[0])
+                ),
+                "github_mutations": 0,
+            }
+        finally:
+            journal.close()
+        print(json.dumps(result))
+        return 0
+    key = environ.get("PIPELINE_CONTROL_KEY")
+    checkpoints = Checkpoints(config, http, key, namespace="diagnostic")
+    if event["mode"] == "connection":
+        print(
+            json.dumps(
+                {
+                    "recovery_store_authenticated": True,
+                    "head": checkpoints.head(),
+                    "agent_started": False,
+                    "github_mutations": 0,
+                }
+            )
+        )
+        return 0
+    if event["mode"] == "recover":
+        print(
+            json.dumps(restore_checkpoint(config, state, checkpoints, http, None, diagnostic=True))
+        )
+        return 0
+    identity = cloud_identity(environ)
+    if identity["automation_id"] != config["recovery_store"]["owner"]:
+        raise PolicyError("Recovery probe belongs to another controller")
+    current, _ = http.request(
+        "GET", "/api/automations/" + identity["automation_id"] + "/runs/" + identity["run_id"]
+    )
+    if (
+        current["status"] != "running"
+        or current["item"]["event"]["data"] != event
+        or len(current["attempts"]) != 1
+        or current["attempts"][0]["n"] != 1
+        or current["attempts"][0]["id"] != identity["attempt_id"]
+    ):
+        raise PolicyError("Recovery probe cannot replay an uncertain attempt")
+    if checkpoints.head() is not None:
+        raise PolicyError("Recover the existing checkpoint; never launch another probe worker")
+    row = config["workers"]["executor"]
+    selection = Selection(**row["selection"])
+    binding = WorkerBinding(**{**row, "selection": selection})
+    prompt = (
+        "Recovery service diagnostic only. Run the exact command below as your first Bash tool. "
+        'Then reply only {"diagnostic":"checkpoint-recovery-ok"}. '
+        "Use no other tools, no MCP, no repository changes or product work.\n"
+        + probe_command(binding.harness)
+    )
+    journal = Journal(state / "journal.sqlite3")
+    try:
+        run = journal.admit(
+            Task(
+                "text",
+                "native-recovery-probe-v1",
+                config["repository"],
+                "Native checkpoint recovery diagnostic",
+                prompt,
+            ),
+            config_digest(config),
+            purpose="readiness",
+        )
+        journal.before_effect = WriteAhead(
+            config, journal, state / "artifacts", checkpoints, identity
+        ).save
+        launch = Collegium(http).dispatch(
+            journal,
+            run,
+            0,
+            binding=binding,
+            selection=selection,
+            prompt=prompt,
+            execution_enabled=True,
+        )
+        print(
+            json.dumps({"probe_ready": True, "root": run, **launch, "github_mutations": 0}),
+            flush=True,
+        )
+        time.sleep(120)
+        return 0
+    finally:
+        journal.close()
+
+
 def main(event=None, *, root=None, environ=None, http=None):
     environ = os.environ if environ is None else environ
     root = Path(root or Path(__file__).resolve().parent)
@@ -339,6 +567,26 @@ def main(event=None, *, root=None, environ=None, http=None):
             ),
             "no_dispatch_records": len(list((state / "no-dispatch").glob("*.json"))),
         }
+        print(json.dumps(result))
+        return 0
+    if action == "recovery-probe":
+        from collegium_pipeline.transport import JsonHttp
+
+        key = environ.get("PIPELINE_CONTROL_KEY")
+        if not key:
+            raise PolicyError("Controller Vault key is required for recovery probe")
+        http = http or JsonHttp(config["server"], {"X-Api-Key": key})
+        return recovery_probe(event, state / "recovery-diagnostics", config, environ, http)
+    if action == "reconcile":
+        if event != {"action": "reconcile"}:
+            raise PolicyError("Reconciliation accepts no event-selected identities or payloads")
+        key = environ.get("PIPELINE_CONTROL_KEY")
+        if not key:
+            raise PolicyError("Controller Vault key is required for recovery")
+        from collegium_pipeline.transport import JsonHttp
+
+        http = http or JsonHttp(config["server"], {"X-Api-Key": key})
+        result = reconcile_controller(config, state, http, key)
         print(json.dumps(result))
         return 0
     if action == "state-probe":

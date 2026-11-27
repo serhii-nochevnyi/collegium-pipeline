@@ -39,9 +39,9 @@ class BundleTests(unittest.TestCase):
 
     def test_installation_contains_controller_and_existing_agent_claims(self):
         self.assertEqual(len(self.manifest["agents"]), 8)
-        self.assertEqual(len(self.manifest["automations"]), 2)
+        self.assertEqual(len(self.manifest["automations"]), 3)
         claims = json.loads((self.path / "claims.json").read_text())
-        self.assertEqual(len(claims), 9)
+        self.assertEqual(len(claims), 10)
         for automation in self.manifest["automations"]:
             self.assertEqual(automation["start"], "paused")
             self.assertLessEqual(len(automation["script"]["files"]), 64)
@@ -489,6 +489,7 @@ class BundleTests(unittest.TestCase):
         root = self.path / "controller"
         config = json.loads((root / "settings.json").read_text())
         config["execution_enabled"] = True
+        config.pop("recovery_store", None)  # Legacy uncheckpointed attempts still cannot resume.
         (root / "settings.json").write_text(json.dumps(config))
         env.update(ARANARIUM_STATE_DIR=str(self.path / "state"), PIPELINE_CONTROL_KEY="fixture-key")
         with patch("collegium_pipeline.cli.main") as dispatch:

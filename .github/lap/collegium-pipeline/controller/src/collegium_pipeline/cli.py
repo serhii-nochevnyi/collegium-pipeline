@@ -15,7 +15,7 @@ from .quality import verify_checks, verify_pr
 from .store import Journal
 
 
-def main(argv=None):
+def main(argv=None, *, recovery=None):
     parser = argparse.ArgumentParser(prog="collegium-pipeline")
     commands = parser.add_subparsers(dest="command", required=True)
     for name in ("doctor", "prepare-text", "verify-pr", "status", "recheck-result"):
@@ -82,6 +82,22 @@ def main(argv=None):
                 with serial_lock(args.journal):
                     journal = Journal(args.journal)
                     try:
+                        if recovery is not None:
+                            from .recovery import Checkpoints, WriteAhead
+
+                            http, key, identity = recovery
+                            if identity["automation_id"] != config.get("recovery_store", {}).get(
+                                "owner"
+                            ):
+                                raise ValueError("Recovery owner differs from the cloud controller")
+                            journal.before_effect = WriteAhead(
+                                config,
+                                journal,
+                                args.artifacts,
+                                Checkpoints(config, http, key),
+                                identity,
+                            ).save
+                            journal.before_effect({"kind": "tick", "run_id": args.run_id})
                         coordinator = Delivery(
                             config,
                             journal,

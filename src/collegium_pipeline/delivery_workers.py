@@ -203,8 +203,17 @@ class NativeJobs:
             (e["data"] for e in reversed(self.journal.events(job)) if e["kind"] == "launched"), None
         )
         if launch is None:
-            self.journal.unknown_launch(job, run["pending_intent"])
-            raise PolicyError("Unresolved worker launch")
+            # Recovery may have identified the existing named session before its
+            # prompt response was observable. Continue only its original idempotency key.
+            resumed = self.platform.resume_dispatch(
+                self.journal,
+                job,
+                binding=binding,
+                selection=selection,
+                prompt=json.dumps(packet),
+                execution_enabled=self.config["execution_enabled"],
+            )
+            launch = resumed
         started = next(
             e["data"]["at"] for e in self.journal.events(job) if e["kind"] == "job_started"
         )

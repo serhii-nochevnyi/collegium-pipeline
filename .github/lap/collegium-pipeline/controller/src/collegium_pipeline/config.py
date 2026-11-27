@@ -35,6 +35,7 @@ FIELDS = {
     "max_worker_jobs",
     "broker_transport",
     "native_broker",
+    "recovery_store",
     "repair_pr_mode",
     "model_policy",
     "model_connection",
@@ -176,6 +177,17 @@ def load_config(path: str | Path) -> dict:
             raise PolicyError(
                 "Native egress requires keep_ready; GraphQL draft transitions are unavailable"
             )
+    if "recovery_store" in config:
+        binding = config["recovery_store"]
+        if (
+            not isinstance(binding, dict)
+            or set(binding) != {"automation_id", "approved_digest", "owner"}
+            or not re.fullmatch(r"aut_[A-Za-z0-9]+", str(binding.get("automation_id", "")))
+            or not re.fullmatch(r"aut_[A-Za-z0-9]+", str(binding.get("owner", "")))
+            or not re.fullmatch(r"[a-f0-9]{64}", str(binding.get("approved_digest", "")))
+            or binding["automation_id"] == binding["owner"]
+        ):
+            raise PolicyError("A distinct pinned independent recovery store is required")
     if "service_test" in config:
         gate = config["service_test"]
         if (

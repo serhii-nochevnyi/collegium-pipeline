@@ -133,11 +133,12 @@ class GithubApp(Github):
 
 
 class PRBroker:
-    def __init__(self, config, journal, github):
+    def __init__(self, config, journal, github, *, observation_only=False):
         self.config, self.journal, self.github = config, journal, github
+        self.observation_only = observation_only
 
     def action(self, run_id, key, operation, payload, observe):
-        if (
+        if not self.observation_only and (
             self.config.get("execution_enabled") is not True
             or self.config.get("broker_enabled") is not True
             or self.config.get("execution_profile", "delivery") != "delivery"
@@ -156,8 +157,17 @@ class PRBroker:
         if intents and intents[-1]["identity"] != identity:
             raise PolicyError("Pending action payload changed")
         found = observe()
+        descriptor = {
+            "kind": "broker",
+            "run_id": run_id,
+            "key": key,
+            "operation": operation,
+            "payload": payload,
+        }
         if found is None:
-            if intents:
+            if self.observation_only or (
+                intents and not self.journal.effect_not_started(descriptor)
+            ):
                 raise PolicyError(
                     "Unresolved external action; observation only, no automatic replay"
                 )
@@ -165,6 +175,15 @@ class PRBroker:
                 run_id, "broker_intent", {"key": key, "identity": identity, "operation": operation}
             )
             self.github.scope()
+            self.journal.checkpoint(
+                {
+                    "kind": "broker",
+                    "run_id": run_id,
+                    "key": key,
+                    "operation": operation,
+                    "payload": payload,
+                }
+            )
             self.github.mutate(operation, payload)
             found = observe()
             if found is None:

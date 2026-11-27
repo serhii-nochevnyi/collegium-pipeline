@@ -37,11 +37,11 @@ DEV Grafana, Langfuse, VictoriaMetrics and Backstage return HTTP 502 from Colleg
 1. Publish the bundle source to a review branch of this repository.
 2. Finish connections in Collegium's project Connections page and discover their actual tools. Save explicit read-only lists and rebuild the bundle. This needs a person's sign-in; no token should be pasted into a chat or the repository.
 3. Plan `lap bundle install --project <project> --repo <this repository> --path .github/lap/collegium-pipeline --ref <review branch> --connection <App connection>` with every mapping from `claims.json` as `--claim KEY=ID`. Read the exact plan and digest before applying it. The earlier plan automatically selected broad platform DEV connections and must not be applied unchanged.
-4. Bind `claude-code-subscription` to the existing private project connection and each emitted MCP need to its recorded **project** connection with `--connection <connection_id>`. Review claimed-field choices: `drop` takes the bundle field, while the default `keep` preserves the live field. Verify MCP entries and tool lists in the resulting operations; do not assume a claim installs the bundle configuration. Only the controller receives `PIPELINE_CONTROL_KEY`, a separate space-limited Collegium key stored at project level, distinct from the Claude token. Do not copy the host's personal CLI key into the cloud.
+4. Bind `claude-code-subscription` to the existing private project connection and each emitted MCP need to its recorded **project** connection with `--connection <connection_id>`. Review claimed-field choices: `drop` takes the bundle field, while the default `keep` preserves the live field. Verify MCP entries and tool lists in the resulting operations; do not assume a claim installs the bundle configuration. Only the controller and repository-free recovery store receive `PIPELINE_CONTROL_KEY`, a separate space-limited Collegium key stored at project level, distinct from the Claude token. Do not copy the host's personal CLI key into the cloud.
 5. Apply the reviewed plan. Validate declared models, effort, harness, owner/project, repository grants, MCP tool ceilings and installed source; refresh controller bindings only against this applied plan. Recalibrate changed worker configurations. The controller settings shipped in this initial bundle intentionally disable execution/writes.
 6. Verify a cloud preflight, persistent state and interrupted-run recovery before enabling a cloud service test. Continue the explicitly authorized PR → assertion failure → repair → green CI test; leave its PR unmerged.
 
-The manifest requires a trigger even for a manually used script. Both automations therefore declare schedules **and start paused**. The broker permits such a configuration only with explicit `broker_allow_paused_triggers`, an exact digest pin and status `paused`; an active broker is rejected. No automation is resumed by the builder.
+The manifest requires a trigger even for a manually used script. All three automations therefore declare schedules **and start paused**. The broker permits such a configuration only with explicit `broker_allow_paused_triggers`, an exact digest pin and status `paused`; an active broker is rejected. No automation is resumed by the builder.
 
 ## Boundaries
 
@@ -77,14 +77,9 @@ failure) save a separate per-attempt `no-dispatch` record in the snapshot. A lat
 checks each attempt identity and skips only that harmless run, then continues checking older
 runs; this record never establishes an anchor. A cancelled/lost attempt discards it too.
 An unaccounted attempt with possible external effects blocks replay for reconciliation. An explicitly paginated history response, or a full history window (100 runs) without an anchor,
-a mismatched automation/attempt, or unavailable history also blocks. This is a safety fence,
-not an automatic external-action recovery mechanism. There is currently no cloud command
-that clears an ambiguous fence: recovery requires an operator-reviewed reconstruction of
-the journal and checkpoint from independently verified session/GitHub identities. Such
-an import/reconciliation interface is not implemented; those cases remain blocked.
-Never clear its receipt or roll back
-state to bypass it; reconcile known worker sessions and GitHub effects before extending
-recovery. Both execution switches remain disabled and both automations stay paused.
+a mismatched automation/attempt, or unavailable history also blocks. The fence is paired with the independent
+checkpoint service below. Never clear receipts or roll back state to bypass it. A legacy
+lost attempt without an independent checkpoint remains blocked. Both execution switches remain disabled and all three automations stay paused.
 
 Prepare admits event data directly, with no shared intake file. Repeated identical intake
 returns the same run; changed acceptance/configuration requires explicit replan. Unique
@@ -99,3 +94,54 @@ cancellation. The next adopted snapshot must contain neither attempted write. `f
 a separate receipt namespace without agents or repository writes. Cancel the held run only
 after `probe_ready` appears. A cancelled fenced probe remains intentionally quarantined;
 it does not affect the product journal. No mode accepts arbitrary commands or enables delivery.
+
+
+## Independent checkpoints and external reconciliation
+
+The third bundle automation, `pipeline-recovery-store-v1`, is a paused script with no
+repository, MCP or model grants. It shares only the controller's environment-delivered
+`project/PIPELINE_CONTROL_KEY` reference, used in memory to authenticate checkpoint RPCs
+and their responses with HMAC. No key value is put in events, state, artifacts or output.
+Both scripts and the exact store owner/project/secret scope are pinned before use.
+
+Cloud delivery saves a consistent SQLite backup and all verified content-addressed
+artifacts before each tick, session creation, prompt submission and broker mutation.
+The store's separate run must finish and adopt that checkpoint before the external effect
+is called. Uploads use immutable 120 KB chunks, a digest and CAS on the previous head;
+partial uploads cannot replace the committed head. Delivery and diagnostic namespaces are
+separate. Bounds are 24 MB raw JSON and 8 MB compressed per checkpoint. Oversized state
+or missing acknowledgement refuses the effect; no evidence is silently truncated. The
+store retains two committed generations and one pending upload. The local head must match
+the independent head before another tick; a late old writer cannot be silently overwritten.
+
+`{"action":"reconcile"}` accepts no caller-selected checkpoint, task, paths or endpoints.
+It reconciles an adopted journal or verifies the latest signed checkpoint's original closed
+controller run/attempt and exact frozen configuration, imports into staging, checks SQLite
+and artifact integrity, and then restores the original journal identities with an audit
+receipt. Importing it twice is idempotent; the receipt must remain joined to the journal's
+checkpoint event. A lost snapshot is imported before an older pending local job can be
+mistaken for its state. Live delivery automatically tries this read-only reconciliation when
+the history fence identifies an uncheckpointed attempt, and then checks the entire fence
+again. Paused schedules are never resumed by recovery.
+
+Agent session names derive from the recorded launch intent. Recovery checks exact agent,
+project, runtime, harness, environment, frozen request and actual prompt trace/turn identity.
+It never creates a replacement session while a previous creation is unknown. If a known
+session's prompt needs continuation, delivery reuses the original Idempotency-Key and exact
+request, which returns its existing turn or sends the first one once. A checkpoint failure
+recorded before the external call is separate from an ambiguous response, so an adopted
+journal may safely retry an action known never to have started.
+
+Commit reconciliation retains the original expected parent, action marker and full tree
+comparison. PR reconciliation checks repository IDs, branch, base/head and the original run
+marker. It records the observed existing result; it never republishes an uncertain mutation.
+Missing or ambiguous objects, changed configuration, an advancing checkpoint, incomplete
+history or external branch/PR drift remain blocked. Reconciliation does not approve code,
+accept CI, change model/effort, merge, release or deploy.
+
+The fixed `recovery-probe` supports `connection`, `start`, `recover`, `inspect`, with both
+execution switches disabled. `start` can launch one fixed private-Claude executor diagnostic,
+checkpoint it, then hold for a real controller cancellation. It refuses a second worker
+while a diagnostic checkpoint exists. `recover` restores that same session/turn in a separate
+journal, without agents or GitHub writes; repeated recovery/inspect proves idempotence.
+This is a service diagnostic, never a product pilot or acceptance shortcut.

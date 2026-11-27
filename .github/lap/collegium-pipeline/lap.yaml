@@ -390,6 +390,7 @@
           "controller/src/collegium_pipeline/platform.py",
           "controller/src/collegium_pipeline/quality.py",
           "controller/src/collegium_pipeline/readiness.py",
+          "controller/src/collegium_pipeline/recovery.py",
           "controller/src/collegium_pipeline/runner.py",
           "controller/src/collegium_pipeline/service_test.py",
           "controller/src/collegium_pipeline/store.py",
@@ -429,6 +430,26 @@
             "connection": "ghc_7de07519a1e3437a95f98edc4545022d",
             "access": "contributor"
           }
+        ]
+      }
+    },
+    {
+      "name": "pipeline-recovery-store-v1",
+      "start": "paused",
+      "schedule": "0 0 1 1 *",
+      "notify": "none",
+      "script": {
+        "files": [
+          "recovery_store.py",
+          "recovery_scope.json"
+        ],
+        "command": "python3 recovery_store.py",
+        "executor": "aranarium",
+        "environment_ref": "custom",
+        "environment": "base",
+        "size": "small",
+        "secrets": [
+          "PIPELINE_CONTROL_KEY"
         ]
       }
     }
