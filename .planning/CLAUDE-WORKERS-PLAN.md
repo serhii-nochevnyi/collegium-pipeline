@@ -9,3 +9,7 @@ The owner explicitly replaced the platform worker model policy with Claude and t
 5. Keep the live service-test admission separate. Before resuming PR delivery, enforce initial-red/repaired-green service fixtures and actual CI failure evidence; do not claim the PR lifecycle from worker calibration alone.
 
 Research: Context7 quota exhausted. Collegium live model-connection help, Aranarium Claude adapter StartSpec and the official Claude Code model configuration document confirm subscription aliases and explicit `--effort`. Aliases may resolve to newer model releases; unsupported effort can be lowered by Claude Code, so report that limit and collect concrete served-model evidence.
+
+## Installed binding refresh and authenticated preflight
+
+The approved six-MCP bundle is installed paused. Verify its actual object identities, private Claude connection and exact MCP references/tool ceilings before repinning worker and native broker digests. Calibrate the eight installed workers against a new frozen readiness configuration. Add a fixed `verify-control` controller action that uses only its Vault key for bounded GETs of the pinned workers and broker metadata; task events cannot select credentials or endpoints. Rebuild and publish this controller/settings refresh through the existing source App broker, review/CI, then apply only the controller update while preserving paused automation status and disabled delivery. Verify actual cloud authentication without printing a key. Historical service admissions retain their original configurations.

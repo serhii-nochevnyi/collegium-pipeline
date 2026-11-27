@@ -25,7 +25,7 @@
         "effort": "high",
         "reason": "base"
       },
-      "approved_agent_digest": "448625e0b423efb6c5583f3654c3ca2092468070d598bfdbcaf563f5adccf5ce",
+      "approved_agent_digest": "811cea3e50576de533fe443e14d14f71c65e4bd309dcc66039eb19725e4020ee",
       "harness": "claude-code",
       "model_connection_id": "mcn_699c8e51528e4438a359acfd4dced40f"
     },
@@ -41,7 +41,7 @@
         "effort": "high",
         "reason": "base"
       },
-      "approved_agent_digest": "09eaed036ddc57dcc480d2d18e998088cc31fcb5d34fe8b1abbfe28650f915fa",
+      "approved_agent_digest": "99764e301d89082f09208672f1bdc864801d4e4dc977a76e079a3f935064e64c",
       "harness": "claude-code",
       "model_connection_id": "mcn_699c8e51528e4438a359acfd4dced40f"
     },
@@ -57,7 +57,7 @@
         "effort": "low",
         "reason": "base"
       },
-      "approved_agent_digest": "80435b566fa62c7aa5d62e572c54a5f598e3c8bc2565464ec65c44c91c6d69c9",
+      "approved_agent_digest": "571530df01b201ff1aa9037a8d49ac5d14ef96b76b3072bc984b863510c66d94",
       "harness": "claude-code",
       "model_connection_id": "mcn_699c8e51528e4438a359acfd4dced40f"
     },
@@ -73,7 +73,7 @@
         "effort": "high",
         "reason": "base"
       },
-      "approved_agent_digest": "a0f4d0fdf94caf511820831c860d7f6652066b0f9d1d78220aae8805ea0270d6",
+      "approved_agent_digest": "ff1830fb652ac72b039e52e9157d0a4213438282053e2c7c7525d02ccf5bacf4",
       "harness": "claude-code",
       "model_connection_id": "mcn_699c8e51528e4438a359acfd4dced40f"
     },
@@ -89,7 +89,7 @@
         "effort": "low",
         "reason": "base"
       },
-      "approved_agent_digest": "659b23a1d289c0e526f74582312c551aa9223102c0d0547d99d3d0b2e0ef23c4",
+      "approved_agent_digest": "101b83cf9adb18bae53b7b795df1d7689256959da2fee421e4b8a50257fcb96e",
       "harness": "claude-code",
       "model_connection_id": "mcn_699c8e51528e4438a359acfd4dced40f"
     },
@@ -105,7 +105,7 @@
         "effort": "medium",
         "reason": "base"
       },
-      "approved_agent_digest": "94ef78d75d132f6bb2cdc655e26f14aa2b2ca0fb612d9e66661cde50451411e5",
+      "approved_agent_digest": "9c2b06e871ab9e2b3f239b03057efbcae821e12a338153ac2502b5e4ae8baf9b",
       "harness": "claude-code",
       "model_connection_id": "mcn_699c8e51528e4438a359acfd4dced40f"
     },
@@ -121,7 +121,7 @@
         "effort": "high",
         "reason": "same_cause_repeat"
       },
-      "approved_agent_digest": "0759830da0b33872f21a542633bd15d4dc31deb28bcde8be3b01846c1abd2483",
+      "approved_agent_digest": "0559a4cc651b7e9b9b2193952dffb8307e126b92434e4b9590617be4ecf14fe8",
       "harness": "claude-code",
       "model_connection_id": "mcn_699c8e51528e4438a359acfd4dced40f"
     },
@@ -137,7 +137,7 @@
         "effort": "max",
         "reason": "repeat_tier_exhausted"
       },
-      "approved_agent_digest": "64ace8421b44f08350b4ac38c11b1247c10d2854623faa0b996a0f5a556014c0",
+      "approved_agent_digest": "ec955e27c681942cf0ed0a6df49c6f15273d7578279c90b88b20a6a6f200a3f4",
       "harness": "claude-code",
       "model_connection_id": "mcn_699c8e51528e4438a359acfd4dced40f"
     }
@@ -168,7 +168,7 @@
   "broker_transport": "collegium_script",
   "native_broker": {
     "automation_id": "aut_5b17ddca92424243b1feb5aa8732a7a0",
-    "approved_digest": "b76437d0ad468f73ba23bc44afa4ae4b2d73bf965e6675501863de07a6d47778"
+    "approved_digest": "fe91045a1fe7a7175953233af7e6d4944e81cd94fc276147d0d917fa2b144a65"
   },
   "model_policy": "claude",
   "model_connection": "project/claude-code-subscription",

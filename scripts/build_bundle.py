@@ -156,7 +156,7 @@ def build(config_path, integrations_path, output=DEFAULT_OUTPUT):
             {
                 "name": "PIPELINE_CONTROL_KEY",
                 "delivery": "env",
-                "description": "Project-scoped Collegium API key for the controller; "
+                "description": "Separate space-limited Collegium API key for the controller; "
                 "separate from the Claude key",
             }
         ],

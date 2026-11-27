@@ -38,7 +38,7 @@
         "searchJiraIssuesUsingJql",
         "search"
       ],
-      "attached_to_live_agents": false,
+      "attached_to_live_agents": true,
       "backend_read_verified": false,
       "authenticated_discovery": true
     },
@@ -60,7 +60,7 @@
         "get_document_tree",
         "get_related_documents"
       ],
-      "attached_to_live_agents": false,
+      "attached_to_live_agents": true,
       "backend_read_verified": false,
       "authenticated_discovery": true
     },
@@ -114,7 +114,7 @@
         "search_folders",
         "search_tempo_traces"
       ],
-      "attached_to_live_agents": false,
+      "attached_to_live_agents": true,
       "backend_read_verified": false,
       "authenticated_discovery": true
     },
@@ -176,7 +176,7 @@
         "top_queries",
         "tsdb_status"
       ],
-      "attached_to_live_agents": false,
+      "attached_to_live_agents": true,
       "backend_read_verified": false,
       "authenticated_discovery": true
     },
@@ -209,7 +209,7 @@
         "get-catalog-entity",
         "validate-entity"
       ],
-      "attached_to_live_agents": false,
+      "attached_to_live_agents": true,
       "backend_read_verified": false,
       "authenticated_discovery": true
     },
@@ -263,12 +263,12 @@
         "get_document_tree",
         "get_related_documents"
       ],
-      "attached_to_live_agents": false,
+      "attached_to_live_agents": true,
       "backend_read_verified": false,
       "authenticated_discovery": true
     }
   ],
   "all_operational": false,
-  "installation_applied": false,
+  "installation_applied": true,
   "backend_calls_verified": false
 }

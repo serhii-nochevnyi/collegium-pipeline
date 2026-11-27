@@ -8,8 +8,10 @@ import runpy
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 from collegium_pipeline.domain import PolicyError
+from collegium_pipeline.platform import agent_digest
 
 ROOT = Path(__file__).resolve().parents[1]
 BUILD = runpy.run_path(str(ROOT / "scripts/build_bundle.py"))["build"]
@@ -84,11 +86,11 @@ class BundleTests(unittest.TestCase):
         self.assertNotEqual(urls["grafana-prod"], urls["grafana-dev"])
         self.assertNotEqual(urls["langfuse-prod"], urls["langfuse-dev"])
         self.assertFalse(integrations["environment_substitution_allowed"])
-        self.assertTrue(all(not s["attached_to_live_agents"] for s in integrations["status"]))
         needs = {c["name"]: c for c in self.manifest["connections"]}
         for status in integrations["status"]:
             if status["state"] != "connected":
                 self.assertEqual(status["allowed_tools"], [])
+                self.assertFalse(status["attached_to_live_agents"])
                 self.assertNotIn(status["need"], needs)
                 for agent in self.manifest["agents"]:
                     self.assertNotIn(status["need"], agent["mcp_servers"])
@@ -98,6 +100,88 @@ class BundleTests(unittest.TestCase):
                 self.assertTrue(needs[status["need"]]["tools"])
             # Tool discovery is not proof of a successful backend data call.
             self.assertFalse(status["backend_read_verified"])
+
+    def control_fixture(self):
+        root = self.path / "controller"
+        config = json.loads((root / "settings.json").read_text())
+        integrations = json.loads((root / "integrations.json").read_text())
+        needs = [s for s in integrations["status"] if s["allowed_tools"]]
+        agents = {}
+        for binding in config["workers"].values():
+            agent = {
+                "id": binding["agent_id"],
+                "references": {
+                    "mcp": [
+                        {"name": s["need"], "level": "project", "id": s["connection_id"]}
+                        for s in needs
+                    ]
+                },
+                "config": {
+                    "tools": [
+                        {
+                            "type": "mcp_toolset",
+                            "mcp_server_name": s["need"],
+                            "default_config": {"enabled": False},
+                            "configs": {n: {"enabled": True} for n in s["allowed_tools"]},
+                        }
+                        for s in needs
+                    ]
+                },
+            }
+            agents["/api/agents/" + binding["agent_id"]] = agent
+            binding["approved_agent_digest"] = agent_digest(agent)
+        (root / "settings.json").write_text(json.dumps(config))
+
+        class ReadOnlyHttp:
+            def request(self, method, path):
+                if method != "GET" or path not in agents:
+                    raise AssertionError("Unexpected control-plane operation")
+                return agents[path], {}
+
+        return root, config, agents, ReadOnlyHttp()
+
+    def test_control_verification_uses_vault_key_and_only_reads_fixed_bindings(self):
+        root, _, _, http = self.control_fixture()
+        with (
+            patch("collegium_pipeline.transport.JsonHttp", return_value=http) as transport,
+            patch("collegium_pipeline.native_broker.ScriptTransport.scope") as scope,
+            contextlib.redirect_stdout(io.StringIO()) as out,
+        ):
+            rc = ENTRY(
+                {"action": "verify-control"},
+                root=root,
+                environ={"PIPELINE_CONTROL_KEY": "fixture-vault-key"},
+            )
+        transport.assert_called_once_with(
+            "https://agentic-platform.infrateam.xyz", {"X-Api-Key": "fixture-vault-key"}
+        )
+        scope.assert_called_once()
+        self.assertEqual(rc, 0)
+        result = json.loads(out.getvalue())
+        self.assertTrue(result["control_key_valid"])
+        self.assertEqual(result["worker_bindings_verified"], 8)
+        self.assertFalse(result["agent_started"])
+        self.assertNotIn("fixture-vault-key", out.getvalue())
+
+    def test_control_verification_rejects_event_credentials_missing_key_and_drift(self):
+        root, _, agents, http = self.control_fixture()
+        for event, environ in (
+            ({"action": "verify-control"}, {"LAP_API_KEY": "host-key"}),
+            (
+                {"action": "verify-control", "PIPELINE_CONTROL_KEY": "event-key"},
+                {"PIPELINE_CONTROL_KEY": "fixture-vault-key"},
+            ),
+        ):
+            with self.assertRaises(PolicyError):
+                ENTRY(event, root=root, environ=environ, http=http)
+        next(iter(agents.values()))["references"]["mcp"][0]["id"] = "broader-connection"
+        with self.assertRaises(PolicyError):
+            ENTRY(
+                {"action": "verify-control"},
+                root=root,
+                environ={"PIPELINE_CONTROL_KEY": "fixture-vault-key"},
+                http=http,
+            )
 
     def test_bundle_refuses_unrestricted_unverified_or_mismatched_mcp(self):
         baseline = json.loads((ROOT / "config/integrations.json").read_text())
