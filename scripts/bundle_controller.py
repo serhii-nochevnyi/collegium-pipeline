@@ -454,11 +454,11 @@ def github_recovery_probe(event, state, config, environ, http):
     checkpoints = Checkpoints(config, http, key, namespace="diagnostic")
     fixture = {
         "tests/test_live_service.py": (
-            '"""Service-only live GitHub checkpoint recovery fixture."""\n'
-            "import unittest\n\n"
+            '"""Service-only live GitHub checkpoint recovery fixture."""\n\n'
+            "import unittest\n\n\n"
             "class LiveCheckpointRecoveryTest(unittest.TestCase):\n"
             "    def test_fixed_fixture(self):\n"
-            '        self.assertEqual("checkpoint-recovery", "checkpoint-recovery")\n'
+            '        self.assertEqual(len("checkpoint-recovery"), 19)\n'
         )
     }
     title = "[Service diagnostic] GitHub checkpoint recovery"
