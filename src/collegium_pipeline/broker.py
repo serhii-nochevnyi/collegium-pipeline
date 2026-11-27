@@ -97,7 +97,7 @@ class GithubApp(Github):
 
     def ref(self, branch):
         try:
-            return self.read("/git/ref/heads/" + quote(branch, safe=""))["object"]["sha"]
+            return self.read("/git/ref/heads/" + quote(branch, safe="/"))["object"]["sha"]
         except RemoteError as exc:
             if exc.status == 404:
                 return None

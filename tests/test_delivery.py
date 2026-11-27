@@ -442,6 +442,19 @@ class DeliveryTests(unittest.TestCase):
             clock=lambda: self.now,
         )
 
+    def test_github_ref_preserves_branch_path_separators(self):
+        calls = []
+
+        class Http:
+            def request(self, method, path):
+                calls.append((method, path))
+                return {"object": {"sha": BASE}}, {}
+
+        app = GithubApp("owner/repo", 123, Http())
+        branch = "collegium/" + self.run
+        self.assertEqual(app.ref(branch), BASE)
+        self.assertEqual(calls, [("GET", "/repos/owner/repo/git/ref/heads/" + branch)])
+
     def test_lost_pr_response_reconciles_without_second_pr(self):
         self.until("opening_pr")
         self.github.lose = "pr"

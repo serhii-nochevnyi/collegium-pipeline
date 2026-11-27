@@ -203,7 +203,7 @@ class NativeGithubApp(GithubApp):
             return super().ref(branch)
         # Matching refs returns [] for absence; gh's generic JSON reader deliberately
         # hides error bodies, so an auth/transport error must never mean "missing".
-        rows = self.reader.read("/git/matching-refs/heads/" + quote(branch, safe=""))
+        rows = self.reader.read("/git/matching-refs/heads/" + quote(branch, safe="/"))
         exact = [r for r in rows if r.get("ref") == "refs/heads/" + branch]
         if not exact:
             return None
