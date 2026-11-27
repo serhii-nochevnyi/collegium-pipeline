@@ -110,8 +110,12 @@ def build(config_path, integrations_path, output=DEFAULT_OUTPUT):
         ),
     )
     script_files = []
+    local_only = {"controller.py", "doctor.py", "packets.py", "readiness.py", "runner.py"}
     for source in sorted((ROOT / "src/collegium_pipeline").glob("*.py")):
         name = "controller/src/collegium_pipeline/" + source.name
+        if source.name in local_only:
+            (output / name).unlink(missing_ok=True)
+            continue
         write(name, source.read_text())
         script_files.append(name)
     write("controller/entry.py", (ROOT / "scripts/bundle_controller.py").read_text())
@@ -136,6 +140,8 @@ def build(config_path, integrations_path, output=DEFAULT_OUTPUT):
     )
     broker_name = f"pipeline-native-broker-{config['repository_id']}-v1"
     claims["automation/" + broker_name] = config["native_broker"]["automation_id"]
+    if sum(len((output / name).read_bytes()) for name in script_files) > 256_000:
+        raise PolicyError("Cloud controller exceeds the platform code.files budget")
     manifest = {
         "apiVersion": "lap.airslate.com/v1alpha1",
         "kind": "Bundle",

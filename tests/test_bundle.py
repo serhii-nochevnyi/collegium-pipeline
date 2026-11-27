@@ -59,6 +59,27 @@ class BundleTests(unittest.TestCase):
             self.assertNotIn("vault_keys", agent)
             self.assertIn("agent/" + agent["name"], claims)
 
+    def test_cloud_package_size_and_isolated_import(self):
+        files = self.manifest["automations"][0]["script"]["files"]
+        self.assertLessEqual(sum((self.path / name).stat().st_size for name in files), 256_000)
+        self.assertFalse((self.path / "controller/src/collegium_pipeline/runner.py").exists())
+        program = (
+            "import runpy; m=runpy.run_path("
+            + repr(str(self.path / "controller/entry.py"))
+            + "); m['main']({'action':'preflight'},root="
+            + repr(str(self.path / "controller"))
+            + ",environ={})"
+        )
+        result = subprocess.run(
+            [sys.executable, "-I", "-c", program],
+            cwd=self.path,
+            capture_output=True,
+            text=True,
+            timeout=20,
+        )
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertFalse(json.loads(result.stdout)["agent_started"])
+
     def test_packaged_preflight_does_not_dispatch_or_need_a_host_credential(self):
         with contextlib.redirect_stdout(io.StringIO()) as out:
             rc = ENTRY({"action": "preflight"}, root=self.path / "controller", environ={})

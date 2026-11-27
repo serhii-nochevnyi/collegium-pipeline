@@ -9,7 +9,6 @@ from pathlib import Path
 
 from .adapters import Github
 from .config import config_digest, load_config
-from .doctor import doctor
 from .domain import Task, digest, select_model
 from .quality import verify_checks, verify_pr
 from .store import Journal
@@ -164,6 +163,8 @@ def main(argv=None, *, recovery=None):
                 finally:
                     journal.close()
             if args.command == "doctor":
+                from .doctor import doctor
+
                 result = doctor(config)
                 print(json.dumps(result, indent=2))
                 return 0 if result["execution_ready"] else 2
