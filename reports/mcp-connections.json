@@ -10,23 +10,37 @@
       "auth_type": "oauth2",
       "need": "pipeline-github",
       "environment": "shared",
-      "state": "needs_auth",
+      "state": "oauth_client_not_configured",
       "http_status": null,
       "allowed_tools": [],
-      "attached_to_live_agents": false
+      "attached_to_live_agents": false,
+      "backend_read_verified": false,
+      "authenticated_discovery": false,
+      "reason": "Authorization server does not support dynamic client registration; server has no configured client_id. Existing repository App is independent."
     },
     {
       "title": "Atlassian Rovo (Jira, Confluence)",
       "server_id": "mcp_cec818f18a63466a92c26b43993eb2b4",
-      "connection_id": "mcpc_52479c22e2f246c6a9f893da82a9d3bb",
+      "connection_id": "mcpc_6922425fd6a845f4b604a8663ab06385",
       "url": "https://mcp.atlassian.com/v2/mcp",
       "auth_type": "oauth2",
       "need": "atlassian-rovo",
       "environment": "shared",
-      "state": "needs_auth",
-      "http_status": 424,
-      "allowed_tools": [],
-      "attached_to_live_agents": false
+      "state": "connected",
+      "http_status": 200,
+      "allowed_tools": [
+        "getAccessibleAtlassianResources",
+        "atlassianUserInfo",
+        "getConfluenceContent",
+        "searchConfluence",
+        "getJiraIssue",
+        "listJiraIssueComments",
+        "searchJiraIssuesUsingJql",
+        "search"
+      ],
+      "attached_to_live_agents": false,
+      "backend_read_verified": false,
+      "authenticated_discovery": true
     },
     {
       "title": "Agents Knowledge (PROD)",
@@ -39,20 +53,64 @@
       "state": "needs_auth",
       "http_status": 424,
       "allowed_tools": [],
-      "attached_to_live_agents": false
+      "attached_to_live_agents": false,
+      "backend_read_verified": false,
+      "authenticated_discovery": false,
+      "reason": "Owner sign-in required in console; Chrome extension requires update before UI flow can continue."
     },
     {
       "title": "Grafana (PROD)",
       "server_id": "mcp_1344b2e627b04128830b01f1cd759383",
-      "connection_id": "mcpc_4f4d6dda76dc4cdca9c3536fd788ad9f",
+      "connection_id": "mcpc_e33ecc0ae7154059b9b17efe5e967331",
       "url": "https://toolhive.infrateam.xyz/grafana-prod/mcp",
-      "auth_type": null,
+      "auth_type": "oauth2",
       "need": "grafana-prod",
       "environment": "PROD",
-      "state": "needs_auth",
-      "http_status": 424,
-      "allowed_tools": [],
-      "attached_to_live_agents": false
+      "state": "connected",
+      "http_status": 200,
+      "allowed_tools": [
+        "alerting_rules_read",
+        "alerting_silences_read",
+        "analyze_loki_labels",
+        "check_datasources_health",
+        "diff_tempo_traces",
+        "get_annotation_tags",
+        "get_annotations",
+        "get_dashboard_by_uid",
+        "get_dashboard_panel_queries",
+        "get_dashboard_property",
+        "get_dashboard_summary",
+        "get_datasource",
+        "get_doc",
+        "get_tempo_trace",
+        "get_tempo_traceql_docs",
+        "list_dashboard_versions",
+        "list_datasources",
+        "list_loki_label_names",
+        "list_loki_label_values",
+        "list_prometheus_label_names",
+        "list_prometheus_label_values",
+        "list_prometheus_metric_metadata",
+        "list_prometheus_metric_names",
+        "list_pyroscope_label_names",
+        "list_pyroscope_label_values",
+        "list_pyroscope_profile_types",
+        "list_tempo_attribute_names",
+        "list_tempo_attribute_values",
+        "query_loki_logs",
+        "query_loki_patterns",
+        "query_loki_stats",
+        "query_prometheus",
+        "query_prometheus_histogram",
+        "query_pyroscope",
+        "query_tempo_metrics",
+        "search_dashboards",
+        "search_folders",
+        "search_tempo_traces"
+      ],
+      "attached_to_live_agents": false,
+      "backend_read_verified": false,
+      "authenticated_discovery": true
     },
     {
       "title": "Grafana (DEV)",
@@ -65,7 +123,9 @@
       "state": "unreachable",
       "http_status": 502,
       "allowed_tools": [],
-      "attached_to_live_agents": false
+      "attached_to_live_agents": false,
+      "backend_read_verified": false,
+      "authenticated_discovery": false
     },
     {
       "title": "VictoriaMetrics (DEV)",
@@ -78,20 +138,41 @@
       "state": "unreachable",
       "http_status": 502,
       "allowed_tools": [],
-      "attached_to_live_agents": false
+      "attached_to_live_agents": false,
+      "backend_read_verified": false,
+      "authenticated_discovery": false
     },
     {
       "title": "VictoriaMetrics (PROD)",
       "server_id": "mcp_bb7dad460a5b4dcdb39d4c4b72e06465",
-      "connection_id": "mcpc_a1da3ff4480743099b8caef9696f5170",
+      "connection_id": "mcpc_729b8150e4074b0f9164946e27998b40",
       "url": "https://toolhive.infrateam.xyz/vmcluster-prod/mcp",
-      "auth_type": null,
+      "auth_type": "oauth2",
       "need": "vmcluster-prod",
       "environment": "PROD",
-      "state": "needs_auth",
-      "http_status": 424,
-      "allowed_tools": [],
-      "attached_to_live_agents": false
+      "state": "connected",
+      "http_status": 200,
+      "allowed_tools": [
+        "active_queries",
+        "alerts",
+        "documentation",
+        "explain_query",
+        "label_values",
+        "labels",
+        "metric_statistics",
+        "metrics",
+        "metrics_metadata",
+        "prettify_query",
+        "query",
+        "query_range",
+        "rules",
+        "series",
+        "top_queries",
+        "tsdb_status"
+      ],
+      "attached_to_live_agents": false,
+      "backend_read_verified": false,
+      "authenticated_discovery": true
     },
     {
       "title": "Backstage (DEV)",
@@ -104,20 +185,27 @@
       "state": "unreachable",
       "http_status": 502,
       "allowed_tools": [],
-      "attached_to_live_agents": false
+      "attached_to_live_agents": false,
+      "backend_read_verified": false,
+      "authenticated_discovery": false
     },
     {
       "title": "Backstage (PROD)",
       "server_id": "mcp_95b80624a5db45f0b6b10959fa09a4e5",
-      "connection_id": "mcpc_a58570652e7d459eb4ffa4b964a26d3e",
+      "connection_id": "mcpc_948ef97eb40d41f5a0b25f1e0240937b",
       "url": "https://toolhive.infrateam.xyz/backstage-prod/mcp",
-      "auth_type": null,
+      "auth_type": "oauth2",
       "need": "backstage-prod",
       "environment": "PROD",
-      "state": "needs_auth",
-      "http_status": 424,
-      "allowed_tools": [],
-      "attached_to_live_agents": false
+      "state": "connected",
+      "http_status": 200,
+      "allowed_tools": [
+        "get-catalog-entity",
+        "validate-entity"
+      ],
+      "attached_to_live_agents": false,
+      "backend_read_verified": false,
+      "authenticated_discovery": true
     },
     {
       "title": "Langfuse (DEV)",
@@ -130,7 +218,10 @@
       "state": "unreachable",
       "http_status": 502,
       "allowed_tools": [],
-      "attached_to_live_agents": false
+      "attached_to_live_agents": false,
+      "backend_read_verified": false,
+      "authenticated_discovery": false,
+      "auth_requirement": "Project-scoped Basic authentication (public key and secret key); project selection pending. Do not store keys in source."
     },
     {
       "title": "Langfuse (PROD)",
@@ -140,10 +231,13 @@
       "auth_type": null,
       "need": "langfuse-prod",
       "environment": "PROD",
-      "state": "needs_auth",
+      "state": "needs_project_credentials",
       "http_status": 424,
       "allowed_tools": [],
-      "attached_to_live_agents": false
+      "attached_to_live_agents": false,
+      "backend_read_verified": false,
+      "authenticated_discovery": false,
+      "auth_requirement": "Project-scoped Basic authentication (public key and secret key); project selection pending. Do not store keys in source."
     },
     {
       "title": "Agents Knowledge (DEV)",
@@ -156,8 +250,13 @@
       "state": "needs_auth",
       "http_status": 424,
       "allowed_tools": [],
-      "attached_to_live_agents": false
+      "attached_to_live_agents": false,
+      "backend_read_verified": false,
+      "authenticated_discovery": false,
+      "reason": "Owner sign-in required in console; Chrome extension requires update before UI flow can continue."
     }
   ],
-  "all_operational": false
+  "all_operational": false,
+  "installation_applied": false,
+  "backend_calls_verified": false
 }

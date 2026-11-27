@@ -25,18 +25,10 @@
         }
       ],
       "mcp_servers": [
-        "pipeline-github",
         "atlassian-rovo",
-        "ak-prod",
         "grafana-prod",
-        "grafana-dev",
-        "vmcluster-dev",
         "vmcluster-prod",
-        "backstage-dev",
-        "backstage-prod",
-        "langfuse-dev",
-        "langfuse-prod",
-        "ak-dev"
+        "backstage-prod"
       ]
     },
     {
@@ -58,18 +50,10 @@
         }
       ],
       "mcp_servers": [
-        "pipeline-github",
         "atlassian-rovo",
-        "ak-prod",
         "grafana-prod",
-        "grafana-dev",
-        "vmcluster-dev",
         "vmcluster-prod",
-        "backstage-dev",
-        "backstage-prod",
-        "langfuse-dev",
-        "langfuse-prod",
-        "ak-dev"
+        "backstage-prod"
       ]
     },
     {
@@ -91,18 +75,10 @@
         }
       ],
       "mcp_servers": [
-        "pipeline-github",
         "atlassian-rovo",
-        "ak-prod",
         "grafana-prod",
-        "grafana-dev",
-        "vmcluster-dev",
         "vmcluster-prod",
-        "backstage-dev",
-        "backstage-prod",
-        "langfuse-dev",
-        "langfuse-prod",
-        "ak-dev"
+        "backstage-prod"
       ]
     },
     {
@@ -124,18 +100,10 @@
         }
       ],
       "mcp_servers": [
-        "pipeline-github",
         "atlassian-rovo",
-        "ak-prod",
         "grafana-prod",
-        "grafana-dev",
-        "vmcluster-dev",
         "vmcluster-prod",
-        "backstage-dev",
-        "backstage-prod",
-        "langfuse-dev",
-        "langfuse-prod",
-        "ak-dev"
+        "backstage-prod"
       ]
     },
     {
@@ -157,18 +125,10 @@
         }
       ],
       "mcp_servers": [
-        "pipeline-github",
         "atlassian-rovo",
-        "ak-prod",
         "grafana-prod",
-        "grafana-dev",
-        "vmcluster-dev",
         "vmcluster-prod",
-        "backstage-dev",
-        "backstage-prod",
-        "langfuse-dev",
-        "langfuse-prod",
-        "ak-dev"
+        "backstage-prod"
       ]
     },
     {
@@ -190,18 +150,10 @@
         }
       ],
       "mcp_servers": [
-        "pipeline-github",
         "atlassian-rovo",
-        "ak-prod",
         "grafana-prod",
-        "grafana-dev",
-        "vmcluster-dev",
         "vmcluster-prod",
-        "backstage-dev",
-        "backstage-prod",
-        "langfuse-dev",
-        "langfuse-prod",
-        "ak-dev"
+        "backstage-prod"
       ]
     },
     {
@@ -223,18 +175,10 @@
         }
       ],
       "mcp_servers": [
-        "pipeline-github",
         "atlassian-rovo",
-        "ak-prod",
         "grafana-prod",
-        "grafana-dev",
-        "vmcluster-dev",
         "vmcluster-prod",
-        "backstage-dev",
-        "backstage-prod",
-        "langfuse-dev",
-        "langfuse-prod",
-        "ak-dev"
+        "backstage-prod"
       ]
     },
     {
@@ -256,18 +200,10 @@
         }
       ],
       "mcp_servers": [
-        "pipeline-github",
         "atlassian-rovo",
-        "ak-prod",
         "grafana-prod",
-        "grafana-dev",
-        "vmcluster-dev",
         "vmcluster-prod",
-        "backstage-dev",
-        "backstage-prod",
-        "langfuse-dev",
-        "langfuse-prod",
-        "ak-dev"
+        "backstage-prod"
       ]
     }
   ],
@@ -285,64 +221,96 @@
   ],
   "connections": [
     {
-      "name": "pipeline-github",
-      "description": "GitHub MCP; read-only tools to be enabled only after authenticated discovery",
-      "url": "https://api.githubcopilot.com/mcp/readonly"
-    },
-    {
       "name": "atlassian-rovo",
-      "description": "Atlassian Rovo (Jira, Confluence); read-only tools to be enabled only after authenticated discovery",
-      "url": "https://mcp.atlassian.com/v2/mcp"
-    },
-    {
-      "name": "ak-prod",
-      "description": "Agents Knowledge (PROD); read-only tools to be enabled only after authenticated discovery",
-      "url": "https://agents-knowledge.infrateam.xyz/mcp"
+      "description": "Atlassian Rovo (Jira, Confluence); explicit read-only tool ceiling; connected",
+      "url": "https://mcp.atlassian.com/v2/mcp",
+      "tools": [
+        "getAccessibleAtlassianResources",
+        "atlassianUserInfo",
+        "getConfluenceContent",
+        "searchConfluence",
+        "getJiraIssue",
+        "listJiraIssueComments",
+        "searchJiraIssuesUsingJql",
+        "search"
+      ]
     },
     {
       "name": "grafana-prod",
-      "description": "Grafana (PROD); read-only tools to be enabled only after authenticated discovery",
-      "url": "https://toolhive.infrateam.xyz/grafana-prod/mcp"
-    },
-    {
-      "name": "grafana-dev",
-      "description": "Grafana (DEV); read-only tools to be enabled only after authenticated discovery",
-      "url": "https://toolhive.infrateam-dev.xyz/grafana/mcp"
-    },
-    {
-      "name": "vmcluster-dev",
-      "description": "VictoriaMetrics (DEV); read-only tools to be enabled only after authenticated discovery",
-      "url": "https://toolhive.infrateam-dev.xyz/vmcluster-dev/mcp"
+      "description": "Grafana (PROD); explicit read-only tool ceiling; connected",
+      "url": "https://toolhive.infrateam.xyz/grafana-prod/mcp",
+      "tools": [
+        "alerting_rules_read",
+        "alerting_silences_read",
+        "analyze_loki_labels",
+        "check_datasources_health",
+        "diff_tempo_traces",
+        "get_annotation_tags",
+        "get_annotations",
+        "get_dashboard_by_uid",
+        "get_dashboard_panel_queries",
+        "get_dashboard_property",
+        "get_dashboard_summary",
+        "get_datasource",
+        "get_doc",
+        "get_tempo_trace",
+        "get_tempo_traceql_docs",
+        "list_dashboard_versions",
+        "list_datasources",
+        "list_loki_label_names",
+        "list_loki_label_values",
+        "list_prometheus_label_names",
+        "list_prometheus_label_values",
+        "list_prometheus_metric_metadata",
+        "list_prometheus_metric_names",
+        "list_pyroscope_label_names",
+        "list_pyroscope_label_values",
+        "list_pyroscope_profile_types",
+        "list_tempo_attribute_names",
+        "list_tempo_attribute_values",
+        "query_loki_logs",
+        "query_loki_patterns",
+        "query_loki_stats",
+        "query_prometheus",
+        "query_prometheus_histogram",
+        "query_pyroscope",
+        "query_tempo_metrics",
+        "search_dashboards",
+        "search_folders",
+        "search_tempo_traces"
+      ]
     },
     {
       "name": "vmcluster-prod",
-      "description": "VictoriaMetrics (PROD); read-only tools to be enabled only after authenticated discovery",
-      "url": "https://toolhive.infrateam.xyz/vmcluster-prod/mcp"
-    },
-    {
-      "name": "backstage-dev",
-      "description": "Backstage (DEV); read-only tools to be enabled only after authenticated discovery",
-      "url": "https://toolhive.infrateam-dev.xyz/backstage/mcp"
+      "description": "VictoriaMetrics (PROD); explicit read-only tool ceiling; connected",
+      "url": "https://toolhive.infrateam.xyz/vmcluster-prod/mcp",
+      "tools": [
+        "active_queries",
+        "alerts",
+        "documentation",
+        "explain_query",
+        "label_values",
+        "labels",
+        "metric_statistics",
+        "metrics",
+        "metrics_metadata",
+        "prettify_query",
+        "query",
+        "query_range",
+        "rules",
+        "series",
+        "top_queries",
+        "tsdb_status"
+      ]
     },
     {
       "name": "backstage-prod",
-      "description": "Backstage (PROD); read-only tools to be enabled only after authenticated discovery",
-      "url": "https://toolhive.infrateam.xyz/backstage-prod/mcp"
-    },
-    {
-      "name": "langfuse-dev",
-      "description": "Langfuse (DEV); read-only tools to be enabled only after authenticated discovery",
-      "url": "https://langfuse.infrateam-dev.xyz/api/public/mcp"
-    },
-    {
-      "name": "langfuse-prod",
-      "description": "Langfuse (PROD); read-only tools to be enabled only after authenticated discovery",
-      "url": "https://langfuse.infrateam.xyz/api/public/mcp"
-    },
-    {
-      "name": "ak-dev",
-      "description": "Agents Knowledge (DEV); read-only tools to be enabled only after authenticated discovery",
-      "url": "https://agents-knowledge.infrateam-dev.xyz/mcp"
+      "description": "Backstage (PROD); explicit read-only tool ceiling; connected",
+      "url": "https://toolhive.infrateam.xyz/backstage-prod/mcp",
+      "tools": [
+        "get-catalog-entity",
+        "validate-entity"
+      ]
     }
   ],
   "secrets": [

@@ -6,7 +6,7 @@ The controller coordinates stage workers, model/effort policy, durable receipts,
 
 Eight Claude Code variants use the owner's existing private `project/claude-code-subscription`. All eight passed live model/effort calibration, including Sonnet low/high/medium and Opus high/max; Claude also passed an exact private-repository checkout. Historical Codex profiles and reports are retained separately.
 
-The bundle contains eight agents, a controller script, the App broker, a shared quality rule and twelve MCP needs: GitHub, Atlassian, plus DEV/PROD pairs of Grafana, Langfuse, VictoriaMetrics, Backstage and Agents Knowledge. Connections were staged in the project with no tools permitted pending authentication and read-only tool discovery. Several PROD services require sign-in; four DEV services currently return gateway errors. Declaring a need does not make it operational.
+The bundle contains eight agents, a controller script, the App broker, a shared quality rule and an integration catalog for twelve MCP services: GitHub, Atlassian, plus DEV/PROD pairs of Grafana, Langfuse, VictoriaMetrics, Backstage and Agents Knowledge. Atlassian, Grafana PROD, VictoriaMetrics PROD and Backstage PROD completed authorization and authenticated discovery, with explicit read-only tool ceilings. Four authenticated MCP needs are included in the manifest; the remaining catalog entries are excluded from agent grants until connected. GitHub MCP needs OAuth client configuration; Langfuse needs project credentials; four DEV services return gateway errors. Backend reads and agent attachments remain to verify.
 
 Both bundle automations start paused. Packaged execution and writes are disabled. No credential is stored in the bundle: Claude uses a model-connection binding; the cloud controller separately needs a project-scoped `PIPELINE_CONTROL_KEY` in the Vault. Existing agent/broker IDs have a claims map. Applying an installation can change their configuration digests, so activation requires fresh binding validation.
 
@@ -16,7 +16,7 @@ uv run python scripts/build_bundle.py
 lap bundle validate .github/lap/collegium-pipeline
 ```
 
-The local suite has 110 tests. The bundle passed the platform's real local-folder validator. The service PR/red-to-green run is paused after planning/review while the bundle and integrations are prepared; no service PR has been created.
+The local suite has 111 tests. The bundle passed the platform's real local-folder validator. The service PR/red-to-green run is paused after planning/review while the bundle and integrations are prepared; no service PR has been created.
 
 - [Specification](SPEC.md) and [implementation slices](docs/IMPLEMENTATION.md).
 - [Claude workers and verified runtime evidence](docs/CLAUDE-WORKERS.md).

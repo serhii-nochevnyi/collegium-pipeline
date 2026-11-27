@@ -1,6 +1,7 @@
 """The bundle carries the controller, preserves claims and starts with dispatch disabled."""
 
 import contextlib
+import copy
 import io
 import json
 import runpy
@@ -12,6 +13,7 @@ from collegium_pipeline.domain import PolicyError
 
 ROOT = Path(__file__).resolve().parents[1]
 BUILD = runpy.run_path(str(ROOT / "scripts/build_bundle.py"))["build"]
+VALIDATE = runpy.run_path(str(ROOT / "scripts/build_bundle.py"))["validate_integrations"]
 ENTRY = runpy.run_path(str(ROOT / "scripts/bundle_controller.py"))["main"]
 
 
@@ -83,7 +85,39 @@ class BundleTests(unittest.TestCase):
         self.assertNotEqual(urls["langfuse-prod"], urls["langfuse-dev"])
         self.assertFalse(integrations["environment_substitution_allowed"])
         self.assertTrue(all(not s["attached_to_live_agents"] for s in integrations["status"]))
-        self.assertTrue(all(s["allowed_tools"] == [] for s in integrations["status"]))
+        needs = {c["name"]: c for c in self.manifest["connections"]}
+        for status in integrations["status"]:
+            if status["state"] != "connected":
+                self.assertEqual(status["allowed_tools"], [])
+                self.assertNotIn(status["need"], needs)
+                for agent in self.manifest["agents"]:
+                    self.assertNotIn(status["need"], agent["mcp_servers"])
+            else:
+                self.assertTrue(status["authenticated_discovery"])
+                self.assertEqual(needs[status["need"]]["tools"], status["allowed_tools"])
+                self.assertTrue(needs[status["need"]]["tools"])
+            # Tool discovery is not proof of a successful backend data call.
+            self.assertFalse(status["backend_read_verified"])
+
+    def test_bundle_refuses_unrestricted_unverified_or_mismatched_mcp(self):
+        baseline = json.loads((ROOT / "config/integrations.json").read_text())
+        for failure in ("implicit_all", "wildcard", "undiscovered", "binding", "role"):
+            with self.subTest(failure=failure):
+                value = copy.deepcopy(baseline)
+                connection = value["connections"][0]
+                status = value["status"][0]
+                if failure == "implicit_all":
+                    connection.pop("tools")
+                elif failure == "wildcard":
+                    connection["tools"] = status["allowed_tools"] = ["*"]
+                elif failure == "undiscovered":
+                    connection["tools"] = status["allowed_tools"] = ["some_read"]
+                elif failure == "binding":
+                    value["bindings"][connection["name"]]["connection_id"] = "other"
+                else:
+                    value["role_connections"]["planner"].append("undeclared")
+                with self.assertRaises(PolicyError):
+                    VALIDATE(value)
 
 
 if __name__ == "__main__":

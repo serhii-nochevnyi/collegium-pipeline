@@ -1,3 +1,35 @@
+# Current MCP and bundle preparation — 2026-11-27
+
+Grafana PROD OAuth completed. Authenticated discovery and actual platform tool ceilings now exist for four project connections: Atlassian mcpc_6922425fd6a845f4b604a8663ab06385 (8), Grafana PROD mcpc_e33ecc0ae7154059b9b17efe5e967331 (38), VictoriaMetrics PROD mcpc_729b8150e4074b0f9164946e27998b40 (16), Backstage PROD mcpc_948ef97eb40d41f5a0b25f1e0240937b (2). No live worker attachments or backend tool-call success is claimed. Integration config/report and generated manifest carry these exact IDs and lists. Every unresolved catalog entry declares tools: []. The real Collegium validator refuses empty manifest toolsets, while absence means ALL. The builder emits only four authenticated nonempty toolsets as manifest needs and agent grants; the eight pending entries remain in the integration catalog. New negative tests cover unrestricted/unverified tools and wrong connection binding.
+
+GitHub MCP OAuth start is concretely blocked: upstream accepts no dynamic client registration and registered server has no client_id. Existing repository App remains independent and functional. Langfuse needs project-scoped Basic public/secret API-key pairs; async question asks only project names/links. Four DEV services still return 502; AK DEV/PROD require sign-in. Chrome extension began refusing control and requires update. Do not retry or work around browser authentication through personal CLI keys.
+
+Installation is still NOT APPLIED; refresh the source/bindings/claim choices before presenting an apply digest. Published source PR #1 at 1595bcd remains the previous independently reviewed version; new local MCP edits have not yet been published. Historical status notes below are retained as history.
+
+# Live MCP authorization update
+
+Atlassian OAuth completed successfully in Chrome. The actual authenticated connection is **mcpc_6922425fd6a845f4b604a8663ab06385**, name default, not the earlier uncredentialed pipeline-readonly metadata ID. It was explicitly narrowed to eight observed read-only tools: getAccessibleAtlassianResources, atlassianUserInfo, getConfluenceContent, searchConfluence, getJiraIssue, listJiraIssueComments, searchJiraIssuesUsingJql and search. No agents are attached yet; update integration bindings/source profiles against this actual ID when the remaining sign-ins are settled. All earlier status snapshots in the source PR are historical to its commit.
+
+Grafana PROD sign-in is now at an explicit ToolHive consent prompt in Chrome browser 3, tab 1255439301. It asks Approve to send the sign-in to agentic-platform.infrateam.xyz, then Okta. Do not click Approve without the owner's action-time confirmation. The project Connections page remains tab 1255439277. A manual takeover will be requested at the end of this turn; when it is pending, make no CUA calls until the owner returns control. No browser completion directive while waiting on that takeover.
+
+The installation plan auto-selected four broad platform DEV connections and has 162 claimed-field choices defaulting to keep. It is NOT APPLIED. Before any apply, rebind MCP needs to the explicitly narrowed actual project connections and review the claimed-field choices so intended bundle fields are used; do not accept the automatic broad platform bindings. Source PR #1 and its green CI/native Opus review remain valid for the published commit; newer local state/report supplements are uncommitted.
+
+---
+
+# Latest verified source publication
+
+Bundle source is in PR #1: https://github.com/serhii-nochevnyi/collegium-pipeline/pull/1, head 1595bcd97904db6503fb8e8a4f56e2a1a69d494a. Created through the native GitHub App; author airslate-agentic-platform[bot]. Actual quality CI is green (run 46046408116). Native independent Claude Opus/high review passed, no blockers: session ses_c966ef65638b4f719361a9be7bfccf5b, turn run_16eda6ac45f34ac8910ec4a0b3474e19. It independently ran all 110 tests, Ruff, compile and byte-for-byte bundle reproducibility. Source receipt: reports/bundle-source-verification.json (local supplemental report after publication).
+
+The default project environment is now pipeline-base, penv_a033dc0b50904b20add0c8136217d304, Aranarium/standard/base image. It was created because the project and space had no default; choosing it moved no existing agents. A real bundle installation PLAN with all nine claims is now prepared: ins_c70812fb10c042028e414bb01285f56b, plan f447c10805077a2c1b11ac6175efaf0f34130f1eadf881ab46f589ef837f1b66. It is appliable, incomplete, and NOT APPLIED. Do not apply an old digest after changing bindings. Missing MCP credentials and PIPELINE_CONTROL_KEY remain; post-install binding refresh/recalibration and cloud-state verification remain activation steps.
+
+Native source publisher v3 is aut_144094f5a49446a1b4de7f8f531d55d9, pinned in .local/bundle-publish-v3.json; source journal .local/bundle-publish.sqlite3, root 9d121af5-f676-4e7b-bb38-b5c571af87c3. Its bounded compressed RPC successfully published all 84 files in one commit. An earlier uncompressed source attempt was definitively refused with 413 before any commit submission; its empty branch was retained, not deleted. No service red-to-green, merge or product pilot is claimed from the source PR.
+
+Chrome tab 1255439277 (browser 3, airslate.com) is on the project's MCP page with the Connect atlassian-rovo form ready. Authentication must be completed by the owner in the console; do not copy host CLI credentials or ask for tokens in chat. The staged MCP connections still deny all tools. The New connection UI creates a credential-bearing connection after sign-in; reconcile its actual ID and narrow to observed read-only tools before binding it to agents. Langfuse PROD is shown as Not set up, so it may require service credentials rather than OAuth; four DEV services are unreachable.
+
+The user also asked how to connect to Lararium from a phone (this is a side question, not a cancellation of bundle work). Official help was checked: company VPN on Mac and phone; https://lar.infrateam-dev.xyz/app/; install lar on Mac (not currently installed), lar login, lar machine pair, scan QR and confirm matching fingerprint on Mac. Do not install it without an action request. Mac must stay online. Current Codex Desktop on macOS is not automatically promised: docs describe Desktop integration on Windows, and ordinary Codex CLI/daemon or Claude Code plugin separately.
+
+---
+
 # Current update — Claude bundle and MCP integrations
 
 2026-11-27. The owner clarified that this repository is the **bundle source**. The deterministic controller remains correct and must be packaged with its workers, rules, configuration and script entry points. Do not replace it with a prompt-only orchestrator. No Jira task or product pilot is selected.

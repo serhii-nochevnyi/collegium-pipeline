@@ -5,15 +5,51 @@ import json
 from pathlib import Path
 
 from collegium_pipeline.config import load_config
-from collegium_pipeline.domain import digest
+from collegium_pipeline.domain import PolicyError, digest
 
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_OUTPUT = ROOT / ".github/lap/collegium-pipeline"
 
 
+def validate_integrations(integrations):
+    """Refuse implicit all-tools access and mismatched staged/authenticated bindings."""
+    connections = integrations["connections"]
+    names = {c["name"] for c in connections}
+    statuses = {s["need"]: s for s in integrations["status"]}
+    bindings = integrations["bindings"]
+    if len(names) != len(connections) or set(statuses) != names or set(bindings) != names:
+        raise PolicyError("MCP needs, status and bindings must name the same unique connections")
+    for connection in connections:
+        name = connection["name"]
+        status = statuses[name]
+        tools = connection.get("tools")
+        if (
+            not isinstance(tools, list)
+            or any(not isinstance(t, str) or not t or t == "*" for t in tools)
+            or len(tools) != len(set(tools))
+            or tools != status["allowed_tools"]
+            or connection["url"] != status["url"]
+            or bindings[name]["target"] != "project/" + name
+            or bindings[name]["connection_id"] != status["connection_id"]
+        ):
+            raise PolicyError(f"MCP {name} needs an explicit, consistent project tool ceiling")
+        if tools and not (
+            status["state"] == "connected" and status.get("authenticated_discovery") is True
+        ):
+            raise PolicyError(f"MCP {name} has tools before authenticated discovery")
+    for role, needs in integrations["role_connections"].items():
+        if set(needs) - names:
+            raise PolicyError(f"MCP role {role} names an undeclared connection")
+
+
 def build(config_path, integrations_path, output=DEFAULT_OUTPUT):
     config = load_config(config_path)
     integrations = json.loads(Path(integrations_path).read_text())
+    validate_integrations(integrations)
+    # Collegium rejects an empty manifest toolset; absence means every tool.
+    # Keep pending needs in the catalog, outside agent grants and manifest bindings.
+    connections = [c for c in integrations["connections"] if c["tools"]]
+    active_needs = {c["name"] for c in connections}
     output = Path(output)
     output.mkdir(parents=True, exist_ok=True)
     files = {}
@@ -53,7 +89,11 @@ def build(config_path, integrations_path, output=DEFAULT_OUTPUT):
                         "access": "read",
                     }
                 ],
-                "mcp_servers": integrations["role_connections"].get(selection["role"], []),
+                "mcp_servers": [
+                    need
+                    for need in integrations["role_connections"].get(selection["role"], [])
+                    if need in active_needs
+                ],
             }
         )
         claims["agent/" + name] = binding["agent_id"]
@@ -111,7 +151,7 @@ def build(config_path, integrations_path, output=DEFAULT_OUTPUT):
                 "description": "Owner's private Claude subscription; never the shared gateway",
             }
         ],
-        "connections": integrations["connections"],
+        "connections": connections,
         "secrets": [
             {
                 "name": "PIPELINE_CONTROL_KEY",
@@ -174,7 +214,8 @@ def build(config_path, integrations_path, output=DEFAULT_OUTPUT):
         "bundle": str(output),
         "agents": len(workers),
         "automations": 2,
-        "connections": len(integrations["connections"]),
+        "connections": len(connections),
+        "pending_connections": len(integrations["connections"]) - len(connections),
         "claimed_existing": len(claims),
         "installed": False,
     }
