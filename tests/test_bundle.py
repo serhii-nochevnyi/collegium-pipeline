@@ -254,9 +254,17 @@ class BundleTests(unittest.TestCase):
             )
             for _ in range(4)
         ]
+        outputs = []
+        try:
+            for child in children:
+                outputs.append(child.communicate(timeout=20))
+        finally:
+            for child in children:
+                if child.poll() is None:
+                    child.kill()
+                    child.communicate()
         results = []
-        for child in children:
-            output, error = child.communicate(timeout=20)
+        for child, (output, error) in zip(children, outputs, strict=True):
             self.assertEqual(child.returncode, 0, error)
             results.append(json.loads(output))
         self.assertEqual(len({r["run_id"] for r in results}), 1)

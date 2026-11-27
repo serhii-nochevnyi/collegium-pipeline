@@ -2,6 +2,7 @@
 
 import json
 import sqlite3
+import time
 from contextlib import contextmanager
 from dataclasses import asdict
 from pathlib import Path
@@ -18,7 +19,22 @@ class Journal:
         self.connection = sqlite3.connect(path, isolation_level=None, timeout=10)
         self.connection.row_factory = sqlite3.Row
         self.connection.execute("PRAGMA foreign_keys=ON")
-        self.connection.execute("PRAGMA journal_mode=WAL")
+        # Concurrent first-open journal-mode changes may return SQLITE_BUSY without
+        # using SQLite's busy timeout. Retry only that initialization, never a task/effect.
+        deadline = time.monotonic() + 10
+        while True:
+            try:
+                self.connection.execute("PRAGMA journal_mode=WAL")
+                break
+            except sqlite3.OperationalError as exc:
+                code = getattr(exc, "sqlite_errorcode", 0) & 0xFF
+                if (
+                    code not in {sqlite3.SQLITE_BUSY, sqlite3.SQLITE_LOCKED}
+                    or time.monotonic() >= deadline
+                ):
+                    self.connection.close()
+                    raise
+                time.sleep(0.01)
         self.connection.executescript("""
             CREATE TABLE IF NOT EXISTS runs (
                 id TEXT PRIMARY KEY, repository TEXT NOT NULL, source TEXT NOT NULL,
