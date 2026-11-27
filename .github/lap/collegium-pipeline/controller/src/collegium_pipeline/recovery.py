@@ -243,6 +243,9 @@ def adopt_pending_head(config, journal, artifacts, checkpoints, *, checkpoint_da
     local_path = state / "checkpoint-head.json"
     local = json.loads(local_path.read_text()) if local_path.exists() else None
     if local == pending["checkpoint"]:
+        current = checkpoints.head()
+        if not current or current["checkpoint"] != local:
+            return False
         pending_path.unlink()
         return True
     if local != pending["parent"] or pending["config_digest"] != config_digest(config):

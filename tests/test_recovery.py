@@ -540,6 +540,26 @@ class RecoveryTests(unittest.TestCase):
         self.assertEqual(self.http.posts, [])
         self.assertFalse((self.state / "checkpoint-pending.json").exists())
 
+    def test_stale_pending_descriptor_never_hides_a_different_store_head(self):
+        current = self.write.save({"kind": "tick", "run_id": self.root})
+        (self.state / "checkpoint-pending.json").write_text(
+            json.dumps(
+                {
+                    "checkpoint": current,
+                    "parent": None,
+                    "identity": self.identity,
+                    "config_digest": config_digest(self.config),
+                    "operation_digest": "old",
+                }
+            )
+        )
+        self.store.put({"advanced": True}, current)
+        with self.assertRaisesRegex(PolicyError, "advanced"):
+            WriteAhead(
+                self.config, self.journal, self.state / "artifacts", self.store, self.identity
+            )
+        self.assertEqual(self.http.posts, [])
+
     def test_config_drift_and_still_running_origin_prevent_import(self):
         self.http.lose = "session"
         with self.assertRaises(RemoteError):
