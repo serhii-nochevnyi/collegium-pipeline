@@ -384,6 +384,60 @@ class BundleTests(unittest.TestCase):
         with self.assertRaisesRegex(PolicyError, "Uncheckpointed"):
             FENCE(event, self.path, env, http, diagnostic=True)
 
+    def test_paginated_history_never_clears_the_fence(self):
+        event, env, delegate = self.fence_fixture()
+
+        class PagedHttp:
+            def request(self, method, path):
+                body, headers = delegate.request(method, path)
+                if path.endswith("?limit=100"):
+                    body["has_more"] = True
+                return body, headers
+
+        for saved in (False, True):
+            if saved:
+                SAVE(
+                    self.path / "cloud-fence.json",
+                    {
+                        "automation_id": "aut_test",
+                        "run_id": "run_prior",
+                        "attempt_id": "att_prior",
+                    },
+                )
+            with self.subTest(receipt=saved), self.assertRaisesRegex(PolicyError, "Paginated"):
+                FENCE(event, self.path, env, PagedHttp())
+
+    def test_normal_failure_saves_receipt_with_journal_including_disabled_delivery(self):
+        from collegium_pipeline.transport import RemoteError
+
+        event, env, http = self.fence_fixture()
+        root = self.path / "controller"
+        env.update(ARANARIUM_STATE_DIR=str(self.path / "state"), PIPELINE_CONTROL_KEY="fixture-key")
+        checkpoint = self.path / "state/collegium-pipeline/cloud-fence.json"
+        # Disabled delivery is rejected AFTER the fence; its harmless failure is accounted for.
+        with patch("collegium_pipeline.cli.main") as dispatch:
+            with self.assertRaisesRegex(PolicyError, "disabled"):
+                ENTRY(event, root=root, environ=env, http=http)
+        dispatch.assert_not_called()
+        self.assertEqual(json.loads(checkpoint.read_text())["run_id"], "run_now")
+        checkpoint.unlink()
+        config = json.loads((root / "settings.json").read_text())
+        config["execution_enabled"] = True
+        (root / "settings.json").write_text(json.dumps(config))
+        with patch("collegium_pipeline.cli.main", side_effect=RemoteError("Response lost")):
+            with patch.dict(os.environ, {}, clear=False), self.assertRaises(RemoteError):
+                ENTRY(event, root=root, environ=env, http=http)
+        self.assertEqual(json.loads(checkpoint.read_text())["attempt_id"], "att_now")
+        # Represent that adopted receipt as the previous failed run in the next sandbox.
+        SAVE(
+            checkpoint,
+            {"automation_id": "aut_test", "run_id": "run_prior", "attempt_id": "att_prior"},
+        )
+        previous = self.previous(status="failed")
+        previous["attempts"][0]["status"] = "failed"
+        next_event, next_env, next_http = self.fence_fixture([previous])
+        FENCE(next_event, checkpoint.parent, next_env, next_http)
+
     def test_delivery_entry_cannot_dispatch_after_lost_snapshot(self):
         event, env, http = self.fence_fixture([self.previous(status="cancelled")])
         root = self.path / "controller"

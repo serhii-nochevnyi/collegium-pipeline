@@ -82,6 +82,8 @@ def cloud_fence(event, state, environ, http, *, diagnostic=False):
     if receipt and receipt.get("automation_id") != automation:
         raise PolicyError("Cloud checkpoint belongs to another automation")
     history, _ = http.request("GET", path + "?limit=100")
+    if any(history.get(k) for k in ("has_more", "next_cursor", "next_page", "next")):
+        raise PolicyError("Paginated cloud history; delivery replay refused")
     rows = history["runs"]
     if not rows or rows[0]["id"] != run or len({r["id"] for r in rows}) != len(rows):
         raise PolicyError("Incomplete cloud history; delivery replay refused")
@@ -285,33 +287,36 @@ def main(event=None, *, root=None, environ=None, http=None):
         raise PolicyError("An existing run_id is required")
     if action == "status":
         return controller(["status", *common, "--run-id", run_id])
-    if event.get("live") is not True:
-        raise PolicyError("Delivery requires explicit live=true")
     key = environ.get("PIPELINE_CONTROL_KEY")
     if not key:
         raise PolicyError("Bind PIPELINE_CONTROL_KEY in the project Vault before cloud dispatch")
-    if not config["execution_enabled"]:
-        raise PolicyError("Cloud delivery is disabled")
     from collegium_pipeline.transport import JsonHttp
 
     http = http or JsonHttp(config["server"], {"X-Api-Key": key})
     receipt_path, receipt = cloud_fence(event, state, environ, http)
-    os.environ["LAP_SERVER"] = config["server"]
-    os.environ["LAP_API_KEY"] = key
-    result = controller(
-        [
-            "deliver",
-            *common,
-            "--run-id",
-            run_id,
-            "--artifacts",
-            str(state / "artifacts"),
-            "--live",
-            "--once",
-        ]
-    )
-    save_receipt(receipt_path, receipt)
-    return result
+    try:
+        if event.get("live") is not True:
+            raise PolicyError("Delivery requires explicit live=true")
+        if not config["execution_enabled"]:
+            raise PolicyError("Cloud delivery is disabled")
+        os.environ["LAP_SERVER"] = config["server"]
+        os.environ["LAP_API_KEY"] = key
+        return controller(
+            [
+                "deliver",
+                *common,
+                "--run-id",
+                run_id,
+                "--artifacts",
+                str(state / "artifacts"),
+                "--live",
+                "--once",
+            ]
+        )
+    finally:
+        # Ordinary failure adopts this receipt WITH its journal. A cancelled/lost
+        # attempt discards both, so an ambiguous external effect still blocks replay.
+        save_receipt(receipt_path, receipt)
 
 
 if __name__ == "__main__":
@@ -319,5 +324,8 @@ if __name__ == "__main__":
         raise SystemExit(main())
     except (ValueError, OSError, RuntimeError) as exc:
         # Avoid echoing an event, environment or a provider's credential-bearing error.
-        print(json.dumps({"error": type(exc).__name__, "executed": False}), file=sys.stderr)
+        print(
+            json.dumps({"error": type(exc).__name__, "outcome": "inspect_run_and_journal"}),
+            file=sys.stderr,
+        )
         raise SystemExit(2) from None

@@ -70,10 +70,15 @@ exactly-once external effects. The platform retries a lost executor from the old
 The cloud delivery entry point checks the platform's independent run history before any
 worker or broker call. Only the first, currently running attempt is eligible. Every earlier
 delivery since the last receipt must be accounted for by a receipt in the adopted snapshot,
-which contains the same journal and artifact directory. A cancelled/lost attempt or missing
-receipt blocks replay for reconciliation. A full history window (100 runs) without an anchor,
+which contains the same journal and artifact directory. Ordinary failures after the fence save a receipt in `finally`, so an adopted journal
+can resume by observing existing effects. Disabled delivery is also recorded this way.
+A cancelled/lost attempt or missing receipt blocks replay for reconciliation. An explicitly paginated history response, or a full history window (100 runs) without an anchor,
 a mismatched automation/attempt, or unavailable history also blocks. This is a safety fence,
-not an automatic external-action recovery mechanism. Never clear its receipt or roll back
+not an automatic external-action recovery mechanism. There is currently no cloud command
+that clears an ambiguous fence: recovery requires an operator-reviewed reconstruction of
+the journal and checkpoint from independently verified session/GitHub identities. Such
+an import/reconciliation interface is not implemented; those cases remain blocked.
+Never clear its receipt or roll back
 state to bypass it; reconcile known worker sessions and GitHub effects before extending
 recovery. Both execution switches remain disabled and both automations stay paused.
 
