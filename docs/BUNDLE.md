@@ -72,7 +72,11 @@ worker or broker call. Only the first, currently running attempt is eligible. Ev
 delivery since the last receipt must be accounted for by a receipt in the adopted snapshot,
 which contains the same journal and artifact directory. Ordinary failures after the fence save a receipt in `finally`, so an adopted journal
 can resume by observing existing effects. Disabled delivery is also recorded this way.
-A cancelled/lost attempt or missing receipt blocks replay for reconciliation. An explicitly paginated history response, or a full history window (100 runs) without an anchor,
+Failures before dispatch (including invalid run ID, missing key and transient history-read
+failure) save a separate per-attempt `no-dispatch` record in the snapshot. A later fence
+checks each attempt identity and skips only that harmless run, then continues checking older
+runs; this record never establishes an anchor. A cancelled/lost attempt discards it too.
+An unaccounted attempt with possible external effects blocks replay for reconciliation. An explicitly paginated history response, or a full history window (100 runs) without an anchor,
 a mismatched automation/attempt, or unavailable history also blocks. This is a safety fence,
 not an automatic external-action recovery mechanism. There is currently no cloud command
 that clears an ambiguous fence: recovery requires an operator-reviewed reconstruction of

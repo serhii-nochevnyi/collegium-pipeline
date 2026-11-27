@@ -297,7 +297,9 @@ class BundleTests(unittest.TestCase):
         self.assertEqual(after["admissions"], 1)
         self.assertEqual(self.invoke(event), first)
 
-    def fence_fixture(self, previous=(), *, retry=False, diagnostic=False):
+    def fence_fixture(
+        self, previous=(), *, retry=False, diagnostic=False, current="run_now", attempt="att_now"
+    ):
         event = (
             {"action": "state-probe", "mode": "fenced-check"}
             if diagnostic
@@ -305,15 +307,15 @@ class BundleTests(unittest.TestCase):
         )
         env = {
             "LAP_AUTOMATION_ID": "aut_test",
-            "LAP_RUN_ID": "run_now",
-            "LAP_ATTEMPT_ID": "att_now",
+            "LAP_RUN_ID": current,
+            "LAP_ATTEMPT_ID": attempt,
         }
         now = {
-            "id": "run_now",
+            "id": current,
             "automation_id": "aut_test",
             "status": "running",
             "item": {"event": {"data": event}},
-            "attempts": [{"id": "att_now", "n": 1, "status": "running"}],
+            "attempts": [{"id": attempt, "n": 1, "status": "running"}],
         }
         if retry:
             now["attempts"].insert(0, {"id": "att_lost", "n": 1, "status": "failed"})
@@ -437,6 +439,50 @@ class BundleTests(unittest.TestCase):
         previous["attempts"][0]["status"] = "failed"
         next_event, next_env, next_http = self.fence_fixture([previous])
         FENCE(next_event, checkpoint.parent, next_env, next_http)
+
+    def test_pre_dispatch_failures_are_accounted_without_hiding_older_ambiguity(self):
+        from collegium_pipeline.transport import RemoteError
+
+        for failure in ("missing-run", "missing-key", "transient-api"):
+            with self.subTest(failure=failure):
+                event, env, _ = self.fence_fixture(current="run_" + failure.replace("-", ""))
+                if failure == "missing-run":
+                    event.pop("run_id")
+                env.update(
+                    ARANARIUM_STATE_DIR=str(self.path / failure), PIPELINE_CONTROL_KEY="fixture-key"
+                )
+                if failure == "missing-key":
+                    env.pop("PIPELINE_CONTROL_KEY")
+
+                class BrokenHttp:
+                    def request(self, method, path):
+                        raise RemoteError("Temporary API read failure")
+
+                with patch("collegium_pipeline.cli.main") as dispatch:
+                    with self.assertRaises((PolicyError, RemoteError)):
+                        ENTRY(event, root=self.path / "controller", environ=env, http=BrokenHttp())
+                dispatch.assert_not_called()
+                prior = {
+                    "id": env["LAP_RUN_ID"],
+                    "automation_id": "aut_test",
+                    "status": "failed",
+                    "item": {"event": {"data": event}},
+                    "attempts": [{"id": "att_now", "n": 1, "status": "failed"}],
+                }
+                next_event, next_env, next_http = self.fence_fixture([prior], current="run_next")
+                state = self.path / failure / "collegium-pipeline"
+                FENCE(next_event, state, next_env, next_http)
+                # A no-dispatch record is NOT an anchor past an older uncertain effect.
+                next_event, next_env, next_http = self.fence_fixture(
+                    [prior, self.previous(status="cancelled")], current="run_next"
+                )
+                with self.assertRaisesRegex(PolicyError, "Uncheckpointed"):
+                    FENCE(next_event, state, next_env, next_http)
+                # A retry record alone cannot account for an earlier lost attempt.
+                prior["attempts"].append({"id": "att_lost", "n": 2, "status": "failed"})
+                next_event, next_env, next_http = self.fence_fixture([prior], current="run_next")
+                with self.assertRaisesRegex(PolicyError, "Uncheckpointed"):
+                    FENCE(next_event, state, next_env, next_http)
 
     def test_delivery_entry_cannot_dispatch_after_lost_snapshot(self):
         event, env, http = self.fence_fixture([self.previous(status="cancelled")])

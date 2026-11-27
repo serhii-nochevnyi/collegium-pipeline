@@ -46,6 +46,100 @@ def verify_control(config, integrations, http):
     }
 
 
+def cloud_identity(environ):
+    import re
+
+    from collegium_pipeline.domain import PolicyError
+
+    identity = {
+        "automation_id": environ.get("LAP_AUTOMATION_ID", ""),
+        "run_id": environ.get("LAP_RUN_ID", ""),
+        "attempt_id": environ.get("LAP_ATTEMPT_ID", ""),
+    }
+    for key, prefix in (("automation_id", "aut"), ("run_id", "run"), ("attempt_id", "att")):
+        if not re.fullmatch(prefix + r"_[a-zA-Z0-9]+", identity[key]):
+            raise PolicyError("Cloud delivery requires platform run and attempt identities")
+    return identity
+
+
+def no_dispatch_accounted(prior, state, automation):
+    """Skip harmless failures without hiding any older uncertain external effects."""
+    attempts = prior.get("attempts", [])
+    if not attempts or prior.get("status") not in {"succeeded", "failed"}:
+        return False
+    for attempt in attempts:
+        identity = cloud_identity(
+            {
+                "LAP_AUTOMATION_ID": automation,
+                "LAP_RUN_ID": prior["id"],
+                "LAP_ATTEMPT_ID": attempt["id"],
+            }
+        )
+        path = state / "no-dispatch" / (identity["run_id"] + "-" + identity["attempt_id"] + ".json")
+        if not path.exists() or json.loads(path.read_text()) != identity:
+            return False
+    return True
+
+
+def cloud_delivery(event, state, config, config_path, environ, http, controller):
+    from collegium_pipeline.domain import PolicyError
+    from collegium_pipeline.transport import JsonHttp
+
+    receipt_path = receipt = None
+    entered = False
+    try:
+        run_id = event.get("run_id")
+        if not isinstance(run_id, str) or not run_id:
+            raise PolicyError("An existing run_id is required")
+        key = environ.get("PIPELINE_CONTROL_KEY")
+        if not key:
+            raise PolicyError(
+                "Bind PIPELINE_CONTROL_KEY in the project Vault before cloud dispatch"
+            )
+        http = http or JsonHttp(config["server"], {"X-Api-Key": key})
+        receipt_path, receipt = cloud_fence(event, state, environ, http)
+        if event.get("live") is not True:
+            raise PolicyError("Delivery requires explicit live=true")
+        if not config["execution_enabled"]:
+            raise PolicyError("Cloud delivery is disabled")
+        os.environ["LAP_SERVER"] = config["server"]
+        os.environ["LAP_API_KEY"] = key
+        entered = True
+        return controller(
+            [
+                "deliver",
+                "--config",
+                str(config_path),
+                "--journal",
+                str(state / "journal.sqlite3"),
+                "--run-id",
+                run_id,
+                "--artifacts",
+                str(state / "artifacts"),
+                "--live",
+                "--once",
+            ]
+        )
+    finally:
+        if receipt is not None:
+            # An ordinary failed process adopts this WITH the journal; cancellation
+            # or executor loss discards both, preserving the replay fence.
+            save_receipt(receipt_path, receipt)
+        elif not entered:
+            # Never anchor on a rejected pre-dispatch run: older ambiguity must still block.
+            # These records also vanish when their attempt snapshot is discarded.
+            try:
+                identity = cloud_identity(environ)
+            except PolicyError:
+                identity = None
+            if identity:
+                folder = state / "no-dispatch"
+                folder.mkdir(mode=0o700, exist_ok=True)
+                save_receipt(
+                    folder / (identity["run_id"] + "-" + identity["attempt_id"] + ".json"), identity
+                )
+
+
 def cloud_fence(event, state, environ, http, *, diagnostic=False):
     """Refuse replay when the platform discarded a previous attempt's journal.
 
@@ -53,16 +147,10 @@ def cloud_fence(event, state, environ, http, *, diagnostic=False):
     adopted snapshot proves that a previous delivery's journal survived with it.
     A lost/cancelled attempt has no such receipt and must be reconciled, not replayed.
     """
-    import re
-
     from collegium_pipeline.domain import PolicyError
 
-    automation, run, attempt = (
-        environ.get(k, "") for k in ("LAP_AUTOMATION_ID", "LAP_RUN_ID", "LAP_ATTEMPT_ID")
-    )
-    for value, prefix in ((automation, "aut"), (run, "run"), (attempt, "att")):
-        if not re.fullmatch(prefix + r"_[a-zA-Z0-9]+", value):
-            raise PolicyError("Cloud delivery requires platform run and attempt identities")
+    identity = cloud_identity(environ)
+    automation, run, attempt = (identity[k] for k in ("automation_id", "run_id", "attempt_id"))
     path = "/api/automations/" + automation + "/runs"
     current, _ = http.request("GET", path + "/" + run)
     attempts = current.get("attempts", [])
@@ -103,13 +191,16 @@ def cloud_fence(event, state, environ, http, *, diagnostic=False):
                 raise PolicyError("Cloud checkpoint attempt differs")
             anchored = True
             break
-        data = prior.get("item", {}).get("event", {}).get("data", {})
+        data = prior.get("item", {}).get("event", {}).get("data")
+        if not isinstance(data, dict):
+            continue  # The entry point rejects non-object data before any action.
+
         unsafe = (
             data.get("action") == "state-probe" and data.get("mode") == "fenced-hold"
             if diagnostic
             else data.get("action") == "deliver"
         )
-        if unsafe:
+        if unsafe and not (not diagnostic and no_dispatch_accounted(prior, state, automation)):
             raise PolicyError("Uncheckpointed cloud execution; reconcile before delivery replay")
     if (receipt and not anchored) or (not receipt and len(rows) >= 100):
         raise PolicyError("Cloud history window exhausted; reconcile before delivery replay")
@@ -241,6 +332,12 @@ def main(event=None, *, root=None, environ=None, http=None):
             "control_key_present": bool(environ.get("PIPELINE_CONTROL_KEY")),
             "state_directory": str(state),
             "agent_started": False,
+            "cloud_checkpoint": (
+                json.loads((state / "cloud-fence.json").read_text())
+                if (state / "cloud-fence.json").exists()
+                else None
+            ),
+            "no_dispatch_records": len(list((state / "no-dispatch").glob("*.json"))),
         }
         print(json.dumps(result))
         return 0
@@ -282,41 +379,12 @@ def main(event=None, *, root=None, environ=None, http=None):
             journal.close()
         print(json.dumps(result))
         return 0
+    if action == "deliver":
+        return cloud_delivery(event, state, config, config_path, environ, http, controller)
     run_id = event.get("run_id")
     if not isinstance(run_id, str) or not run_id:
         raise PolicyError("An existing run_id is required")
-    if action == "status":
-        return controller(["status", *common, "--run-id", run_id])
-    key = environ.get("PIPELINE_CONTROL_KEY")
-    if not key:
-        raise PolicyError("Bind PIPELINE_CONTROL_KEY in the project Vault before cloud dispatch")
-    from collegium_pipeline.transport import JsonHttp
-
-    http = http or JsonHttp(config["server"], {"X-Api-Key": key})
-    receipt_path, receipt = cloud_fence(event, state, environ, http)
-    try:
-        if event.get("live") is not True:
-            raise PolicyError("Delivery requires explicit live=true")
-        if not config["execution_enabled"]:
-            raise PolicyError("Cloud delivery is disabled")
-        os.environ["LAP_SERVER"] = config["server"]
-        os.environ["LAP_API_KEY"] = key
-        return controller(
-            [
-                "deliver",
-                *common,
-                "--run-id",
-                run_id,
-                "--artifacts",
-                str(state / "artifacts"),
-                "--live",
-                "--once",
-            ]
-        )
-    finally:
-        # Ordinary failure adopts this receipt WITH its journal. A cancelled/lost
-        # attempt discards both, so an ambiguous external effect still blocks replay.
-        save_receipt(receipt_path, receipt)
+    return controller(["status", *common, "--run-id", run_id])
 
 
 if __name__ == "__main__":
