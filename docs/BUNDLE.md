@@ -113,6 +113,10 @@ separate. Bounds are 24 MB raw JSON and 8 MB compressed per checkpoint. Oversize
 or missing acknowledgement refuses the effect; no evidence is silently truncated. The
 store retains two committed generations and one pending upload. The local head must match
 the independent head before another tick; a late old writer cannot be silently overwritten.
+A persisted pending-upload descriptor allows adoption of this controller's exact committed
+checkpoint after a lost acknowledgement: parent, owner, attempt, configuration and operation
+must match, and the journal must prove the effect never started (or a tick remained unchanged).
+This advances only the local checkpoint head, preserves the newer journal and never dispatches.
 
 `{"action":"reconcile"}` accepts no caller-selected checkpoint, task, paths or endpoints.
 It reconciles an adopted journal or verifies the latest signed checkpoint's original closed

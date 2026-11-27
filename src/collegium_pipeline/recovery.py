@@ -177,7 +177,11 @@ class WriteAhead:
         self.local_head = self.artifacts.parent / "checkpoint-head.json"
         local = json.loads(self.local_head.read_text()) if self.local_head.exists() else None
         if local != self.parent:
-            raise PolicyError("Independent checkpoint advanced; reconcile before another effect")
+            adopted = adopt_pending_head(config, journal, self.artifacts, checkpoints)
+            if not adopted:
+                raise PolicyError(
+                    "Independent checkpoint advanced; reconcile before another effect"
+                )
 
     def save(self, operation):
         from .config import config_digest
@@ -207,11 +211,100 @@ class WriteAhead:
             "journal": data,
             "artifacts": artifacts,
         }
+        expected = hashlib.sha256(zlib.compress(canonical(value), 9)).hexdigest()
+        pending = {
+            "checkpoint": expected,
+            "parent": self.parent,
+            "identity": self.identity,
+            "config_digest": config_digest(self.config),
+            "operation_digest": digest(operation),
+        }
+        pending_path = self.artifacts.parent / "checkpoint-pending.json"
+        pending_tmp = pending_path.with_suffix(".tmp")
+        pending_tmp.write_bytes(canonical(pending))
+        pending_tmp.replace(pending_path)
         self.parent = self.checkpoints.put(value, self.parent)
         temporary = self.local_head.with_suffix(".tmp")
         temporary.write_bytes(canonical(self.parent))
         temporary.replace(self.local_head)
+        pending_path.unlink(missing_ok=True)
         return self.parent
+
+
+def adopt_pending_head(config, journal, artifacts, checkpoints, *, checkpoint_data=None):
+    """Adopt only our exact committed upload whose actual effect was never called."""
+    from .config import config_digest
+
+    state = Path(artifacts).parent
+    pending_path = state / "checkpoint-pending.json"
+    if not pending_path.exists():
+        return False
+    pending = json.loads(pending_path.read_text())
+    local_path = state / "checkpoint-head.json"
+    local = json.loads(local_path.read_text()) if local_path.exists() else None
+    if local == pending["checkpoint"]:
+        pending_path.unlink()
+        return True
+    if local != pending["parent"] or pending["config_digest"] != config_digest(config):
+        return False
+    head = checkpoints.head()
+    if not head or head["checkpoint"] != pending["checkpoint"] or head["parent"] != local:
+        return False
+    checkpoint, value = checkpoint_data if checkpoint_data is not None else checkpoints.get()
+    if (
+        checkpoint != pending["checkpoint"]
+        or value["identity"] != pending["identity"]
+        or value["identity"]["automation_id"] != config["recovery_store"]["owner"]
+        or value["config_digest"] != config_digest(config)
+        or digest(value["operation"]) != pending["operation_digest"]
+    ):
+        return False
+    operation = value["operation"]
+    if not journal.effect_not_started(operation):
+        if operation["kind"] != "tick":
+            return False
+        # Initial tick failure happens before the state machine. Require the captured
+        # run rows/events and delivery documents to remain exactly unchanged.
+        with tempfile.TemporaryDirectory() as folder:
+            path = Path(folder) / "snapshot.sqlite3"
+            path.write_bytes(base64.b64decode(value["journal"], validate=True))
+            saved = sqlite3.connect(path)
+            saved.row_factory = sqlite3.Row
+            try:
+                for row in saved.execute("SELECT * FROM runs"):
+                    if dict(row) != journal.get(row["id"]):
+                        return False
+                    events = saved.execute(
+                        "SELECT * FROM events WHERE run_id=? ORDER BY sequence", (row["id"],)
+                    ).fetchall()
+                    current = journal.connection.execute(
+                        "SELECT * FROM events WHERE run_id=? ORDER BY sequence", (row["id"],)
+                    ).fetchall()
+                    if [dict(e) for e in events] != [dict(e) for e in current]:
+                        return False
+                if saved.execute("SELECT 1 FROM sqlite_master WHERE name='deliveries'").fetchone():
+                    for row in saved.execute("SELECT * FROM deliveries"):
+                        current = journal.connection.execute(
+                            "SELECT * FROM deliveries WHERE run_id=?", (row["run_id"],)
+                        ).fetchone()
+                        if current is None or dict(row) != dict(current):
+                            return False
+            finally:
+                saved.close()
+    temporary = local_path.with_suffix(".tmp")
+    temporary.write_bytes(canonical(checkpoint))
+    temporary.replace(local_path)
+    pending_path.unlink()
+    journal.record(
+        operation["run_id"],
+        "checkpoint_ack_reconciled",
+        {
+            "checkpoint": checkpoint,
+            "origin": pending["identity"],
+            "external_effect_started": False,
+        },
+    )
+    return True
 
 
 def session_name(intent):

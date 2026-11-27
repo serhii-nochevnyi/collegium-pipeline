@@ -486,6 +486,60 @@ class RecoveryTests(unittest.TestCase):
             self.write.save({"kind": "tick", "run_id": self.root})
         self.assertEqual(self.http.posts, [])
 
+    def test_committed_checkpoint_with_lost_ack_can_resume_one_agent(self):
+        from collegium_pipeline.recovery import reconcile_existing
+
+        original = self.store.call
+        lost = [False]
+
+        def call(action, **fields):
+            result = original(action, **fields)
+            if action == "finish" and not lost[0]:
+                lost[0] = True
+                raise PolicyError("Checkpoint acknowledgement unknown")
+            return result
+
+        self.store.call = call
+        with self.assertRaises(PolicyError):
+            self.dispatch()
+        self.assertEqual(self.http.posts, [])
+        self.assertTrue((self.state / "checkpoint-pending.json").exists())
+        self.journal.close()
+        self.journal = Journal(self.state / "journal.sqlite3")
+        self.write = WriteAhead(
+            self.config, self.journal, self.state / "artifacts", self.store, self.identity
+        )
+        self.journal.before_effect = self.write.save
+        reconcile_existing(self.config, self.journal, self.http, self.github)
+        self.write.save({"kind": "tick", "run_id": self.root})
+        Collegium(self.http).resume_dispatch(
+            self.journal,
+            self.root,
+            binding=self.binding,
+            selection=self.selection,
+            prompt="Exact diagnostic prompt",
+            execution_enabled=True,
+        )
+        self.assertEqual(len(self.http.sessions), 1)
+        self.assertEqual(len(self.http.turns), 1)
+
+    def test_lost_tick_checkpoint_ack_can_be_adopted_without_rolling_back_state(self):
+        original = self.store.call
+
+        def call(action, **fields):
+            result = original(action, **fields)
+            if action == "finish":
+                raise PolicyError("Checkpoint acknowledgement unknown")
+            return result
+
+        self.store.call = call
+        with self.assertRaises(PolicyError):
+            self.write.save({"kind": "tick", "run_id": self.root})
+        self.store.call = original
+        WriteAhead(self.config, self.journal, self.state / "artifacts", self.store, self.identity)
+        self.assertEqual(self.http.posts, [])
+        self.assertFalse((self.state / "checkpoint-pending.json").exists())
+
     def test_config_drift_and_still_running_origin_prevent_import(self):
         self.http.lose = "session"
         with self.assertRaises(RemoteError):

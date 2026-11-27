@@ -97,7 +97,6 @@ def main(argv=None, *, recovery=None):
                                 Checkpoints(config, http, key),
                                 identity,
                             ).save
-                            journal.before_effect({"kind": "tick", "run_id": args.run_id})
                         coordinator = Delivery(
                             config,
                             journal,
@@ -105,6 +104,11 @@ def main(argv=None, *, recovery=None):
                             local_platform(),
                             args.artifacts,
                         )
+                        if recovery is not None:
+                            from .recovery import reconcile_existing
+
+                            reconcile_existing(config, journal, http, coordinator.broker.github)
+                            journal.before_effect({"kind": "tick", "run_id": args.run_id})
                         deadline = time.monotonic() + args.timeout
                         while time.monotonic() < deadline:
                             result = coordinator.step(args.run_id)

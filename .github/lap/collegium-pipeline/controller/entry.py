@@ -158,7 +158,12 @@ def reconcile_controller(config, state, http, key):
     from collegium_pipeline.config import config_digest
     from collegium_pipeline.domain import Task
     from collegium_pipeline.native_broker import NativeGithubApp
-    from collegium_pipeline.recovery import Checkpoints, reconcile_existing, restore_checkpoint
+    from collegium_pipeline.recovery import (
+        Checkpoints,
+        adopt_pending_head,
+        reconcile_existing,
+        restore_checkpoint,
+    )
     from collegium_pipeline.store import Journal
 
     state.mkdir(mode=0o700, parents=True, exist_ok=True)
@@ -178,6 +183,16 @@ def reconcile_controller(config, state, http, key):
         checkpoints = Checkpoints(config, http, key)
         head = checkpoints.head()
         downloaded = checkpoints.get() if head else None
+        if downloaded and (state / "journal.sqlite3").is_file():
+            current = Journal(state / "journal.sqlite3")
+            try:
+                if adopt_pending_head(
+                    config, current, state / "artifacts", checkpoints, checkpoint_data=downloaded
+                ):
+                    result = reconcile_existing(config, current, http, github)
+                    return result or {"mode": "checkpoint_ack_reconciled", "external_mutations": 0}
+            finally:
+                current.close()
         fence = (
             json.loads((state / "cloud-fence.json").read_text())
             if (state / "cloud-fence.json").exists()
