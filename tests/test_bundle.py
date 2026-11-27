@@ -384,6 +384,18 @@ class BundleTests(unittest.TestCase):
         with self.assertRaisesRegex(PolicyError, "Uncheckpointed"):
             FENCE(event, self.path, env, http, diagnostic=True)
 
+    def test_delivery_entry_cannot_dispatch_after_lost_snapshot(self):
+        event, env, http = self.fence_fixture([self.previous(status="cancelled")])
+        root = self.path / "controller"
+        config = json.loads((root / "settings.json").read_text())
+        config["execution_enabled"] = True
+        (root / "settings.json").write_text(json.dumps(config))
+        env.update(ARANARIUM_STATE_DIR=str(self.path / "state"), PIPELINE_CONTROL_KEY="fixture-key")
+        with patch("collegium_pipeline.cli.main") as dispatch:
+            with self.assertRaisesRegex(PolicyError, "Uncheckpointed"):
+                ENTRY(event, root=root, environ=env, http=http)
+        dispatch.assert_not_called()
+
     def test_diagnostics_cannot_enable_execution_or_accept_arbitrary_commands(self):
         with self.assertRaises(PolicyError):
             self.invoke({"action": "state-probe", "mode": "commit", "command": "anything"})

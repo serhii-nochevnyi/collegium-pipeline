@@ -170,6 +170,12 @@ def state_probe(event, state, config, environ, http):
                     "INSERT OR IGNORE INTO probe_effects VALUES ('committed')"
                 )
             else:
+                if event["mode"] == "hold":
+                    # This autocommit distinguishes whole-snapshot cancellation from
+                    # ordinary SQLite transaction rollback after process death.
+                    journal.connection.execute(
+                        "INSERT OR IGNORE INTO probe_effects VALUES ('attempt-committed')"
+                    )
                 # Simulate a process dying in the middle of a real SQLite transaction.
                 journal.connection.execute("BEGIN IMMEDIATE")
                 journal.connection.execute("INSERT INTO probe_effects VALUES ('uncommitted')")

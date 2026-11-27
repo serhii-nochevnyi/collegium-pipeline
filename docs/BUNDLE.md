@@ -84,8 +84,9 @@ tests reopen the database after lost PR/commit responses and confirm a single ex
 
 The fixed manual `state-probe` action uses a separate diagnostic database and requires both
 execution switches off. Modes: `commit`/`inspect` test a single admission/effect;
-`crash` exits 75 inside an uncommitted SQLite transaction; `hold` pauses 120 seconds for a
-real platform cancellation. `fenced-hold` and `fenced-check` exercise the same cloud fence in
+`crash` exits 75 inside an uncommitted SQLite transaction; `hold` first commits a disposable
+attempt marker, then pauses 120 seconds inside another transaction for a real platform
+cancellation. The next adopted snapshot must contain neither attempted write. `fenced-hold` and `fenced-check` exercise the same cloud fence in
 a separate receipt namespace without agents or repository writes. Cancel the held run only
 after `probe_ready` appears. A cancelled fenced probe remains intentionally quarantined;
 it does not affect the product journal. No mode accepts arbitrary commands or enables delivery.
