@@ -27,7 +27,7 @@
     "controller/src/collegium_pipeline/effort.py": "d0ebe3f5754c233d9325b2dab0463d55c1c37aae69d84ead653d1430da237035",
     "controller/src/collegium_pipeline/native_broker.py": "495817b15d02a02fab7648d46c6bf1be600c5e22d115d3d884b1fc4bc2f4c2f3",
     "controller/src/collegium_pipeline/packets.py": "6dedd07f93f8e35dad8dc3eb2fbd1c7f511dd32fb49ae07e5aab9b08ccb57f7d",
-    "controller/src/collegium_pipeline/platform.py": "309ccc760ce0d5433d404db276f48d2bfb0560b6bed9c56703757d29f7c1126b",
+    "controller/src/collegium_pipeline/platform.py": "7f328de11c49554411a413c1b276e81e63b3ca683cca0ee0ad11c9d82aab0a7d",
     "controller/src/collegium_pipeline/quality.py": "b31d522965aa5c609e1cff8e15e650a0f1809f2e7a570e93659640f7fb57ad68",
     "controller/src/collegium_pipeline/readiness.py": "360bb6d8232944d0fd08fbf40cb608561404c1778371ec2c78d68128ae98c748",
     "controller/src/collegium_pipeline/runner.py": "91a5b1ad494ccee598a15a7bed2733d546921225d856224d40383f9db4bb6877",
@@ -35,12 +35,12 @@
     "controller/src/collegium_pipeline/store.py": "96ea5add410571bab34f1f9808a5c157c308e18f45d603d0e905836c9ae5e3c0",
     "controller/src/collegium_pipeline/transport.py": "33c56e666dc263974739c4f7f3e83601e0724898a8c98bedfa95f97709fd816c",
     "controller/entry.py": "c19f8ba3cd25f699bfba15a35dac3e8a32d1d24a3b5a14f5387095aacb2cf9f9",
-    "controller/settings.json": "634e0dc6a35156e8c1be9b81a2e7037096bfa3339236f1d29f4734b64a9295de",
-    "controller/integrations.json": "cfee56ae6f2faec5fd0de3ecef5442fab471ea11bf044de861d56a7477370483",
+    "controller/settings.json": "3b497501ff118967bd3019b63ce85a86e35ce072a0acf3a297197c34e50f0155",
+    "controller/integrations.json": "a10ca2a0bb00efc7c202e92bf739280f663e9c59f93632762de545813194f0bb",
     "native_github_broker.py": "33d7a21aa3a7a867c89a4119e3d331577afa0d8c54973d877093e3c9ed38f6ae",
     "broker_scope.json": "678b8d876cee8beed5924e7f2545bd458c8c997c5d471e3d900b7bf68f0f3f08",
     "lap.yaml": "2a1e6e29f8c51d59a5cacd971d1ec05109b95a94f678daf7b50fe38db68a5bcb",
     "claims.json": "ebbddaacc8d0a4cbdafa38176cae0c9b697f35624cd2828695c6d401ed054606"
   },
-  "controller_config_digest": "f5d058c07ba0cf4b6f6a68b482b1c1f41df8d29ec8caf7c4f741f59e9210ae02"
+  "controller_config_digest": "52d7df2a7a54b9df1df52e97f13228113c1f5aa5254c31ce81b75018fcde51a8"
 }

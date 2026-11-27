@@ -25,9 +25,18 @@ class WorkerBinding:
 
 
 def agent_digest(agent: dict) -> str:
-    """Pin all returned configuration except presentation/usage timestamps."""
+    """Pin configuration and ownership, excluding usage and source revision labels."""
     volatile = {"created_at_ms", "updated_at_ms", "last_run_at", "last_error", "status", "spend"}
-    return digest({key: value for key, value in agent.items() if key not in volatile})
+    snapshot = {key: value for key, value in agent.items() if key not in volatile}
+    if isinstance(snapshot.get("provenance"), dict):
+        # Applying new controller code updates this label for unchanged workers too.
+        # Keep installation/source/instance identity and source_gone pinned.
+        snapshot["provenance"] = {
+            key: value
+            for key, value in snapshot["provenance"].items()
+            if key not in {"commit", "version"}
+        }
+    return digest(snapshot)
 
 
 class Collegium:

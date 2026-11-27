@@ -245,7 +245,11 @@
       ],
       "attached_to_live_agents": true,
       "backend_read_verified": false,
-      "authenticated_discovery": true
+      "authenticated_discovery": true,
+      "backend_tool_call_verified": true,
+      "backend_probe_tool": "mcp__atlassian-rovo__getAccessibleAtlassianResources",
+      "backend_probe_session": "ses_091e22d78d8d4cd981e1e56cee4efda7",
+      "backend_probe_observation_digest": "d51de187390e9a33394c6578617664e4e7c5a40f0cc98393f00705469a55295b"
     },
     {
       "title": "Agents Knowledge (PROD)",
@@ -267,7 +271,11 @@
       ],
       "attached_to_live_agents": true,
       "backend_read_verified": false,
-      "authenticated_discovery": true
+      "authenticated_discovery": true,
+      "backend_tool_call_verified": true,
+      "backend_probe_tool": "mcp__ak-prod__list_workspaces",
+      "backend_probe_session": "ses_091e22d78d8d4cd981e1e56cee4efda7",
+      "backend_probe_observation_digest": "d51de187390e9a33394c6578617664e4e7c5a40f0cc98393f00705469a55295b"
     },
     {
       "title": "Grafana (PROD)",
@@ -321,7 +329,11 @@
       ],
       "attached_to_live_agents": true,
       "backend_read_verified": false,
-      "authenticated_discovery": true
+      "authenticated_discovery": true,
+      "backend_tool_call_verified": true,
+      "backend_probe_tool": "mcp__grafana-prod__list_datasources",
+      "backend_probe_session": "ses_091e22d78d8d4cd981e1e56cee4efda7",
+      "backend_probe_observation_digest": "d51de187390e9a33394c6578617664e4e7c5a40f0cc98393f00705469a55295b"
     },
     {
       "title": "Grafana (DEV)",
@@ -383,7 +395,11 @@
       ],
       "attached_to_live_agents": true,
       "backend_read_verified": false,
-      "authenticated_discovery": true
+      "authenticated_discovery": true,
+      "backend_tool_call_verified": true,
+      "backend_probe_tool": "mcp__vmcluster-prod__query",
+      "backend_probe_session": "ses_091e22d78d8d4cd981e1e56cee4efda7",
+      "backend_probe_observation_digest": "d51de187390e9a33394c6578617664e4e7c5a40f0cc98393f00705469a55295b"
     },
     {
       "title": "Backstage (DEV)",
@@ -416,7 +432,11 @@
       ],
       "attached_to_live_agents": true,
       "backend_read_verified": false,
-      "authenticated_discovery": true
+      "authenticated_discovery": true,
+      "backend_tool_call_verified": true,
+      "backend_probe_tool": "mcp__backstage-prod__validate-entity",
+      "backend_probe_session": "ses_091e22d78d8d4cd981e1e56cee4efda7",
+      "backend_probe_observation_digest": "d51de187390e9a33394c6578617664e4e7c5a40f0cc98393f00705469a55295b"
     },
     {
       "title": "Langfuse (DEV)",
@@ -470,7 +490,11 @@
       ],
       "attached_to_live_agents": true,
       "backend_read_verified": false,
-      "authenticated_discovery": true
+      "authenticated_discovery": true,
+      "backend_tool_call_verified": true,
+      "backend_probe_tool": "mcp__ak-dev__list_workspaces",
+      "backend_probe_session": "ses_091e22d78d8d4cd981e1e56cee4efda7",
+      "backend_probe_observation_digest": "d51de187390e9a33394c6578617664e4e7c5a40f0cc98393f00705469a55295b"
     }
   ],
   "role_connections": {

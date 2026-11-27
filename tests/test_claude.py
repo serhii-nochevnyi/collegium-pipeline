@@ -16,6 +16,32 @@ from collegium_pipeline.store import Journal
 
 
 class ClaudeTests(unittest.TestCase):
+    def test_installed_source_revision_does_not_repin_unchanged_worker_authority(self):
+        original = {
+            "model": "opus",
+            "config": {"effort": "high"},
+            "vault_keys": [],
+            "provenance": {
+                "commit": "old",
+                "version": 1,
+                "installation": {"id": "installed"},
+                "source_gone": False,
+            },
+        }
+        updated = copy.deepcopy(original)
+        updated["provenance"].update(commit="new", version=2)
+        self.assertEqual(agent_digest(original), agent_digest(updated))
+        self.assertEqual(original["provenance"]["commit"], "old")
+        for field, value in (
+            ("model", "sonnet"),
+            ("config", {"effort": "max"}),
+            ("vault_keys", ["new-secret"]),
+        ):
+            changed = {**updated, field: value}
+            self.assertNotEqual(agent_digest(original), agent_digest(changed))
+        updated["provenance"]["installation"]["id"] = "another-installation"
+        self.assertNotEqual(agent_digest(original), agent_digest(updated))
+
     def setUp(self):
         self.selection = select_model("planner", profile="claude")
         self.agent = {

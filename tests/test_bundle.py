@@ -182,6 +182,25 @@ class BundleTests(unittest.TestCase):
                 environ={"PIPELINE_CONTROL_KEY": "fixture-vault-key"},
                 http=http,
             )
+        for drift in ("reference", "tool-ceiling"):
+            with self.subTest(drift=drift):
+                root, config, agents, http = self.control_fixture()
+                agent = next(iter(agents.values()))
+                if drift == "reference":
+                    agent["references"]["mcp"][0]["id"] = "broader-connection"
+                else:
+                    agent["config"]["tools"][0]["default_config"]["enabled"] = True
+                next(iter(config["workers"].values()))["approved_agent_digest"] = agent_digest(
+                    agent
+                )
+                (root / "settings.json").write_text(json.dumps(config))
+                with self.assertRaisesRegex(PolicyError, "Installed MCP"):
+                    ENTRY(
+                        {"action": "verify-control"},
+                        root=root,
+                        environ={"PIPELINE_CONTROL_KEY": "fixture-vault-key"},
+                        http=http,
+                    )
 
     def test_bundle_refuses_unrestricted_unverified_or_mismatched_mcp(self):
         baseline = json.loads((ROOT / "config/integrations.json").read_text())

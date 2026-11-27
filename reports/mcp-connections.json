@@ -40,7 +40,11 @@
       ],
       "attached_to_live_agents": true,
       "backend_read_verified": false,
-      "authenticated_discovery": true
+      "authenticated_discovery": true,
+      "backend_tool_call_verified": true,
+      "backend_probe_tool": "mcp__atlassian-rovo__getAccessibleAtlassianResources",
+      "backend_probe_session": "ses_091e22d78d8d4cd981e1e56cee4efda7",
+      "backend_probe_observation_digest": "d51de187390e9a33394c6578617664e4e7c5a40f0cc98393f00705469a55295b"
     },
     {
       "title": "Agents Knowledge (PROD)",
@@ -62,7 +66,11 @@
       ],
       "attached_to_live_agents": true,
       "backend_read_verified": false,
-      "authenticated_discovery": true
+      "authenticated_discovery": true,
+      "backend_tool_call_verified": true,
+      "backend_probe_tool": "mcp__ak-prod__list_workspaces",
+      "backend_probe_session": "ses_091e22d78d8d4cd981e1e56cee4efda7",
+      "backend_probe_observation_digest": "d51de187390e9a33394c6578617664e4e7c5a40f0cc98393f00705469a55295b"
     },
     {
       "title": "Grafana (PROD)",
@@ -116,7 +124,11 @@
       ],
       "attached_to_live_agents": true,
       "backend_read_verified": false,
-      "authenticated_discovery": true
+      "authenticated_discovery": true,
+      "backend_tool_call_verified": true,
+      "backend_probe_tool": "mcp__grafana-prod__list_datasources",
+      "backend_probe_session": "ses_091e22d78d8d4cd981e1e56cee4efda7",
+      "backend_probe_observation_digest": "d51de187390e9a33394c6578617664e4e7c5a40f0cc98393f00705469a55295b"
     },
     {
       "title": "Grafana (DEV)",
@@ -178,7 +190,11 @@
       ],
       "attached_to_live_agents": true,
       "backend_read_verified": false,
-      "authenticated_discovery": true
+      "authenticated_discovery": true,
+      "backend_tool_call_verified": true,
+      "backend_probe_tool": "mcp__vmcluster-prod__query",
+      "backend_probe_session": "ses_091e22d78d8d4cd981e1e56cee4efda7",
+      "backend_probe_observation_digest": "d51de187390e9a33394c6578617664e4e7c5a40f0cc98393f00705469a55295b"
     },
     {
       "title": "Backstage (DEV)",
@@ -211,7 +227,11 @@
       ],
       "attached_to_live_agents": true,
       "backend_read_verified": false,
-      "authenticated_discovery": true
+      "authenticated_discovery": true,
+      "backend_tool_call_verified": true,
+      "backend_probe_tool": "mcp__backstage-prod__validate-entity",
+      "backend_probe_session": "ses_091e22d78d8d4cd981e1e56cee4efda7",
+      "backend_probe_observation_digest": "d51de187390e9a33394c6578617664e4e7c5a40f0cc98393f00705469a55295b"
     },
     {
       "title": "Langfuse (DEV)",
@@ -265,10 +285,63 @@
       ],
       "attached_to_live_agents": true,
       "backend_read_verified": false,
-      "authenticated_discovery": true
+      "authenticated_discovery": true,
+      "backend_tool_call_verified": true,
+      "backend_probe_tool": "mcp__ak-dev__list_workspaces",
+      "backend_probe_session": "ses_091e22d78d8d4cd981e1e56cee4efda7",
+      "backend_probe_observation_digest": "d51de187390e9a33394c6578617664e4e7c5a40f0cc98393f00705469a55295b"
     }
   ],
   "all_operational": false,
   "installation_applied": true,
-  "backend_calls_verified": false
+  "backend_calls_verified": true,
+  "backend_tool_calls_verified": true,
+  "probe_evidence": {
+    "session_id": "ses_091e22d78d8d4cd981e1e56cee4efda7",
+    "observation_digest": "d51de187390e9a33394c6578617664e4e7c5a40f0cc98393f00705469a55295b",
+    "calls": [
+      {
+        "tool": "mcp__atlassian-rovo__getAccessibleAtlassianResources",
+        "tool_use_id": "toolu_01MKUxdJPELnG6W7EZ81sV4m",
+        "event_id": "evt_01M8F9X6FT0ED6WF8SQXPXW62A",
+        "result_event_id": "evt_01M8F9X6NE3PW1DAGCHXNS1854",
+        "is_error": false
+      },
+      {
+        "tool": "mcp__ak-prod__list_workspaces",
+        "tool_use_id": "toolu_01NegV9c8iWV7SQKV8KM468F",
+        "event_id": "evt_01M8F9X6NE15SJ0XSBEKAA16GR",
+        "result_event_id": "evt_01M8F9X6RVAYPTR53B79CJ0958",
+        "is_error": false
+      },
+      {
+        "tool": "mcp__ak-dev__list_workspaces",
+        "tool_use_id": "toolu_01UxEKwycEyZcLEvBHVnt4Cc",
+        "event_id": "evt_01M8F9X6XXH7J14EQJNF9SMTVE",
+        "result_event_id": "evt_01M8F9X6ZT0AP5A8Y18SGBV7Q0",
+        "is_error": false
+      },
+      {
+        "tool": "mcp__grafana-prod__list_datasources",
+        "tool_use_id": "toolu_01PAkeSFE5vHWg2iT86iQZAc",
+        "event_id": "evt_01M8F9X743NZP66EH8FWZ1TZNW",
+        "result_event_id": "evt_01M8F9X747X7CYQ6VB1HCDY3CW",
+        "is_error": false
+      },
+      {
+        "tool": "mcp__vmcluster-prod__query",
+        "tool_use_id": "toolu_01HMA2d17wviMrrV86De4Ecc",
+        "event_id": "evt_01M8F9X7GMQ7H8JC2J0R9470S9",
+        "result_event_id": "evt_01M8F9X7GMQY8EH6XSE1FXP8J2",
+        "is_error": false
+      },
+      {
+        "tool": "mcp__backstage-prod__validate-entity",
+        "tool_use_id": "toolu_01Pfz8qugvoKWEmzKUQU82dw",
+        "event_id": "evt_01M8F9X84YR7QARGKBRVTNV57M",
+        "result_event_id": "evt_01M8F9X87V5T7D6Y8V72DY6YA6",
+        "is_error": false
+      }
+    ]
+  }
 }

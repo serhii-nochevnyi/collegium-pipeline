@@ -25,7 +25,7 @@
         "effort": "high",
         "reason": "base"
       },
-      "approved_agent_digest": "811cea3e50576de533fe443e14d14f71c65e4bd309dcc66039eb19725e4020ee",
+      "approved_agent_digest": "4f839e27d4975dfd96345cb130a631581c98865f0394a54d4483a45f1eda7e69",
       "harness": "claude-code",
       "model_connection_id": "mcn_699c8e51528e4438a359acfd4dced40f"
     },
@@ -41,7 +41,7 @@
         "effort": "high",
         "reason": "base"
       },
-      "approved_agent_digest": "99764e301d89082f09208672f1bdc864801d4e4dc977a76e079a3f935064e64c",
+      "approved_agent_digest": "43c0c430face8815823c9405abcdbc9aa75294c3a7a5fdd196ed8c8693b041d4",
       "harness": "claude-code",
       "model_connection_id": "mcn_699c8e51528e4438a359acfd4dced40f"
     },
@@ -57,7 +57,7 @@
         "effort": "low",
         "reason": "base"
       },
-      "approved_agent_digest": "571530df01b201ff1aa9037a8d49ac5d14ef96b76b3072bc984b863510c66d94",
+      "approved_agent_digest": "505ee317dc997083ae96e68afaffdfe829a87649795d83ec316ac6a18463ab64",
       "harness": "claude-code",
       "model_connection_id": "mcn_699c8e51528e4438a359acfd4dced40f"
     },
@@ -73,7 +73,7 @@
         "effort": "high",
         "reason": "base"
       },
-      "approved_agent_digest": "ff1830fb652ac72b039e52e9157d0a4213438282053e2c7c7525d02ccf5bacf4",
+      "approved_agent_digest": "e3bbc0bdd165f392819b6a195f5a511cd4b4ebeaa171e6abfc824beaa2923a0a",
       "harness": "claude-code",
       "model_connection_id": "mcn_699c8e51528e4438a359acfd4dced40f"
     },
@@ -89,7 +89,7 @@
         "effort": "low",
         "reason": "base"
       },
-      "approved_agent_digest": "101b83cf9adb18bae53b7b795df1d7689256959da2fee421e4b8a50257fcb96e",
+      "approved_agent_digest": "85a98cb2628de0cec813a26c18539e411d96159e2b072dffbc8749f0103b1d83",
       "harness": "claude-code",
       "model_connection_id": "mcn_699c8e51528e4438a359acfd4dced40f"
     },
@@ -105,7 +105,7 @@
         "effort": "medium",
         "reason": "base"
       },
-      "approved_agent_digest": "9c2b06e871ab9e2b3f239b03057efbcae821e12a338153ac2502b5e4ae8baf9b",
+      "approved_agent_digest": "9dc2a685909ec1fea3ca7481fd32f401dab21b81652005cbe887945ee1534676",
       "harness": "claude-code",
       "model_connection_id": "mcn_699c8e51528e4438a359acfd4dced40f"
     },
@@ -121,7 +121,7 @@
         "effort": "high",
         "reason": "same_cause_repeat"
       },
-      "approved_agent_digest": "0559a4cc651b7e9b9b2193952dffb8307e126b92434e4b9590617be4ecf14fe8",
+      "approved_agent_digest": "a78559d242b8f4b9ababb179e96d8c3e503be7395c0649573c8d6fe1350964c7",
       "harness": "claude-code",
       "model_connection_id": "mcn_699c8e51528e4438a359acfd4dced40f"
     },
@@ -137,7 +137,7 @@
         "effort": "max",
         "reason": "repeat_tier_exhausted"
       },
-      "approved_agent_digest": "ec955e27c681942cf0ed0a6df49c6f15273d7578279c90b88b20a6a6f200a3f4",
+      "approved_agent_digest": "b799f016d3cbabde00fa3a36607cb145f77d6e88001f4632545d685701aaa9f9",
       "harness": "claude-code",
       "model_connection_id": "mcn_699c8e51528e4438a359acfd4dced40f"
     }
