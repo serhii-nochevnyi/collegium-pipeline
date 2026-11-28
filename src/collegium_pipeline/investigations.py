@@ -365,7 +365,9 @@ class Investigations:
             else None,
             "payload_contract": self.contract(stage, perspective),
             "required_validation_commands": self.config["validation_commands"],
-            "feedback": doc.get("feedback"),
+            "feedback": doc.get("feedback")
+            if stage in {"synthesizing", "investigation_review"}
+            else doc.get("stage_feedback", {}).get(logical),
         }
         try:
             result = self.jobs.step(root, key, stage, doc["head"], context, selection)
@@ -413,6 +415,77 @@ class Investigations:
         for key in ("synthesizing", "investigation_review"):
             doc["results"].pop(key, None)
 
+    def checked_payload(self, doc, result, logical, sources):
+        if result["verdict"] != "pass":
+            raise PolicyError("Investigation payload is inconclusive")
+        if logical == "assessing":
+            return assessment(
+                result["payload"],
+                sources,
+                doc["intake"]["risk_flags"],
+                self.config["investigation"]["minimum_complexity"],
+            )
+        if logical.startswith("researching:"):
+            return validate_research(result["payload"], sources, logical.split(":", 1)[1])
+        if logical == "synthesizing":
+            return validate_synthesis(result["payload"], sources, self.config)
+        raise PolicyError("This stage cannot use payload repair")
+
+    def repair_payload(self, doc, result, logical, reason):
+        if logical == "synthesizing":
+            return self.repair_synthesis(doc, result, reason)
+        attempt = doc["attempts"].get(logical, 0)
+        rejected = self.artifacts.put(result)
+        doc["rejections"].append(
+            {
+                "revision": doc["revision"],
+                "stage": logical,
+                "attempt": attempt,
+                "artifact_digest": rejected,
+                "reason": reason,
+            }
+        )
+        if attempt >= self.config["max_repair_attempts"]:
+            raise PolicyError("Investigation payload retry limit exhausted: " + reason)
+        doc["attempts"][logical] = attempt + 1
+        doc.setdefault("stage_feedback", {})[logical] = {
+            "rejected_digest": rejected,
+            "reason": reason,
+            "rejected_result": result,
+        }
+        doc["results"].pop(logical, None)
+        doc["state"] = logical.split(":", 1)[0]
+
+    def retry_payload(self, root):
+        """Explicitly retry only a known invalid terminal payload; never an unknown launch."""
+        doc = self.load(root)
+        if doc["state"] != "blocked":
+            raise PolicyError("Payload repair requires a blocked run")
+        self.settle(root, doc)
+        self.save(root, doc)
+        if doc["settlement"]["pending"]:
+            raise PolicyError("Cannot repair while an external turn is unresolved")
+        sources = self.artifacts.get(doc["sources"])["sources"]
+        rejected = []
+        for logical, value in doc["results"].items():
+            if logical not in {"assessing", "synthesizing"} and not logical.startswith(
+                "researching:"
+            ):
+                continue
+            result = self.artifacts.get(value)
+            if result.get("runtime_evidence", {}).get("verified_by_platform") is not True:
+                raise PolicyError("Payload repair requires a verified native terminal result")
+            try:
+                self.checked_payload(doc, result, logical, sources)
+            except PolicyError as exc:
+                rejected.append((logical, result, str(exc)))
+        if len(rejected) != 1:
+            raise PolicyError("Repair requires one unambiguous invalid payload; no identity reset")
+        logical, result, reason = rejected[0]
+        self.repair_payload(doc, result, logical, reason)
+        doc.pop("reason", None)
+        return self.save(root, doc)
+
     def step(self, root):
         if not self.config["execution_enabled"] or self.config["broker_enabled"]:
             raise PolicyError("Investigation dispatch requires explicit read-only live authority")
@@ -427,34 +500,32 @@ class Investigations:
             if not doc["assessment"]:
                 result = self.step_job(root, doc, "assessing")
                 if result:
-                    if result["verdict"] != "pass":
-                        raise PolicyError("Assessment was inconclusive")
-                    payload = assessment(
-                        result["payload"],
-                        sources,
-                        doc["intake"]["risk_flags"],
-                        self.config["investigation"]["minimum_complexity"],
-                    )
-                    doc.update(assessment=self.artifacts.put(payload), state="researching")
+                    try:
+                        payload = self.checked_payload(doc, result, "assessing", sources)
+                    except PolicyError as exc:
+                        self.repair_payload(doc, result, "assessing", str(exc))
+                    else:
+                        doc.update(assessment=self.artifacts.put(payload), state="researching")
             elif len(doc["research"]) < len(PERSPECTIVES):
                 for perspective in PERSPECTIVES:
                     if perspective in doc["research"] or doc["state"] == "blocked":
                         continue
                     result = self.step_job(root, doc, "researching", perspective)
                     if result:
-                        if result["verdict"] != "pass":
-                            raise PolicyError("Research perspective is inconclusive")
-                        validate_research(result["payload"], sources, perspective)
-                        doc["research"][perspective] = self.artifacts.put(result)
+                        logical = "researching:" + perspective
+                        try:
+                            self.checked_payload(doc, result, logical, sources)
+                        except PolicyError as exc:
+                            self.repair_payload(doc, result, logical, str(exc))
+                        else:
+                            doc["research"][perspective] = self.artifacts.put(result)
                 if len(doc["research"]) == len(PERSPECTIVES):
                     doc["state"] = "synthesizing"
             elif not doc["synthesis"]:
                 result = self.step_job(root, doc, "synthesizing")
                 if result:
                     try:
-                        if result["verdict"] != "pass":
-                            raise PolicyError("Synthesis was inconclusive")
-                        validate_synthesis(result["payload"], sources, self.config)
+                        self.checked_payload(doc, result, "synthesizing", sources)
                     except PolicyError as exc:
                         self.repair_synthesis(doc, result, str(exc))
                     else:

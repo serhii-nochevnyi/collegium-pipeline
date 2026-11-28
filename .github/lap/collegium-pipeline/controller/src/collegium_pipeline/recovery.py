@@ -658,7 +658,7 @@ def restore_checkpoint(
     allowed = allowed or (
         bool(config.get("investigation"))
         and data.get("action") == "investigate"
-        and data.get("operation") in {"prepare", "tick", "pause", "resume"}
+        and data.get("operation") in {"prepare", "tick", "pause", "resume", "repair"}
     )
     if getattr(checkpoints, "namespace", "delivery") == "service":
         allowed = data in (

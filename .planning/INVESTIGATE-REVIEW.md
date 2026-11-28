@@ -33,3 +33,13 @@ artifacts and retained usage; the same two-repair budget is shared with review f
 Added regressions for successful correction without repeated research and exhaustion
 without review/admission. The blocked v1 service run is retained as negative evidence;
 the updated code receives a separate, explicit service replan, never a silent reset.
+
+The explicit v2 service replan revealed a one-character assessment quote typo. Added
+bounded per-perspective/assessment payload correction with exact registered-quote
+feedback. A manual repair operation handles a previously blocked known terminal payload:
+it revalidates it, refuses pending/unknown launches, preserves all existing receipts and
+budgets, and launches no agent itself. This permits repairing v1 synthesis while retaining
+its four accepted research artifacts. Invalid native JSON/identities remain hard-blocked.
+Added tests for quote correction, previous-version repair without repeated research,
+unresolved-launch refusal and inability to reset exhausted retry budgets. Reviewed shared
+checkpoint admission for the new repair origin; original delivery/epic origins unchanged.

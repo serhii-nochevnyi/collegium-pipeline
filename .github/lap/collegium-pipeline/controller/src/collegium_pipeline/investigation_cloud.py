@@ -78,6 +78,7 @@ def dispatch(event, state, config, environ, http, hooks, *, sources=None):
         "tick": {"action", "operation", "run_id", "live"},
         "pause": {"action", "operation", "run_id"},
         "resume": {"action", "operation", "run_id"},
+        "repair": {"action", "operation", "run_id"},
     }
     operation = event.get("operation")
     if (
@@ -153,6 +154,8 @@ def dispatch(event, state, config, environ, http, hooks, *, sources=None):
                         engine.step(root)
                     elif operation in {"pause", "resume"}:
                         engine.pause(root, operation == "pause")
+                    elif operation == "repair":
+                        engine.retry_payload(root)
                     result = {"run_id": root}
                 if operation != "status":
                     journal.checkpoint({"kind": "tick", "run_id": result["run_id"]})

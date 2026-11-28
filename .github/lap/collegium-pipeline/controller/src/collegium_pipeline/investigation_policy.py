@@ -1,5 +1,7 @@
 """Deterministic investigation routing and conservative, evidence-bound complexity."""
 
+import json
+
 from .capacity import checked_paths
 from .domain import PolicyError, Selection, digest
 
@@ -96,7 +98,17 @@ def cited(claim, sources):
         lines = source["text"].splitlines()
         quote = "\n".join(lines[ref["start"] - source["start"] : ref["end"] - source["start"] + 1])
         if not quote.strip() or ref["quote"] != quote:
-            raise PolicyError("Citation quote differs from the pinned source")
+            raise PolicyError(
+                "Citation quote differs from the pinned source: "
+                + json.dumps(
+                    {
+                        "source_id": ref["source_id"],
+                        "start": ref["start"],
+                        "end": ref["end"],
+                        "expected_quote": quote,
+                    }
+                )
+            )
     return claim
 
 

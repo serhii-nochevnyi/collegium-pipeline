@@ -57,11 +57,15 @@ Run the installed `pipeline-investigate` script with managed event `data`:
 }
 ```
 
-`status`, `pause` and `resume` accept exactly `action`, `operation`, `run_id`.
+`status`, `pause`, `resume` and `repair` accept exactly `action`, `operation`, `run_id`.
 `tick` additionally requires `live:true`. Each tick observes existing turns and may
 start the next eligible stages. Pausing drains existing completed work without
 starting or replacing turns. Resume preserves those identities. This run-level
 pause is distinct from the automation's paused schedule, which remains unchanged.
+`repair` never starts an agent. It can reopen only one independently revalidated,
+invalid terminal payload in a blocked run, with every external turn settled. It retains
+the same intake, head, accepted research, native receipts and retry budgets. Unknown
+launches, invalid native envelopes and stale reviewer identities cannot be reset this way.
 
 Prepare is idempotent for identical task/config/head/source snapshots. A changed
 admission requires an explicit new identity; it cannot alter an existing run. Signed
@@ -90,6 +94,10 @@ commands or invalid citations) and failed reviews share at most two synthesis/re
 repairs, with the exact rejected artifact and controller findings retained. Research is
 reused, paid usage is retained and configured commands never change. Invalid native
 envelopes or stale review identities block; exhausting repairs also blocks.
+Assessment and each research perspective also receive at most two payload corrections,
+within the global job/token budgets. Quote errors report the exact captured line to
+correct the response; the citation validator itself remains strict. Only the rejected
+perspective is repeated, so already-running sibling packets remain immutable.
 
 Success ends at `ready_for_decision`, or `needs_input` when any blocking question
 remains. Both return `decision_approved:false` and `delivered:false`. Human acceptance,

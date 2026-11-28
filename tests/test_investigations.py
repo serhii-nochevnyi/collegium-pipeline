@@ -343,6 +343,71 @@ class InvestigationTests(unittest.TestCase):
         self.assertIsNone(result["review"])
         self.assertIn("retry limit", result["reason"])
         self.assertEqual(self.engine.step(self.root)["tokens"], 160)
+        with self.assertRaises(PolicyError):
+            self.engine.retry_payload(self.root)
+
+    def test_assessment_quote_typo_is_repaired_with_exact_feedback(self):
+        original = self.payload
+
+        def typo(packet, observed):
+            original(packet, observed)
+            if packet["stage"] == "assessing" and packet["job_key"].endswith(":0"):
+                result = json.loads(observed["turn"]["answer"])
+                result["payload"]["dimensions"]["scope"]["evidence"]["citations"][0]["quote"] = (
+                    "typo"
+                )
+                observed["turn"]["answer"] = json.dumps(result)
+
+        self.http.mutate = typo
+        result = self.until("ready_for_decision")
+        self.assertEqual((self.http.created, result["tokens"]), (8, 160))
+        self.assertEqual(result["attempts"]["assessing"], 1)
+        self.assertIn("expected_quote", result["stage_feedback"]["assessing"]["reason"])
+
+    def test_explicit_repair_reuses_known_research_and_never_dispatches_itself(self):
+        original = self.payload
+
+        def rejected(packet, observed):
+            original(packet, observed)
+            if packet["stage"] == "synthesizing" and ":1:" in packet["job_key"]:
+                result = json.loads(observed["turn"]["answer"])
+                result["payload"]["tickets"][0]["validation_commands"] = [["true"]]
+                observed["turn"]["answer"] = json.dumps(result)
+
+        self.http.mutate = rejected
+        # Reproduce the previous installed version's fail-closed behavior.
+        repair = self.engine.repair_synthesis
+        self.engine.repair_synthesis = lambda *args: (_ for _ in ()).throw(
+            PolicyError("Legacy validation block")
+        )
+        blocked = self.until("blocked")
+        self.engine.repair_synthesis = repair
+        before = self.http.created
+        migrated = self.engine.retry_payload(self.root)
+        self.assertEqual(self.http.created, before)
+        self.assertEqual(migrated["research"], blocked["research"])
+        self.assertEqual(migrated["revision"], 2)
+        self.assertEqual(self.until("ready_for_decision")["tokens"], 160)
+        with self.assertRaises(PolicyError):
+            self.engine.retry_payload(self.root)
+
+    def test_explicit_repair_cannot_reset_unknown_launch(self):
+        request = self.http.request
+
+        def lost(method, path, *args, **kwargs):
+            if method == "POST" and path == "/session":
+                request(method, path, *args, **kwargs)
+                raise RemoteError("lost", unknown_outcome=True)
+            return request(method, path, *args, **kwargs)
+
+        self.http.request = lost
+        with self.assertRaises(RemoteError):
+            self.engine.step(self.root)
+        self.engine.step(self.root)
+        before = self.http.created
+        with self.assertRaises(PolicyError):
+            self.engine.retry_payload(self.root)
+        self.assertEqual(self.http.created, before)
 
     def test_ambiguous_launch_is_never_replaced(self):
         request = self.http.request
@@ -496,3 +561,5 @@ class InvestigationTests(unittest.TestCase):
         self.assertFalse(result["settlement"]["pending"])
         self.assertEqual(self.engine.step(self.root)["tokens"], 20)
         self.assertEqual(self.http.created, 1)
+        with self.assertRaises(PolicyError):
+            self.engine.retry_payload(self.root)
