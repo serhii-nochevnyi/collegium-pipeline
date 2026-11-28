@@ -119,6 +119,21 @@ class NativeTransportTests(unittest.TestCase):
         self.assertEqual(self.transport.scope()["credential_location"], "native_egress_proxy")
         self.assertEqual(self.platform.submissions, 1)
 
+    def test_nested_working_scope_is_pinned_and_ambiguous_scope_refused(self):
+        files = self.platform.code["current"]["files"]
+        files["epic-broker/broker_scope.json"] = files.pop("broker_scope.json")
+        self.config["native_broker"]["approved_digest"] = binding_digest(
+            self.platform.row, self.platform.code
+        )
+        self.assertEqual(self.transport.scope()["kind"], "github_app")
+        files["broker_scope.json"] = files["epic-broker/broker_scope.json"]
+        self.config["native_broker"]["approved_digest"] = binding_digest(
+            self.platform.row, self.platform.code
+        )
+        with self.assertRaisesRegex(PolicyError, "unambiguous"):
+            self.transport.scope()
+        self.assertEqual(self.platform.submissions, 0)
+
     def test_native_logs_verify_digest_expansion_and_no_gh_fallback(self):
         app = NativeGithubApp(self.config, self.platform, self.journal, self.run)
         raw = b"test_service_phase: AssertionError: red"

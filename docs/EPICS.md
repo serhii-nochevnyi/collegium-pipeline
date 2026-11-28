@@ -93,14 +93,25 @@ The script now has the existing `atlassian-rovo` read-only connection. It calls 
 `lap_mcp` stubs, not host credentials. Schemas were discovered from the actual project:
 `getJiraIssue(cloudId,issueIdOrKey,...)` and `searchJiraIssuesUsingJql(cloudId,jql,...)`.
 Both explicitly request full views and lossless HTML bodies; truncated/repeating page
-results fail. Directed `inwardIssue` links of the configured blocks type are prerequisites.
+results fail. Directed `inwardIssue` links of the configured blocks type and explicit
+additional type/direction mappings are prerequisites.
 References outside the imported graph fail rather than silently discard dependencies.
 
-Jira site/type/link mapping is deliberately `null`: no product epic was selected. Before
-an eventual pilot, configure `epic.jira` with `cloud_id`, `epic_type_id`,
-`blocks_link_type_id`, and optional `epic.scopes[ISSUE_KEY]` path/resource declarations.
-The selected repository/path ceiling must separately cover the intended work. The current
-installed App ceiling remains the existing service fixture; it is not silently widened.
+`config/epic-policy.json` configures the live verified pdffiller.atlassian.net cloud
+`3e1c0d80-f6e4-4767-ad1c-f06c182b0f93`, shared company-managed Epic type `10000`,
+Blockers `10000` inward (`is blocked by`) and Depends `10400` outward (`depends on`).
+No project, epic or ticket was selected. Project-specific team-managed Epic type IDs are
+different and explicitly refused until separately configured. Atlassian MCP already uses
+its authenticated connection; no extra Jira API token or copied OAuth token is packaged.
+
+A separate pinned paused working App broker covers only `src/collegium_pipeline/`,
+`tests/`, `docs/`, `README.md`, `pyproject.toml`, and `uv.lock` in this repository.
+`.github/`, `config/`, `scripts/`, secret files and other repositories are outside that
+ceiling. The historical service broker still covers only `tests/test_live_service.py`.
+Per-ticket `epic.scopes[ISSUE_KEY]` path/resource declarations or explicit exported graphs
+can narrow the working ceiling; no issue-specific scope is invented before a pilot exists.
+Without such declarations, unknown overlap serializes safely. Shared dependency/lockfile
+changes must reserve a common resource; disjoint paths alone do not prove independence.
 
 The builder emits a separate disabled `controller/epic-settings.json`. It preserves the
 historical service profile byte-for-byte. Preparation pins the intended runnable contract
@@ -108,7 +119,8 @@ while actual installed enable switches stay off; turning those switches on later
 rewrite already admitted acceptance/model/budget policy. Every tick still checks both
 installed switches before doing anything. Signed checkpoints use the intended contract.
 A bounded registry of the two installed profiles and their intended variants resolves
-each pending effect and checkpoint origin by its frozen digest; unknown profiles or
+each pending effect and checkpoint origin by its frozen digest, including distinct pinned
+working/service brokers and path ceilings; unknown profiles or
 foreign controller owners fail before effects. Existing readiness rechecks never acquire
 new work capacity, and pending integrated CI waits up to the configured CI deadline.
 Prerequisites are refreshed together against one immutable base snapshot before admission;

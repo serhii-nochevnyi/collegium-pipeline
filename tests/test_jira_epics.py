@@ -78,6 +78,37 @@ class JiraEpicTests(unittest.TestCase):
             read_graph("100", self.config, self.connection)["epic"]["source_id"], "100"
         )
 
+    def test_verified_depends_direction_and_mcp_data_envelope(self):
+        self.config["epic"]["jira"]["dependency_links"] = [
+            {"type_id": "depends", "direction": "outward"}
+        ]
+        self.b["fields"]["issuelinks"].extend(
+            [
+                {"type": {"id": "depends"}, "outwardIssue": {"key": "P-2"}},
+                {"type": {"id": "depends"}, "inwardIssue": {"key": "OTHER-1"}},
+                {"type": {"id": "relates"}, "outwardIssue": {"key": "OTHER-2"}},
+            ]
+        )
+        self.connection.call.side_effect = [
+            {"data": self.epic},
+            [
+                {
+                    "type": "text",
+                    "text": json.dumps({"data": {"issues": [self.a, self.b], "isLast": True}}),
+                }
+            ],
+        ]
+        graph = read_graph("P-1", self.config, self.connection)
+        self.assertEqual(graph["tickets"][0]["depends_on"], [])
+        self.assertEqual(graph["tickets"][1]["depends_on"], ["P-2"])
+
+    def test_unsupported_project_specific_epic_type_refuses_before_child_search(self):
+        self.epic["fields"]["issuetype"]["id"] = "team-managed-other"
+        self.connection.call.return_value = self.epic
+        with self.assertRaisesRegex(PolicyError, "configured epic type"):
+            read_graph("P-1", self.config, self.connection)
+        self.connection.call.assert_called_once()
+
     def test_epic_response_with_noncanonical_id_stops_before_child_search(self):
         self.connection.call.return_value = {**self.epic, "id": "0100"}
         with self.assertRaisesRegex(PolicyError, "canonical positive decimal"):

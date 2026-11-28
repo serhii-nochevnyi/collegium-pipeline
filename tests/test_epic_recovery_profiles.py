@@ -58,6 +58,12 @@ class RecoveryProfileTests(unittest.TestCase):
         return run
 
     def test_workers_and_broker_effects_use_their_own_profiles(self):
+        self.epic = {
+            **self.epic,
+            "allowed_paths": ["src/"],
+            "native_broker": {"automation_id": "aut_working", "approved_digest": "a" * 64},
+        }
+        self.profiles = recovery_profiles(self.singleton, self.epic)
         standalone = self.pending(self.singleton, "standalone")
         epic = self.pending(self.epic, "epic")
         for invocation in (self.singleton, self.epic):

@@ -84,7 +84,14 @@ class ScriptTransport:
             or any(target.get(k) for k in ("secrets", "variables", "mcp_servers"))
         ):
             raise PolicyError("Native broker scope differs from its admitted project/repository")
-        scope = json.loads(code["current"]["files"]["broker_scope.json"])
+        scope_files = [
+            p
+            for p in code["current"]["files"]
+            if p == "broker_scope.json" or p.endswith("/broker_scope.json")
+        ]
+        if len(scope_files) != 1:
+            raise PolicyError("Native broker needs one unambiguous pinned scope file")
+        scope = json.loads(code["current"]["files"][scope_files[0]])
         if scope != {k: self.config[k] for k in ("repository", "base_branch", "allowed_paths")}:
             raise PolicyError("Native broker path/branch policy differs")
         # Connection kind is checked through the authoritative project connection list.

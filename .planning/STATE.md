@@ -1,3 +1,33 @@
+# Active Jira mapping / working scope update — installation pending
+
+2026-11-28: metadata verified, mapping configured for pdffiller.atlassian.net shared Epic10000;
+Blockers10000 inward and Depends10400 outward. No issue/project/pilot selected.
+Separate paused working broker v8 aut_25092aee432946ceade2ea4c6bc2a2d7 prepared.
+Allowed: src/collegium_pipeline/, tests/, docs/, README.md, pyproject.toml, uv.lock.
+Source/installed controller still v16 until publication+plan/apply below completes.
+Targeted tests pass, inline review recorded EPIC-MAPPING-REVIEW.md. No local git commits.
+All execution remains disabled and automations paused. Existing service profile/pins intact.
+
+Earlier chronological notes follow; pending updates supersede earlier completion scope.
+
+# Epic bundle installed and verified — 2026-11-28
+
+Latest user scope complete: dependency DAG and independent parallel tickets implemented
+and installed as controller v16, source fe91ffbcc9d894e58eb4c186977a5cd186a25e6d.
+248 local and remote CI tests PASS; independent review fixes confirmed PASS.
+Native readonly epic Atlassian and control binding checks succeeded on v16.
+All10 project automations remain paused; single-ticket and epic dispatch/broker flagsfalse.
+No pilot/Jira write/actual paid epic delivery/product PR/merge selected or performed.
+Main and 8 private Claude worker/model/effort bindings unchanged. Old service proof intact.
+Before actual epic use, configure Jira mapping and approved working broker/path/resource
+scopes: installed epic profile still inherits narrow tests/test_live_service.py write ceiling.
+Evidence: reports/EPIC-DELIVERY.md, reports/epic-verification.json, docs/EPICS.md.
+New paused exact-source helper: aut_f9fdd52da91645df87973a0030ddec26 (v7);
+source payload/root/commit receipts retained in .local/epic-* for recovery, never overwrite.
+Existing source PR1 remains open. No local git commit/branch/worktree was created.
+
+Earlier chronological notes follow; their pending statuses are superseded above.
+
 # Epic implementation verified — installation pending
 
 2026-11-28: 248 tests PASS; third-review CR01–04 independently resolved

@@ -98,9 +98,9 @@ class BundleTests(unittest.TestCase):
 
     def test_installation_contains_controller_and_existing_agent_claims(self):
         self.assertEqual(len(self.manifest["agents"]), 8)
-        self.assertEqual(len(self.manifest["automations"]), 3)
+        self.assertEqual(len(self.manifest["automations"]), 4)
         claims = json.loads((self.path / "claims.json").read_text())
-        self.assertEqual(len(claims), 10)
+        self.assertEqual(len(claims), 11)
         for automation in self.manifest["automations"]:
             self.assertEqual(automation["start"], "paused")
             self.assertLessEqual(len(automation["script"]["files"]), 64)
@@ -188,6 +188,13 @@ class BundleTests(unittest.TestCase):
         self.assertNotIn("service_test", epic)
         self.assertNotIn("epic", base)
         self.assertEqual(base["workers"], epic["workers"])
+        self.assertEqual(base["allowed_paths"], ["tests/test_live_service.py"])
+        self.assertNotEqual(base["native_broker"], epic["native_broker"])
+        working = json.loads((self.path / "epic-broker/broker_scope.json").read_text())
+        self.assertEqual(working["allowed_paths"], epic["allowed_paths"])
+        self.assertIn("src/collegium_pipeline/", epic["allowed_paths"])
+        self.assertEqual(epic["epic"]["jira"]["epic_type_id"], "10000")
+        self.assertEqual(epic["epic"]["jira"]["blocks_link_type_id"], "10000")
         self.assertEqual(
             config_digest(
                 {
@@ -210,6 +217,35 @@ class BundleTests(unittest.TestCase):
             with self.assertRaises(PolicyError):
                 ENTRY_MODULE["cloud_service"](event, self.path / "state", config, {}, http)
             http.request.assert_not_called()
+
+    def test_working_policy_cannot_widen_service_broker_or_protected_paths(self):
+        policy_path = ROOT / "config/epic-policy.json"
+        policy = json.loads(policy_path.read_text())
+        service = json.loads((ROOT / "config/claude-service.json").read_text())
+        original_read = Path.read_text
+        for change in ("protected_path", "service_reuse", "worker_override"):
+            candidate = copy.deepcopy(policy)
+            if change == "protected_path":
+                candidate["working_broker"]["allowed_paths"] = [".github/"]
+            elif change == "service_reuse":
+                candidate["working_broker"]["native_broker"] = service["native_broker"]
+            else:
+                candidate["workers"] = {}
+
+            def read(path, *args, candidate=candidate, **kwargs):
+                return (
+                    json.dumps(candidate)
+                    if path == policy_path
+                    else original_read(path, *args, **kwargs)
+                )
+
+            with self.subTest(change=change), patch.object(Path, "read_text", read):
+                with self.assertRaises(PolicyError):
+                    BUILD(
+                        ROOT / "config/claude-service.json",
+                        ROOT / "config/integrations.json",
+                        self.path,
+                    )
 
     def test_cloud_inspect_before_admission_reports_policy_failure_without_creating_task(self):
         import sqlite3

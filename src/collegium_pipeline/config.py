@@ -253,13 +253,33 @@ def load_config(path: str | Path) -> dict:
         jira = policy["jira"]
         if jira is not None and (
             not isinstance(jira, dict)
-            or set(jira) != {"cloud_id", "epic_type_id", "blocks_link_type_id"}
+            or set(jira)
+            not in (
+                {"cloud_id", "epic_type_id", "blocks_link_type_id"},
+                {"cloud_id", "epic_type_id", "blocks_link_type_id", "dependency_links"},
+            )
             or any(
                 not isinstance(v, str) or not re.fullmatch(r"[a-zA-Z0-9-]{1,100}", v)
-                for v in jira.values()
+                for k, v in jira.items()
+                if k != "dependency_links"
             )
         ):
             raise PolicyError("Jira needs explicit cloud/type/block-link identities")
+        if jira is not None and "dependency_links" in jira:
+            links = jira["dependency_links"]
+            if (
+                not isinstance(links, list)
+                or len(links) > 16
+                or any(
+                    not isinstance(link, dict)
+                    or set(link) != {"type_id", "direction"}
+                    or not isinstance(link["type_id"], str)
+                    or not re.fullmatch(r"[a-zA-Z0-9-]{1,100}", link["type_id"])
+                    or link["direction"] not in {"inward", "outward"}
+                    for link in links
+                )
+            ):
+                raise PolicyError("Jira dependencies need explicit link IDs and directions")
     return config
 
 

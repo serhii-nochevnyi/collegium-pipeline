@@ -154,9 +154,35 @@ def build(config_path, integrations_path, output=DEFAULT_OUTPUT):
     # Generated runtime data stays compact within the executor's code.files ceiling.
     write("controller/settings.json", json.dumps(settings, sort_keys=True, separators=(",", ":")))
     policy = json.loads((ROOT / "config/epic-policy.json").read_text())
+    working = policy.pop("working_broker", None)
     if set(policy) != {"epic", "scheduling"}:
         raise PolicyError("Epic policy cannot override worker, repository or execution authority")
     epic_settings = {**settings, **policy}
+    if working is not None:
+        from collegium_pipeline.capacity import checked_paths
+
+        if (
+            not isinstance(working, dict)
+            or set(working) != {"name", "allowed_paths", "native_broker"}
+            or working["name"] != f"pipeline-native-broker-{config['repository_id']}-v8"
+        ):
+            raise PolicyError("Epic working broker needs its separate pinned identity")
+        checked_paths(
+            working["allowed_paths"],
+            [
+                "src/collegium_pipeline/",
+                "tests/",
+                "docs/",
+                "README.md",
+                "pyproject.toml",
+                "uv.lock",
+            ],
+        )
+        if working["native_broker"] == settings["native_broker"]:
+            raise PolicyError("Epic working broker cannot widen the historical service broker")
+        epic_settings.update(
+            allowed_paths=working["allowed_paths"], native_broker=working["native_broker"]
+        )
     epic_settings.pop("service_test", None)
     epic_settings["validation_commands"] = config.get(
         "repair_validation_commands", config["validation_commands"]
@@ -258,6 +284,45 @@ def build(config_path, integrations_path, output=DEFAULT_OUTPUT):
             },
         ],
     }
+    if working is not None:
+        write(
+            "epic-broker/native_github_broker.py",
+            (ROOT / "scripts/native_github_broker.py").read_text(),
+        )
+        write(
+            "epic-broker/broker_scope.json",
+            json.dumps(
+                {k: epic_settings[k] for k in ("repository", "base_branch", "allowed_paths")},
+                sort_keys=True,
+            ),
+        )
+        claims["automation/" + working["name"]] = working["native_broker"]["automation_id"]
+        manifest["automations"].append(
+            {
+                "name": working["name"],
+                "start": "paused",
+                "schedule": "0 0 1 1 *",
+                "notify": "none",
+                "script": {
+                    "files": [
+                        "epic-broker/native_github_broker.py",
+                        "epic-broker/broker_scope.json",
+                    ],
+                    "command": "cd epic-broker && python3 native_github_broker.py",
+                    "executor": "aranarium",
+                    "environment_ref": "custom",
+                    "environment": "base",
+                    "size": "small",
+                    "repositories": [
+                        {
+                            "url": "https://github.com/" + config["repository"],
+                            "connection": config["github_connection_id"],
+                            "access": "contributor",
+                        }
+                    ],
+                },
+            }
+        )
     if config.get("recovery_store"):
         recovery = config["recovery_store"]
         write("recovery_store.py", (ROOT / "scripts/recovery_store.py").read_text())

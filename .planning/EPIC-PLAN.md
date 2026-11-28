@@ -35,3 +35,15 @@ changed graph/source/head/config blocks, combined-quality failures cannot finish
 isolated packaged runtime and real platform bundle validator. No real epic/pilot run.
 Review source changes, publish into existing source PR through the App, show installation
 plan, apply only the scoped bundle update, and audit disabled flags/paused configuration.
+
+Completion evidence — 2026-11-28:
+- 248 local/remote CI tests PASS; independent targeted final review PASS, all blockers resolved.
+- Reviewed source fe91ffbcc9d894e58eb4c186977a5cd186a25e6d published through a new paused,
+  exact-58-path GitHub App source helper; existing source PR1, no merge or pilot.
+- Exact plan20a6c233...26c5383c applied; installed controller v16, five code files/170547bytes.
+- Live v16 readonly epic Atlassian preflight and control-key/eight-worker/six-MCP checks PASS.
+- All10 automations paused; both execution profiles disabled. Main, private Claude bindings,
+  historical service profile and narrow service broker/store pins unchanged.
+- Actual epic paid concurrency remains untested live. Jira mapping and approved working
+  scopes remain deferred; inherited service-file scope does not enable arbitrary writes.
+See reports/EPIC-DELIVERY.md and reports/epic-verification.json.

@@ -9,16 +9,44 @@ from .domain import PolicyError
 from .epics import graph_checked
 
 
-def result_object(value):
-    if isinstance(value, list):
+def mcp_value(value):
+    if isinstance(value, dict) and value.get("isError"):
+        raise PolicyError("Jira MCP returned an error")
+    if isinstance(value, dict) and "content" in value:
+        value = value.get("structuredContent") or value["content"]
+    if isinstance(value, list) and all(
+        isinstance(x, dict) and x.get("type") == "text" for x in value
+    ):
         text = "".join(x.get("text", "") for x in value if x.get("type") == "text")
         try:
             value = json.loads(text)
         except (ValueError, TypeError) as exc:
             raise PolicyError("Jira returned no structured JSON") from exc
+    if isinstance(value, dict) and "data" in value:
+        if not isinstance(value["data"], dict) or any(
+            k in value for k in ("id", "key", "fields", "issues", "resources")
+        ):
+            raise PolicyError("Ambiguous Jira MCP data envelope")
+        value = value["data"]
+    return value
+
+
+def result_object(value):
+    value = mcp_value(value)
     if not isinstance(value, dict):
         raise PolicyError("Unexpected Jira MCP result")
     return value
+
+
+def resource_ids(value):
+    value = mcp_value(value)
+    resources = value.get("resources") if isinstance(value, dict) else value
+    if not isinstance(resources, list) or any(not isinstance(r, dict) for r in resources):
+        raise PolicyError("Incomplete Atlassian resource metadata")
+    identities = [r.get("cloudId") or r.get("id") for r in resources]
+    if any(not isinstance(i, str) or not i for i in identities):
+        raise PolicyError("Atlassian resource identity is missing")
+    return set(identities)
 
 
 def read_graph(key, config, connection=None):
@@ -86,18 +114,20 @@ def read_graph(key, config, connection=None):
         parent = fields.get("parent") or {}
         if parent.get("id") != epic_task.source_id or parent.get("key") != key:
             raise PolicyError("Jira child does not belong to the admitted epic")
-        deps = []
+        deps = set()
+        mappings = [{"type_id": jira["blocks_link_type_id"], "direction": "inward"}]
+        mappings.extend(jira.get("dependency_links", []))
         for link in fields.get("issuelinks", []):
-            if str(link.get("type", {}).get("id")) == jira["blocks_link_type_id"] and link.get(
-                "inwardIssue"
-            ):
-                deps.append(link["inwardIssue"]["key"])
+            for mapping in mappings:
+                target = link.get(mapping["direction"] + "Issue")
+                if str(link.get("type", {}).get("id")) == mapping["type_id"] and target:
+                    deps.add(target["key"])
         scope = policy.get("scopes", {}).get(issue_key, {})
         tickets.append(
             {
                 "key": issue_key,
                 "task": asdict(jira_snapshot(issue, config["repository"])),
-                "depends_on": deps,
+                "depends_on": sorted(deps),
                 "paths": scope.get("paths"),
                 "resources": scope.get("resources"),
             }
