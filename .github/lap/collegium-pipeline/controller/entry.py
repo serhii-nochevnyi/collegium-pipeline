@@ -613,8 +613,9 @@ def _cloud_service(event, state, config, environ, http, guard):
         except PolicyError as exc:
             # Our policy errors contain controlled diagnostic text, not HTTP bodies/keys.
             reason = {"reason": str(exc), "run_id": root}
-            if root is not None:
-                journal.record(root, "service_policy_failure", reason)
+            # Keep SQLite unchanged after an unacknowledged tick checkpoint, so its
+            # exact snapshot can still be adopted if the store committed the upload.
+            save_receipt(state / "policy-failure.json", reason)
             print(json.dumps({"service_policy_failure": reason}), flush=True)
             raise
         finally:

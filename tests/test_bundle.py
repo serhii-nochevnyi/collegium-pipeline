@@ -124,6 +124,60 @@ class BundleTests(unittest.TestCase):
         self.assertEqual(c.execute("SELECT count(*) FROM runs").fetchone()[0], 0)
         c.close()
 
+    def test_policy_diagnostic_does_not_poison_unacknowledged_tick_snapshot(self):
+        import sqlite3
+
+        config = json.loads((self.path / "controller/settings.json").read_text())
+        owner = config["recovery_store"]["owner"]
+        event = {"action": "service-test", "mode": "run"}
+        environ = {
+            "LAP_AUTOMATION_ID": owner,
+            "LAP_RUN_ID": "run_tick",
+            "LAP_ATTEMPT_ID": "att_tick",
+            "PIPELINE_CONTROL_KEY": "fixture",
+        }
+        current = {
+            "id": "run_tick",
+            "automation_id": owner,
+            "status": "running",
+            "attempts": [{"id": "att_tick", "n": 1, "status": "running"}],
+            "item": {"event": {"data": event}},
+        }
+        http = unittest.mock.Mock()
+        http.request.side_effect = [
+            ({"status": "paused"}, {}),
+            (current, {}),
+            ({"runs": [current]}, {}),
+        ]
+        snapshot = []
+
+        def database():
+            c = sqlite3.connect(self.path / "state/journal.sqlite3")
+            value = {
+                table: c.execute("SELECT * FROM " + table).fetchall()
+                for table in ("runs", "events", "deliveries")
+            }
+            c.close()
+            return value
+
+        def fail_tick(operation):
+            snapshot.append(database())
+            raise PolicyError("Checkpoint ack dropped")
+
+        with (
+            patch("collegium_pipeline.recovery.Checkpoints"),
+            patch(
+                "collegium_pipeline.recovery.WriteAhead",
+                return_value=unittest.mock.Mock(save=fail_tick),
+            ),
+            contextlib.redirect_stdout(io.StringIO()),
+        ):
+            with self.assertRaisesRegex(PolicyError, "ack dropped"):
+                ENTRY_MODULE["cloud_service"](event, self.path / "state", config, environ, http)
+        self.assertEqual(database(), snapshot[0])
+        self.assertTrue((self.path / "state/policy-failure.json").is_file())
+        self.assertFalse((self.path / "state/no-dispatch/run_tick-att_tick.json").exists())
+
     def test_manual_cloud_service_uses_delivery_engine_and_inspects_without_duplicates(self):
         from test_delivery import DeliveryTests as Harness
 

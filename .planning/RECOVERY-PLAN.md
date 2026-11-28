@@ -79,3 +79,11 @@ no write ceiling/credentials change. Bound compressed log evidence and verify ra
 First prove read access without workers, then run bounded cloud slices manually while all
 automations remain paused; collect native model/effort, actual initial red assertion, fixer,
 fresh full validation/independent review and samePR green. Preserve all prior service proofs.
+
+
+Cloud live test exposed queued-item/no-run acknowledgements. Track returned item ids
+through run summaries instead of serially scanning100 unrelated histories; persist App
+queued receipts before observing so loss of that read never causes another mutation POST.
+Keep MAC/request/owner/namespace/status verification. Regression tests cover late queue
+claim, one submission, replay after failed observation and unchanged SQLite after a
+checkpoint policy failure. Put diagnostics outside SQLite to preserve exact tick adoption.

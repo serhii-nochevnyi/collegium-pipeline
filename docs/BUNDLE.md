@@ -212,3 +212,11 @@ or choose a product pilot to run this diagnostic.
 CI job/run metadata and compressed logs are read through the native App broker with
 repository/endpoint restrictions, bounded decoding and SHA-256 verification. The cloud
 path has no host gh fallback, exported GitHub token or desktop state machine.
+
+A manual RPC may return a queued item with no run id. Both checkpoint and App clients
+track that exact item in run summaries, wait for its assigned run and retain the receipt
+through observation failures. They never submit a replacement mutation. Checkpoint
+responses still require the signed request/owner/namespace identity and a succeeded run.
+Policy diagnostics stay outside SQLite so an unacknowledged tick snapshot can still be
+adopted exactly. Runtime integration JSON omits only build-time bindings and role matrices;
+the full source config, manifest, connection catalogue/status and tool ceilings are retained.
