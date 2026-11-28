@@ -106,7 +106,14 @@ class Journal:
         )
 
     def admit(self, task: Task, config_digest: str, *, purpose="delivery") -> str:
-        if purpose not in {"delivery", "readiness", "calibration", "delivery_worker", "epic"}:
+        if purpose not in {
+            "delivery",
+            "readiness",
+            "calibration",
+            "delivery_worker",
+            "epic",
+            "investigation",
+        }:
             raise PolicyError("Unknown run purpose")
         with self.transaction():
             existing = self.connection.execute(

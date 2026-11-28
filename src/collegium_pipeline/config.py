@@ -48,6 +48,7 @@ FIELDS = {
     "scheduling",
     "epic",
     "epic_service_test",
+    "investigation",
 }
 
 
@@ -78,6 +79,14 @@ def load_config(path: str | Path) -> dict:
             or config.get("base_branch") != "collegium/" + spec["suite_id"]
         ):
             raise PolicyError("Only the fixed isolated epic service diagnostic is supported")
+    if "investigation" in config:
+        from .investigation_policy import validate_policy
+
+        validate_policy(config["investigation"])
+        if config.get("broker_enabled") is not False:
+            raise PolicyError("Investigation never grants publication authority")
+        if config.get("model_policy") != "claude":
+            raise PolicyError("Investigation requires the configured private Claude policy")
     if config.get("schema_version") != "pilot/v1" or config.get("mode") != "local_serial_prototype":
         raise PolicyError("Only the explicit local serial prototype is supported")
     if config.get("execution_profile", "delivery") not in {"delivery", "readiness"}:

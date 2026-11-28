@@ -97,10 +97,10 @@ class BundleTests(unittest.TestCase):
         self.folder.cleanup()
 
     def test_installation_contains_controller_and_existing_agent_claims(self):
-        self.assertEqual(len(self.manifest["agents"]), 8)
-        self.assertEqual(len(self.manifest["automations"]), 6)
+        self.assertEqual(len(self.manifest["agents"]), 18)
+        self.assertEqual(len(self.manifest["automations"]), 8)
         claims = json.loads((self.path / "claims.json").read_text())
-        self.assertEqual(len(claims), 13)
+        self.assertEqual(len(claims), 25)
         for automation in self.manifest["automations"]:
             self.assertEqual(automation["start"], "paused")
             self.assertLessEqual(len(automation["script"]["files"]), 64)

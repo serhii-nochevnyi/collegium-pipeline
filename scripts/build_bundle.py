@@ -223,6 +223,61 @@ def build(config_path, integrations_path, output=DEFAULT_OUTPUT):
             write("controller/epic-service-v1-settings.json", archived.read_text())
             load_config(output / "controller/epic-service-v1-settings.json")
             script_files.append("controller/epic-service-v1-settings.json")
+    investigation_path = ROOT / "config/investigation.json"
+    investigation = load_config(investigation_path) if investigation_path.exists() else None
+    if investigation:
+        from collegium_pipeline.investigation_policy import binding_key, variants
+
+        if set(investigation["workers"]) != {binding_key(s) for s in variants()}:
+            raise PolicyError("Investigation requires every immutable model/effort variant")
+        write(
+            "controller/investigation-settings.json",
+            json.dumps(investigation, sort_keys=True, separators=(",", ":")),
+        )
+        write(
+            "controller/investigation_entry.py",
+            (ROOT / "scripts/investigation_entry.py").read_text(),
+        )
+        write(
+            "rules/investigation-quality.md",
+            "Read-only investigation. Preserve exact task/config/head and registered source "
+            "citations. Separate facts, assumptions and open questions. Independent review "
+            "must bind exact synthesis/research digests. Never publish, mutate Jira, "
+            "delegate, expose credentials or fabricate human approval. "
+            "ADR/tickets are proposals.\n",
+        )
+        for selection in variants():
+            key = binding_key(selection)
+            binding = investigation["workers"][key]
+            role_name = selection.role.removeprefix("investigation_").replace("_", "-")
+            name = f"pipeline-investigation-{role_name}-{selection.model}-{selection.effort}-v1"
+            prompt = "agents/investigation-" + key.replace(":", "-") + ".md"
+            write(
+                prompt,
+                (ROOT / "agents/investigation-worker.md").read_text()
+                + f"\nYour fixed role is {selection.role}.\n",
+            )
+            workers.append(
+                {
+                    "name": name,
+                    "system_file": prompt,
+                    "harness": "claude-code",
+                    "model": selection.model,
+                    "effort": selection.effort,
+                    "model_connection": "claude-code-subscription",
+                    "max_runtime_minutes": 5,
+                    "rules": ["pipeline-investigation-quality"],
+                    "mcp_servers": [],
+                    "repositories": [
+                        {
+                            "url": "https://github.com/" + config["repository"],
+                            "connection": config["github_connection_id"],
+                            "access": "read",
+                        }
+                    ],
+                }
+            )
+            claims["agent/" + name] = binding["agent_id"]
     runtime_integrations = {
         k: v
         for k, v in integrations.items()
@@ -452,6 +507,66 @@ def build(config_path, integrations_path, output=DEFAULT_OUTPUT):
                         "environment_ref": "custom",
                         "environment": "base",
                         "size": "small",
+                        **script,
+                    },
+                }
+            )
+    if investigation:
+        recovery = investigation["recovery_store"]
+        claims["automation/pipeline-investigate"] = recovery["owner"]
+        claims["automation/pipeline-investigation-recovery-v1"] = recovery["automation_id"]
+        prefix = "investigation-recovery/"
+        write(prefix + "recovery_store.py", (ROOT / "scripts/recovery_store.py").read_text())
+        write(
+            prefix + "recovery_scope.json", json.dumps({"owner": recovery["owner"]}, sort_keys=True)
+        )
+        manifest["rules"].append(
+            {"name": "pipeline-investigation-quality", "file": "rules/investigation-quality.md"}
+        )
+        inv_files = [
+            "controller/entry.py",
+            "controller/investigation_entry.py",
+            "controller/runtime.b64",
+            "controller/settings.json",
+            "controller/investigation-settings.json",
+        ]
+        if sum(len((output / name).read_bytes()) for name in inv_files) > 256000:
+            raise PolicyError("Investigation controller exceeds platform code.files budget")
+        for name, script in (
+            (
+                "pipeline-investigate",
+                {
+                    "files": inv_files,
+                    "command": "python3 controller/investigation_entry.py",
+                    "repositories": [
+                        {
+                            "url": "https://github.com/" + config["repository"],
+                            "connection": config["github_connection_id"],
+                            "access": "read",
+                        }
+                    ],
+                },
+            ),
+            (
+                "pipeline-investigation-recovery-v1",
+                {
+                    "files": [prefix + "recovery_store.py", prefix + "recovery_scope.json"],
+                    "command": "cd investigation-recovery && python3 recovery_store.py",
+                },
+            ),
+        ):
+            manifest["automations"].append(
+                {
+                    "name": name,
+                    "start": "paused",
+                    "schedule": "0 0 1 1 *",
+                    "notify": "none",
+                    "script": {
+                        "executor": "aranarium",
+                        "environment_ref": "custom",
+                        "environment": "base",
+                        "size": "small",
+                        "secrets": ["PIPELINE_CONTROL_KEY"],
                         **script,
                     },
                 }

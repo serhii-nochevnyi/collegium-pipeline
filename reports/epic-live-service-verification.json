@@ -1,0 +1,2586 @@
+{
+  "verified_at": "2026-11-28T16:40:51.245269+00:00",
+  "state": "verified",
+  "final_result": {
+    "run_id": "d19e0950-cbb0-4f9a-98ce-324a3ecfaf87",
+    "base": "ed79efbdd3db3734ad901375ce0a99dc8795f230",
+    "cursor": 0,
+    "delivered": false,
+    "drained_tokens": 77996,
+    "graph_digest": "6061dc970455e0cc373f0df7f32bdc74ca91b85da477cc4cab4665096ea47944",
+    "integration_attempt": 1,
+    "integration_ci": {
+      "evidence": "0e41021b468df3319f7d73f957241ebc773c081a11532c83533ec9782f527458",
+      "head": "5805b160c9bc147ed2e530158b7b7bea9cd0e4b7",
+      "state": "green"
+    },
+    "integration_ci_started_at": 1795883745.2947147,
+    "integration_feedback": {
+      "instructions": "Return exactly one valid result_schema JSON object. No Markdown or prose corrections. Correct values inside that object before returning.",
+      "kind": "invalid_result_json"
+    },
+    "integration_head": "5805b160c9bc147ed2e530158b7b7bea9cd0e4b7",
+    "integration_json_corrected": true,
+    "integration_json_retries": [
+      "83304fee-462a-4009-a1cd-da8924e68584"
+    ],
+    "merge_metadata_reconciled": true,
+    "nodes": {
+      "A": {
+        "merged": {
+          "ancestry_proof": "accepted_head",
+          "contained_commit": "3674ddd9de484d7c65669a69f2ba9804dd83e379",
+          "head": "3674ddd9de484d7c65669a69f2ba9804dd83e379",
+          "merge_commit": null,
+          "observed_base": "5805b160c9bc147ed2e530158b7b7bea9cd0e4b7",
+          "pr": {
+            "node_id": "PR_kwDOV-WVs88AAAABSlG48g",
+            "number": 7,
+            "url": "https://github.com/serhii-nochevnyi/collegium-pipeline/pull/7"
+          }
+        },
+        "reason": null,
+        "run_id": "7d02691a-7835-4d31-af29-1bf821d62e6e",
+        "state": "merged"
+      },
+      "B": {
+        "merged": {
+          "ancestry_proof": "accepted_head",
+          "contained_commit": "cbbd6b4fbc6be5afb98acb6ecbd1293dad8c31b7",
+          "head": "cbbd6b4fbc6be5afb98acb6ecbd1293dad8c31b7",
+          "merge_commit": null,
+          "observed_base": "5805b160c9bc147ed2e530158b7b7bea9cd0e4b7",
+          "pr": {
+            "node_id": "PR_kwDOV-WVs88AAAABSlF9xw",
+            "number": 6,
+            "url": "https://github.com/serhii-nochevnyi/collegium-pipeline/pull/6"
+          }
+        },
+        "reason": null,
+        "run_id": "b373fb41-031e-4886-bf5a-c2a9d6665865",
+        "state": "merged"
+      },
+      "C": {
+        "merged": {
+          "ancestry_proof": "accepted_head",
+          "contained_commit": "e7a668640b2010cd5ab6823912081a7ac35f5c04",
+          "head": "e7a668640b2010cd5ab6823912081a7ac35f5c04",
+          "merge_commit": null,
+          "observed_base": "5805b160c9bc147ed2e530158b7b7bea9cd0e4b7",
+          "pr": {
+            "node_id": "PR_kwDOV-WVs88AAAABSlYKOQ",
+            "number": 8,
+            "url": "https://github.com/serhii-nochevnyi/collegium-pipeline/pull/8"
+          }
+        },
+        "reason": null,
+        "run_id": "1e5ed552-06d4-4481-9904-93583ed4dc3f",
+        "state": "merged"
+      }
+    },
+    "output_retry_completed": true,
+    "paused": false,
+    "reason": null,
+    "settlement": {
+      "pending": [],
+      "settled": [],
+      "tokens": 77996
+    },
+    "state": "ready_for_acceptance",
+    "tokens": 293174,
+    "version": 1,
+    "dependencies": {
+      "A": [],
+      "B": [],
+      "C": [
+        "A",
+        "B"
+      ]
+    },
+    "deliveries": {
+      "7d02691a-7835-4d31-af29-1bf821d62e6e": {
+        "state": "ready_for_acceptance",
+        "head": "3674ddd9de484d7c65669a69f2ba9804dd83e379",
+        "base": "ed79efbdd3db3734ad901375ce0a99dc8795f230",
+        "branch": "collegium/7d02691a-7835-4d31-af29-1bf821d62e6e",
+        "pr": {
+          "node_id": "PR_kwDOV-WVs88AAAABSlG48g",
+          "number": 7,
+          "url": "https://github.com/serhii-nochevnyi/collegium-pipeline/pull/7"
+        },
+        "tokens": 764597,
+        "used_jobs": [
+          "0:planning:0",
+          "0:plan_review:0",
+          "0:implementing:0",
+          "0:validating:1",
+          "0:reviewing:1"
+        ]
+      },
+      "b373fb41-031e-4886-bf5a-c2a9d6665865": {
+        "state": "ready_for_acceptance",
+        "head": "cbbd6b4fbc6be5afb98acb6ecbd1293dad8c31b7",
+        "base": "ed79efbdd3db3734ad901375ce0a99dc8795f230",
+        "branch": "collegium/b373fb41-031e-4886-bf5a-c2a9d6665865",
+        "pr": {
+          "node_id": "PR_kwDOV-WVs88AAAABSlF9xw",
+          "number": 6,
+          "url": "https://github.com/serhii-nochevnyi/collegium-pipeline/pull/6"
+        },
+        "tokens": 735152,
+        "used_jobs": [
+          "0:planning:0",
+          "0:plan_review:0",
+          "0:implementing:0",
+          "0:validating:1",
+          "0:reviewing:1"
+        ]
+      },
+      "1e5ed552-06d4-4481-9904-93583ed4dc3f": {
+        "state": "ready_for_acceptance",
+        "head": "e7a668640b2010cd5ab6823912081a7ac35f5c04",
+        "base": "256a47cb2863fc64d164e79b6b661cdf4c13550d",
+        "branch": "collegium/1e5ed552-06d4-4481-9904-93583ed4dc3f",
+        "pr": {
+          "node_id": "PR_kwDOV-WVs88AAAABSlYKOQ",
+          "number": 8,
+          "url": "https://github.com/serhii-nochevnyi/collegium-pipeline/pull/8"
+        },
+        "tokens": 644406,
+        "used_jobs": [
+          "0:planning:0",
+          "0:plan_review:0",
+          "0:implementing:0",
+          "0:validating:0",
+          "0:reviewing:0"
+        ]
+      }
+    },
+    "workers": [
+      {
+        "owner": "d19e0950-cbb0-4f9a-98ce-324a3ecfaf87",
+        "job": "83304fee-462a-4009-a1cd-da8924e68584",
+        "job_key": "d19e0950-cbb0-4f9a-98ce-324a3ecfaf87:epic:5805b160c9bc147ed2e530158b7b7bea9cd0e4b7:validating",
+        "state": "failed",
+        "accepted": false,
+        "runtime_evidence": null,
+        "observed_tokens": null,
+        "revision": null,
+        "at": 1795882620.4279432,
+        "intent": "0e87a62f-2f78-4376-a0cd-e6c6916670b8",
+        "session_id": "ses_f69fa490ae6d4c749217a02107803d93",
+        "turn_id": "run_d5f455dfdc294e8fadbf6e0e98f6a1d1"
+      },
+      {
+        "owner": "d19e0950-cbb0-4f9a-98ce-324a3ecfaf87",
+        "job": "cd015e3e-1b29-4ea2-88e9-11c8a642276d",
+        "job_key": "d19e0950-cbb0-4f9a-98ce-324a3ecfaf87:epic:5805b160c9bc147ed2e530158b7b7bea9cd0e4b7:validating:1",
+        "state": "worker_completed",
+        "accepted": true,
+        "runtime_evidence": {
+          "agent_id": "agent_4c9ad221e4294286a9b82f194a5e2846",
+          "command_digest": "419021bec18b972b5b5e9ec44658eeb4996f504eeab3cda4c8f051a4bbd9f6b4",
+          "command_normalization": "same_python_ast_and_pinned_shell_frame",
+          "effort": "low",
+          "effort_verification": "explicit_launch_argument_and_supported_served_model",
+          "harness": "claude-code",
+          "harness_release": "claude-code-2.1.289-9162edd4",
+          "model": "sonnet",
+          "model_connection_id": "mcn_699c8e51528e4438a359acfd4dced40f",
+          "process_id": 7,
+          "proof_kind": "first_tool_claude_code_process_arguments",
+          "provider_internal_reasoning_verified": false,
+          "runtime": "aranarium-aws",
+          "served_model": "claude-sonnet-5-5",
+          "session_id": "ses_ae0128b477fb410196f29a44b0ebdfc4",
+          "tool_result_event_id": "evt_01M8HFS5SP4GTZX3DKYHQES0ZF",
+          "tool_use_id": "toolu_012nN93y9eGt2UqxxHWCShVi",
+          "turn_id": "run_421a5817d2994fc0b1be298b73fa9f3d",
+          "verified_by_platform": true
+        },
+        "observed_tokens": 77918,
+        "revision": {
+          "acceptance_digest": "ece7e6764bd99007e943e4c2f7fc650cca8c3262a6980179c113cbf097044277",
+          "base": "ed79efbdd3db3734ad901375ce0a99dc8795f230",
+          "config_digest": "b17b10fd8952c6725ca48ef9d73fb6e0c637bb6855e80ba8c7dc51da9c56ec5e",
+          "head": "5805b160c9bc147ed2e530158b7b7bea9cd0e4b7"
+        },
+        "at": 1795883304.2825124,
+        "intent": "cc63d274-92e7-4bad-b0f2-ca847fc09f21",
+        "session_id": "ses_ae0128b477fb410196f29a44b0ebdfc4",
+        "turn_id": "run_421a5817d2994fc0b1be298b73fa9f3d"
+      },
+      {
+        "owner": "d19e0950-cbb0-4f9a-98ce-324a3ecfaf87",
+        "job": "a19361a4-e77e-4fb6-82e6-f443961d9890",
+        "job_key": "d19e0950-cbb0-4f9a-98ce-324a3ecfaf87:epic:5805b160c9bc147ed2e530158b7b7bea9cd0e4b7:reviewing:1",
+        "state": "worker_completed",
+        "accepted": true,
+        "runtime_evidence": {
+          "agent_id": "agent_15d9dc28b6e24e42a97961dbc461648f",
+          "command_digest": "419021bec18b972b5b5e9ec44658eeb4996f504eeab3cda4c8f051a4bbd9f6b4",
+          "command_normalization": "same_python_ast_and_pinned_shell_frame",
+          "effort": "high",
+          "effort_verification": "explicit_launch_argument_and_supported_served_model",
+          "harness": "claude-code",
+          "harness_release": "claude-code-2.1.289-9162edd4",
+          "model": "opus",
+          "model_connection_id": "mcn_699c8e51528e4438a359acfd4dced40f",
+          "process_id": 7,
+          "proof_kind": "first_tool_claude_code_process_arguments",
+          "provider_internal_reasoning_verified": false,
+          "runtime": "aranarium-aws",
+          "served_model": "claude-opus-5-5",
+          "session_id": "ses_93760bb4822f497d8d9b22c553faa9e5",
+          "tool_result_event_id": "evt_01M8HG0EA4K7BE2FNY46813XH2",
+          "tool_use_id": "toolu_01AYWAx9pvgg8LtzXykQtUxZ",
+          "turn_id": "run_31f39e60c86344b7868062e39767ea94",
+          "verified_by_platform": true
+        },
+        "observed_tokens": 137260,
+        "revision": {
+          "acceptance_digest": "ece7e6764bd99007e943e4c2f7fc650cca8c3262a6980179c113cbf097044277",
+          "base": "ed79efbdd3db3734ad901375ce0a99dc8795f230",
+          "config_digest": "b17b10fd8952c6725ca48ef9d73fb6e0c637bb6855e80ba8c7dc51da9c56ec5e",
+          "head": "5805b160c9bc147ed2e530158b7b7bea9cd0e4b7"
+        },
+        "at": 1795883541.6884518,
+        "intent": "7ac53671-382e-45b9-bd61-e2b9a545acf6",
+        "session_id": "ses_93760bb4822f497d8d9b22c553faa9e5",
+        "turn_id": "run_31f39e60c86344b7868062e39767ea94"
+      },
+      {
+        "owner": "7d02691a-7835-4d31-af29-1bf821d62e6e",
+        "job": "76f90f3f-ed98-4a20-9f61-f855940d0860",
+        "job_key": "7d02691a-7835-4d31-af29-1bf821d62e6e:0:planning:0",
+        "state": "worker_completed",
+        "accepted": true,
+        "runtime_evidence": {
+          "agent_id": "agent_9c74ac49c7fa4989843c984ed2cd40a1",
+          "command_digest": "419021bec18b972b5b5e9ec44658eeb4996f504eeab3cda4c8f051a4bbd9f6b4",
+          "command_normalization": "same_python_ast_and_pinned_shell_frame",
+          "effort": "high",
+          "effort_verification": "explicit_launch_argument_and_supported_served_model",
+          "harness": "claude-code",
+          "harness_release": "claude-code-2.1.289-9162edd4",
+          "model": "opus",
+          "model_connection_id": "mcn_699c8e51528e4438a359acfd4dced40f",
+          "process_id": 7,
+          "proof_kind": "first_tool_claude_code_process_arguments",
+          "provider_internal_reasoning_verified": false,
+          "runtime": "aranarium-aws",
+          "served_model": "claude-opus-5-5",
+          "session_id": "ses_ce09691d947649e69a61b256bd2f5e3b",
+          "tool_result_event_id": "evt_01M8HBBSV4SG6PDF3VQTMFB8H9",
+          "tool_use_id": "toolu_01KRdfe5nQMD6bPfQzyutvC2",
+          "turn_id": "run_d466f3416a4d44c295d803f8562bf97a",
+          "verified_by_platform": true
+        },
+        "observed_tokens": 182443,
+        "revision": {
+          "acceptance_digest": "12b159e002f0df761c7b9f485828f9d3454f83d20d5e0096e78a0183555c0270",
+          "base": "ed79efbdd3db3734ad901375ce0a99dc8795f230",
+          "config_digest": "b17b10fd8952c6725ca48ef9d73fb6e0c637bb6855e80ba8c7dc51da9c56ec5e",
+          "head": "ed79efbdd3db3734ad901375ce0a99dc8795f230"
+        },
+        "at": 1795878669.3544528,
+        "intent": "eca80205-7b01-4bab-808a-edb29dd7524d",
+        "session_id": "ses_ce09691d947649e69a61b256bd2f5e3b",
+        "turn_id": "run_d466f3416a4d44c295d803f8562bf97a"
+      },
+      {
+        "owner": "7d02691a-7835-4d31-af29-1bf821d62e6e",
+        "job": "d4d939c4-787f-4ca5-bb2c-db864d45c709",
+        "job_key": "7d02691a-7835-4d31-af29-1bf821d62e6e:0:plan_review:0",
+        "state": "worker_completed",
+        "accepted": true,
+        "runtime_evidence": {
+          "agent_id": "agent_8eade93c03414f50bd6eb40263d8beb3",
+          "command_digest": "419021bec18b972b5b5e9ec44658eeb4996f504eeab3cda4c8f051a4bbd9f6b4",
+          "command_normalization": "same_python_ast_and_pinned_shell_frame",
+          "effort": "high",
+          "effort_verification": "explicit_launch_argument_and_supported_served_model",
+          "harness": "claude-code",
+          "harness_release": "claude-code-2.1.289-9162edd4",
+          "model": "opus",
+          "model_connection_id": "mcn_699c8e51528e4438a359acfd4dced40f",
+          "process_id": 8,
+          "proof_kind": "first_tool_claude_code_process_arguments",
+          "provider_internal_reasoning_verified": false,
+          "runtime": "aranarium-aws",
+          "served_model": "claude-opus-5-5",
+          "session_id": "ses_57cdfd38bed14302978dd8f2d2becc59",
+          "tool_result_event_id": "evt_01M8HBKTPCZ7853D0MSSWQ38TE",
+          "tool_use_id": "toolu_01LagUHiXmsGSMfRDvdpJN8x",
+          "turn_id": "run_2bd2638d47a04ac09f4e8b39923c7f15",
+          "verified_by_platform": true
+        },
+        "observed_tokens": 132619,
+        "revision": {
+          "acceptance_digest": "12b159e002f0df761c7b9f485828f9d3454f83d20d5e0096e78a0183555c0270",
+          "base": "ed79efbdd3db3734ad901375ce0a99dc8795f230",
+          "config_digest": "b17b10fd8952c6725ca48ef9d73fb6e0c637bb6855e80ba8c7dc51da9c56ec5e",
+          "head": "ed79efbdd3db3734ad901375ce0a99dc8795f230"
+        },
+        "at": 1795878933.1074326,
+        "intent": "86601f9d-9b8b-438f-82dd-5ca57f9b1936",
+        "session_id": "ses_57cdfd38bed14302978dd8f2d2becc59",
+        "turn_id": "run_2bd2638d47a04ac09f4e8b39923c7f15"
+      },
+      {
+        "owner": "7d02691a-7835-4d31-af29-1bf821d62e6e",
+        "job": "838f94f9-f700-4ba7-b07d-c6d71a525220",
+        "job_key": "7d02691a-7835-4d31-af29-1bf821d62e6e:0:implementing:0",
+        "state": "worker_completed",
+        "accepted": true,
+        "runtime_evidence": {
+          "agent_id": "agent_4c9ad221e4294286a9b82f194a5e2846",
+          "command_digest": "419021bec18b972b5b5e9ec44658eeb4996f504eeab3cda4c8f051a4bbd9f6b4",
+          "command_normalization": "same_python_ast_and_pinned_shell_frame",
+          "effort": "low",
+          "effort_verification": "explicit_launch_argument_and_supported_served_model",
+          "harness": "claude-code",
+          "harness_release": "claude-code-2.1.289-9162edd4",
+          "model": "sonnet",
+          "model_connection_id": "mcn_699c8e51528e4438a359acfd4dced40f",
+          "process_id": 8,
+          "proof_kind": "first_tool_claude_code_process_arguments",
+          "provider_internal_reasoning_verified": false,
+          "runtime": "aranarium-aws",
+          "served_model": "claude-sonnet-5-5",
+          "session_id": "ses_be07ebe78f074ee5ad85f30b93547679",
+          "tool_result_event_id": "evt_01M8HBS80FF1G18HYCYQQ3V78W",
+          "tool_use_id": "toolu_0145LDkD1t4Whsed4YrJzEfS",
+          "turn_id": "run_f4b674816a804d83b90498c33544d753",
+          "verified_by_platform": true
+        },
+        "observed_tokens": 51282,
+        "revision": {
+          "acceptance_digest": "12b159e002f0df761c7b9f485828f9d3454f83d20d5e0096e78a0183555c0270",
+          "base": "ed79efbdd3db3734ad901375ce0a99dc8795f230",
+          "config_digest": "b17b10fd8952c6725ca48ef9d73fb6e0c637bb6855e80ba8c7dc51da9c56ec5e",
+          "head": "ed79efbdd3db3734ad901375ce0a99dc8795f230"
+        },
+        "at": 1795879111.7326238,
+        "intent": "e7bd9e7e-6d3c-4577-9872-db1f6bbd019f",
+        "session_id": "ses_be07ebe78f074ee5ad85f30b93547679",
+        "turn_id": "run_f4b674816a804d83b90498c33544d753"
+      },
+      {
+        "owner": "7d02691a-7835-4d31-af29-1bf821d62e6e",
+        "job": "3ba92922-cf1c-4053-96d0-e99af8705da1",
+        "job_key": "7d02691a-7835-4d31-af29-1bf821d62e6e:0:validating:0",
+        "state": "failed",
+        "accepted": false,
+        "runtime_evidence": null,
+        "observed_tokens": null,
+        "revision": null,
+        "at": 1795879397.2952003,
+        "intent": "09898ba6-9866-447c-aa87-4a03e61ccad0",
+        "session_id": "ses_c2a927f1e9864294b427eb79a1a797ee",
+        "turn_id": "run_c60ca309bc494e6da13baf0211dcae09"
+      },
+      {
+        "owner": "7d02691a-7835-4d31-af29-1bf821d62e6e",
+        "job": "e1f04f1c-ea19-4ee1-a87a-e6ecb3f48855",
+        "job_key": "7d02691a-7835-4d31-af29-1bf821d62e6e:0:validating:1",
+        "state": "worker_completed",
+        "accepted": true,
+        "runtime_evidence": {
+          "agent_id": "agent_4c9ad221e4294286a9b82f194a5e2846",
+          "command_digest": "419021bec18b972b5b5e9ec44658eeb4996f504eeab3cda4c8f051a4bbd9f6b4",
+          "command_normalization": "same_python_ast_and_pinned_shell_frame",
+          "effort": "low",
+          "effort_verification": "explicit_launch_argument_and_supported_served_model",
+          "harness": "claude-code",
+          "harness_release": "claude-code-2.1.289-9162edd4",
+          "model": "sonnet",
+          "model_connection_id": "mcn_699c8e51528e4438a359acfd4dced40f",
+          "process_id": 7,
+          "proof_kind": "first_tool_claude_code_process_arguments",
+          "provider_internal_reasoning_verified": false,
+          "runtime": "aranarium-aws",
+          "served_model": "claude-sonnet-5-5",
+          "session_id": "ses_b2892938e43f426f8b9ada2c5816d16a",
+          "tool_result_event_id": "evt_01M8HCKR7B16C4M1M2HZDQFX8Q",
+          "tool_use_id": "toolu_01RzJbeAAEvnRzDhM1C3KfZs",
+          "turn_id": "run_dfeb0ae723b0471ea97e2301774a5d58",
+          "verified_by_platform": true
+        },
+        "observed_tokens": 109750,
+        "revision": {
+          "acceptance_digest": "12b159e002f0df761c7b9f485828f9d3454f83d20d5e0096e78a0183555c0270",
+          "base": "ed79efbdd3db3734ad901375ce0a99dc8795f230",
+          "config_digest": "b17b10fd8952c6725ca48ef9d73fb6e0c637bb6855e80ba8c7dc51da9c56ec5e",
+          "head": "3674ddd9de484d7c65669a69f2ba9804dd83e379"
+        },
+        "at": 1795879980.5203564,
+        "intent": "01ef0a03-18b9-478e-85ed-f22dcb08b71b",
+        "session_id": "ses_b2892938e43f426f8b9ada2c5816d16a",
+        "turn_id": "run_dfeb0ae723b0471ea97e2301774a5d58"
+      },
+      {
+        "owner": "7d02691a-7835-4d31-af29-1bf821d62e6e",
+        "job": "599a6370-8ec6-4b0e-a5b8-4831010c336f",
+        "job_key": "7d02691a-7835-4d31-af29-1bf821d62e6e:0:reviewing:1",
+        "state": "worker_completed",
+        "accepted": true,
+        "runtime_evidence": {
+          "agent_id": "agent_15d9dc28b6e24e42a97961dbc461648f",
+          "command_digest": "419021bec18b972b5b5e9ec44658eeb4996f504eeab3cda4c8f051a4bbd9f6b4",
+          "command_normalization": "same_python_ast_and_pinned_shell_frame",
+          "effort": "high",
+          "effort_verification": "explicit_launch_argument_and_supported_served_model",
+          "harness": "claude-code",
+          "harness_release": "claude-code-2.1.289-9162edd4",
+          "model": "opus",
+          "model_connection_id": "mcn_699c8e51528e4438a359acfd4dced40f",
+          "process_id": 7,
+          "proof_kind": "first_tool_claude_code_process_arguments",
+          "provider_internal_reasoning_verified": false,
+          "runtime": "aranarium-aws",
+          "served_model": "claude-opus-5-5",
+          "session_id": "ses_d3958c2542e04239b2fda9fb7b36409d",
+          "tool_result_event_id": "evt_01M8HCSMFBHZC4BRZDSKTQ8Q1S",
+          "tool_use_id": "toolu_01UZWWJBnZzqK3wGubZzBK9f",
+          "turn_id": "run_7c70396bebca467f88ba2c8d0d63ea75",
+          "verified_by_platform": true
+        },
+        "observed_tokens": 204417,
+        "revision": {
+          "acceptance_digest": "12b159e002f0df761c7b9f485828f9d3454f83d20d5e0096e78a0183555c0270",
+          "base": "ed79efbdd3db3734ad901375ce0a99dc8795f230",
+          "config_digest": "b17b10fd8952c6725ca48ef9d73fb6e0c637bb6855e80ba8c7dc51da9c56ec5e",
+          "head": "3674ddd9de484d7c65669a69f2ba9804dd83e379"
+        },
+        "at": 1795880172.6550016,
+        "intent": "78d07c70-5a9d-4242-bc9e-baf6d6949cff",
+        "session_id": "ses_d3958c2542e04239b2fda9fb7b36409d",
+        "turn_id": "run_7c70396bebca467f88ba2c8d0d63ea75"
+      },
+      {
+        "owner": "b373fb41-031e-4886-bf5a-c2a9d6665865",
+        "job": "d389ae23-113c-4534-82eb-ad82d3c364f1",
+        "job_key": "b373fb41-031e-4886-bf5a-c2a9d6665865:0:planning:0",
+        "state": "worker_completed",
+        "accepted": true,
+        "runtime_evidence": {
+          "agent_id": "agent_9c74ac49c7fa4989843c984ed2cd40a1",
+          "command_digest": "419021bec18b972b5b5e9ec44658eeb4996f504eeab3cda4c8f051a4bbd9f6b4",
+          "command_normalization": "same_python_ast_and_pinned_shell_frame",
+          "effort": "high",
+          "effort_verification": "explicit_launch_argument_and_supported_served_model",
+          "harness": "claude-code",
+          "harness_release": "claude-code-2.1.289-9162edd4",
+          "model": "opus",
+          "model_connection_id": "mcn_699c8e51528e4438a359acfd4dced40f",
+          "process_id": 7,
+          "proof_kind": "first_tool_claude_code_process_arguments",
+          "provider_internal_reasoning_verified": false,
+          "runtime": "aranarium-aws",
+          "served_model": "claude-opus-5-5",
+          "session_id": "ses_6f7743c17da145209348d8bed7e9cd22",
+          "tool_result_event_id": "evt_01M8HBCAHPSSF8HYZCS7KG5ZQ5",
+          "tool_use_id": "toolu_01J1w2adf7U7asSJSNQ76cN6",
+          "turn_id": "run_577b2dd8032548418c2a61ad3cf2ea91",
+          "verified_by_platform": true
+        },
+        "observed_tokens": 152140,
+        "revision": {
+          "acceptance_digest": "bb66559a5b033c733fb7d4ea834e672359a6070ea1a619e832a6edd994edef77",
+          "base": "ed79efbdd3db3734ad901375ce0a99dc8795f230",
+          "config_digest": "b17b10fd8952c6725ca48ef9d73fb6e0c637bb6855e80ba8c7dc51da9c56ec5e",
+          "head": "ed79efbdd3db3734ad901375ce0a99dc8795f230"
+        },
+        "at": 1795878703.5336597,
+        "intent": "314aecfc-95a8-4605-922f-78a55d5a2c36",
+        "session_id": "ses_6f7743c17da145209348d8bed7e9cd22",
+        "turn_id": "run_577b2dd8032548418c2a61ad3cf2ea91"
+      },
+      {
+        "owner": "b373fb41-031e-4886-bf5a-c2a9d6665865",
+        "job": "f7f4050f-4905-4bae-b54e-29c5c0709b6c",
+        "job_key": "b373fb41-031e-4886-bf5a-c2a9d6665865:0:plan_review:0",
+        "state": "worker_completed",
+        "accepted": true,
+        "runtime_evidence": {
+          "agent_id": "agent_8eade93c03414f50bd6eb40263d8beb3",
+          "command_digest": "419021bec18b972b5b5e9ec44658eeb4996f504eeab3cda4c8f051a4bbd9f6b4",
+          "command_normalization": "same_python_ast_and_pinned_shell_frame",
+          "effort": "high",
+          "effort_verification": "explicit_launch_argument_and_supported_served_model",
+          "harness": "claude-code",
+          "harness_release": "claude-code-2.1.289-9162edd4",
+          "model": "opus",
+          "model_connection_id": "mcn_699c8e51528e4438a359acfd4dced40f",
+          "process_id": 7,
+          "proof_kind": "first_tool_claude_code_process_arguments",
+          "provider_internal_reasoning_verified": false,
+          "runtime": "aranarium-aws",
+          "served_model": "claude-opus-5-5",
+          "session_id": "ses_92687ededd454126a12162e5e68f5eec",
+          "tool_result_event_id": "evt_01M8HBK8E2VV6YVHHAY54AH2X9",
+          "tool_use_id": "toolu_01W1VuhzLfj2VB9kPZA2JztV",
+          "turn_id": "run_ccbe93cf95b64bdeaf829beb15d730af",
+          "verified_by_platform": true
+        },
+        "observed_tokens": 133132,
+        "revision": {
+          "acceptance_digest": "bb66559a5b033c733fb7d4ea834e672359a6070ea1a619e832a6edd994edef77",
+          "base": "ed79efbdd3db3734ad901375ce0a99dc8795f230",
+          "config_digest": "b17b10fd8952c6725ca48ef9d73fb6e0c637bb6855e80ba8c7dc51da9c56ec5e",
+          "head": "ed79efbdd3db3734ad901375ce0a99dc8795f230"
+        },
+        "at": 1795878914.9857075,
+        "intent": "7165862e-91ee-4b65-9f1b-4a3a4de2df8b",
+        "session_id": "ses_92687ededd454126a12162e5e68f5eec",
+        "turn_id": "run_ccbe93cf95b64bdeaf829beb15d730af"
+      },
+      {
+        "owner": "b373fb41-031e-4886-bf5a-c2a9d6665865",
+        "job": "8b17bf26-7d2d-4899-ae6e-16d52dd84e35",
+        "job_key": "b373fb41-031e-4886-bf5a-c2a9d6665865:0:implementing:0",
+        "state": "worker_completed",
+        "accepted": true,
+        "runtime_evidence": {
+          "agent_id": "agent_4c9ad221e4294286a9b82f194a5e2846",
+          "command_digest": "419021bec18b972b5b5e9ec44658eeb4996f504eeab3cda4c8f051a4bbd9f6b4",
+          "command_normalization": "same_python_ast_and_pinned_shell_frame",
+          "effort": "low",
+          "effort_verification": "explicit_launch_argument_and_supported_served_model",
+          "harness": "claude-code",
+          "harness_release": "claude-code-2.1.289-9162edd4",
+          "model": "sonnet",
+          "model_connection_id": "mcn_699c8e51528e4438a359acfd4dced40f",
+          "process_id": 7,
+          "proof_kind": "first_tool_claude_code_process_arguments",
+          "provider_internal_reasoning_verified": false,
+          "runtime": "aranarium-aws",
+          "served_model": "claude-sonnet-5-5",
+          "session_id": "ses_1bd907e535524f669277aaa3d79daf52",
+          "tool_result_event_id": "evt_01M8HBQ7DD2P2JKZHK886ZRRC2",
+          "tool_use_id": "toolu_01DAVc1cu7BuJdubwhWW7W7e",
+          "turn_id": "run_fb7f3eb376e2448084bb6a5cedb4ec80",
+          "verified_by_platform": true
+        },
+        "observed_tokens": 77069,
+        "revision": {
+          "acceptance_digest": "bb66559a5b033c733fb7d4ea834e672359a6070ea1a619e832a6edd994edef77",
+          "base": "ed79efbdd3db3734ad901375ce0a99dc8795f230",
+          "config_digest": "b17b10fd8952c6725ca48ef9d73fb6e0c637bb6855e80ba8c7dc51da9c56ec5e",
+          "head": "ed79efbdd3db3734ad901375ce0a99dc8795f230"
+        },
+        "at": 1795879046.3483005,
+        "intent": "18bcb099-c1db-48b9-bf50-5bb860af842e",
+        "session_id": "ses_1bd907e535524f669277aaa3d79daf52",
+        "turn_id": "run_fb7f3eb376e2448084bb6a5cedb4ec80"
+      },
+      {
+        "owner": "b373fb41-031e-4886-bf5a-c2a9d6665865",
+        "job": "b7369b7c-b836-4ca7-8334-e0b8d930799e",
+        "job_key": "b373fb41-031e-4886-bf5a-c2a9d6665865:0:validating:0",
+        "state": "failed",
+        "accepted": false,
+        "runtime_evidence": null,
+        "observed_tokens": null,
+        "revision": null,
+        "at": 1795879324.4353316,
+        "intent": "d8bd590a-c64b-429a-96d6-5686c5b37199",
+        "session_id": "ses_03f2265c70ca44f48447030712959b21",
+        "turn_id": "run_cebe1551f31d438ab04fdde7ff1af870"
+      },
+      {
+        "owner": "b373fb41-031e-4886-bf5a-c2a9d6665865",
+        "job": "5e90c4b1-ea73-479d-a904-0e209f0ab383",
+        "job_key": "b373fb41-031e-4886-bf5a-c2a9d6665865:0:validating:1",
+        "state": "worker_completed",
+        "accepted": true,
+        "runtime_evidence": {
+          "agent_id": "agent_4c9ad221e4294286a9b82f194a5e2846",
+          "command_digest": "419021bec18b972b5b5e9ec44658eeb4996f504eeab3cda4c8f051a4bbd9f6b4",
+          "command_normalization": "same_python_ast_and_pinned_shell_frame",
+          "effort": "low",
+          "effort_verification": "explicit_launch_argument_and_supported_served_model",
+          "harness": "claude-code",
+          "harness_release": "claude-code-2.1.289-9162edd4",
+          "model": "sonnet",
+          "model_connection_id": "mcn_699c8e51528e4438a359acfd4dced40f",
+          "process_id": 7,
+          "proof_kind": "first_tool_claude_code_process_arguments",
+          "provider_internal_reasoning_verified": false,
+          "runtime": "aranarium-aws",
+          "served_model": "claude-sonnet-5-5",
+          "session_id": "ses_ad714a0c7dc24c5f9d7dbd5b243d7534",
+          "tool_result_event_id": "evt_01M8HCMMZ71W750C82MAXHBSMV",
+          "tool_use_id": "toolu_01NaaNQL3xAcWrDFwdKqafj6",
+          "turn_id": "run_a70cf41f87224f1793d2466912a96712",
+          "verified_by_platform": true
+        },
+        "observed_tokens": 112041,
+        "revision": {
+          "acceptance_digest": "bb66559a5b033c733fb7d4ea834e672359a6070ea1a619e832a6edd994edef77",
+          "base": "ed79efbdd3db3734ad901375ce0a99dc8795f230",
+          "config_digest": "b17b10fd8952c6725ca48ef9d73fb6e0c637bb6855e80ba8c7dc51da9c56ec5e",
+          "head": "cbbd6b4fbc6be5afb98acb6ecbd1293dad8c31b7"
+        },
+        "at": 1795880008.8671696,
+        "intent": "8b8106b3-840f-4571-90c3-f245eb78cf03",
+        "session_id": "ses_ad714a0c7dc24c5f9d7dbd5b243d7534",
+        "turn_id": "run_a70cf41f87224f1793d2466912a96712"
+      },
+      {
+        "owner": "b373fb41-031e-4886-bf5a-c2a9d6665865",
+        "job": "5e521e91-0dbc-4053-aa7a-17ad83d45226",
+        "job_key": "b373fb41-031e-4886-bf5a-c2a9d6665865:0:reviewing:1",
+        "state": "worker_completed",
+        "accepted": true,
+        "runtime_evidence": {
+          "agent_id": "agent_15d9dc28b6e24e42a97961dbc461648f",
+          "command_digest": "419021bec18b972b5b5e9ec44658eeb4996f504eeab3cda4c8f051a4bbd9f6b4",
+          "command_normalization": "same_python_ast_and_pinned_shell_frame",
+          "effort": "high",
+          "effort_verification": "explicit_launch_argument_and_supported_served_model",
+          "harness": "claude-code",
+          "harness_release": "claude-code-2.1.289-9162edd4",
+          "model": "opus",
+          "model_connection_id": "mcn_699c8e51528e4438a359acfd4dced40f",
+          "process_id": 7,
+          "proof_kind": "first_tool_claude_code_process_arguments",
+          "provider_internal_reasoning_verified": false,
+          "runtime": "aranarium-aws",
+          "served_model": "claude-opus-5-5",
+          "session_id": "ses_6b789c98f6854706a3fc4821d7787540",
+          "tool_result_event_id": "evt_01M8HCRR3J7X909A1564P0QKWD",
+          "tool_use_id": "toolu_01MeianTDGs9xkfxGzwerMtd",
+          "turn_id": "run_984c23702fc44bef9a2ae81af9ea1179",
+          "verified_by_platform": true
+        },
+        "observed_tokens": 177843,
+        "revision": {
+          "acceptance_digest": "bb66559a5b033c733fb7d4ea834e672359a6070ea1a619e832a6edd994edef77",
+          "base": "ed79efbdd3db3734ad901375ce0a99dc8795f230",
+          "config_digest": "b17b10fd8952c6725ca48ef9d73fb6e0c637bb6855e80ba8c7dc51da9c56ec5e",
+          "head": "cbbd6b4fbc6be5afb98acb6ecbd1293dad8c31b7"
+        },
+        "at": 1795880142.5981452,
+        "intent": "6bddf00c-4669-4ff0-9a7e-997a52d9b1e9",
+        "session_id": "ses_6b789c98f6854706a3fc4821d7787540",
+        "turn_id": "run_984c23702fc44bef9a2ae81af9ea1179"
+      },
+      {
+        "owner": "1e5ed552-06d4-4481-9904-93583ed4dc3f",
+        "job": "32bf802d-742a-475a-945f-545bcafbde78",
+        "job_key": "1e5ed552-06d4-4481-9904-93583ed4dc3f:0:planning:0",
+        "state": "worker_completed",
+        "accepted": true,
+        "runtime_evidence": {
+          "agent_id": "agent_9c74ac49c7fa4989843c984ed2cd40a1",
+          "command_digest": "419021bec18b972b5b5e9ec44658eeb4996f504eeab3cda4c8f051a4bbd9f6b4",
+          "command_normalization": "same_python_ast_and_pinned_shell_frame",
+          "effort": "high",
+          "effort_verification": "explicit_launch_argument_and_supported_served_model",
+          "harness": "claude-code",
+          "harness_release": "claude-code-2.1.289-9162edd4",
+          "model": "opus",
+          "model_connection_id": "mcn_699c8e51528e4438a359acfd4dced40f",
+          "process_id": 7,
+          "proof_kind": "first_tool_claude_code_process_arguments",
+          "provider_internal_reasoning_verified": false,
+          "runtime": "aranarium-aws",
+          "served_model": "claude-opus-5-5",
+          "session_id": "ses_16beec59ddef453ca5cb1419fbd9fe31",
+          "tool_result_event_id": "evt_01M8HDQ8D1636ZRBXPJ5DWHNCM",
+          "tool_use_id": "toolu_01FG8e1bj4uCwz55ff16JbtX",
+          "turn_id": "run_1ac68c2158ac4bcdbad9ab2d362caccf",
+          "verified_by_platform": true
+        },
+        "observed_tokens": 157388,
+        "revision": {
+          "acceptance_digest": "dfea66bb875165ed6ea1bdc30554bf272bd2bf31c824d38b07e70b6eca146ef6",
+          "base": "256a47cb2863fc64d164e79b6b661cdf4c13550d",
+          "config_digest": "b17b10fd8952c6725ca48ef9d73fb6e0c637bb6855e80ba8c7dc51da9c56ec5e",
+          "head": "256a47cb2863fc64d164e79b6b661cdf4c13550d"
+        },
+        "at": 1795881141.859362,
+        "intent": "6d2e62e2-f159-4872-b34f-89b0749626b8",
+        "session_id": "ses_16beec59ddef453ca5cb1419fbd9fe31",
+        "turn_id": "run_1ac68c2158ac4bcdbad9ab2d362caccf"
+      },
+      {
+        "owner": "1e5ed552-06d4-4481-9904-93583ed4dc3f",
+        "job": "5b5bd697-86a7-4a5e-a7a0-9ea700a8d8f7",
+        "job_key": "1e5ed552-06d4-4481-9904-93583ed4dc3f:0:plan_review:0",
+        "state": "worker_completed",
+        "accepted": true,
+        "runtime_evidence": {
+          "agent_id": "agent_8eade93c03414f50bd6eb40263d8beb3",
+          "command_digest": "419021bec18b972b5b5e9ec44658eeb4996f504eeab3cda4c8f051a4bbd9f6b4",
+          "command_normalization": "same_python_ast_and_pinned_shell_frame",
+          "effort": "high",
+          "effort_verification": "explicit_launch_argument_and_supported_served_model",
+          "harness": "claude-code",
+          "harness_release": "claude-code-2.1.289-9162edd4",
+          "model": "opus",
+          "model_connection_id": "mcn_699c8e51528e4438a359acfd4dced40f",
+          "process_id": 7,
+          "proof_kind": "first_tool_claude_code_process_arguments",
+          "provider_internal_reasoning_verified": false,
+          "runtime": "aranarium-aws",
+          "served_model": "claude-opus-5-5",
+          "session_id": "ses_b5cc87f297004091967f61fa257b1cbe",
+          "tool_result_event_id": "evt_01M8HDWTD6R59PKHQRGBHGK0XX",
+          "tool_use_id": "toolu_01Ce7DppgrDcj91As6zRL8cq",
+          "turn_id": "run_5a8eb2d883cd4302b1876b2ccbfe5aa3",
+          "verified_by_platform": true
+        },
+        "observed_tokens": 136694,
+        "revision": {
+          "acceptance_digest": "dfea66bb875165ed6ea1bdc30554bf272bd2bf31c824d38b07e70b6eca146ef6",
+          "base": "256a47cb2863fc64d164e79b6b661cdf4c13550d",
+          "config_digest": "b17b10fd8952c6725ca48ef9d73fb6e0c637bb6855e80ba8c7dc51da9c56ec5e",
+          "head": "256a47cb2863fc64d164e79b6b661cdf4c13550d"
+        },
+        "at": 1795881325.0572503,
+        "intent": "0a5330f2-0dae-4748-b88b-0121755b9101",
+        "session_id": "ses_b5cc87f297004091967f61fa257b1cbe",
+        "turn_id": "run_5a8eb2d883cd4302b1876b2ccbfe5aa3"
+      },
+      {
+        "owner": "1e5ed552-06d4-4481-9904-93583ed4dc3f",
+        "job": "2ad05ae6-cfab-4e4f-8050-4b5ff474958c",
+        "job_key": "1e5ed552-06d4-4481-9904-93583ed4dc3f:0:implementing:0",
+        "state": "worker_completed",
+        "accepted": true,
+        "runtime_evidence": {
+          "agent_id": "agent_4c9ad221e4294286a9b82f194a5e2846",
+          "command_digest": "419021bec18b972b5b5e9ec44658eeb4996f504eeab3cda4c8f051a4bbd9f6b4",
+          "command_normalization": "same_python_ast_and_pinned_shell_frame",
+          "effort": "low",
+          "effort_verification": "explicit_launch_argument_and_supported_served_model",
+          "harness": "claude-code",
+          "harness_release": "claude-code-2.1.289-9162edd4",
+          "model": "sonnet",
+          "model_connection_id": "mcn_699c8e51528e4438a359acfd4dced40f",
+          "process_id": 7,
+          "proof_kind": "first_tool_claude_code_process_arguments",
+          "provider_internal_reasoning_verified": false,
+          "runtime": "aranarium-aws",
+          "served_model": "claude-sonnet-5-5",
+          "session_id": "ses_0024781e03ea47fcb281bce95c2d9967",
+          "tool_result_event_id": "evt_01M8HE2F0F6847KZXP7TN4WXCZ",
+          "tool_use_id": "toolu_01EqDpTeTNWFfJKXV4s32Pis",
+          "turn_id": "run_2c8e9f2efc534640beab2ba45dc3bfb9",
+          "verified_by_platform": true
+        },
+        "observed_tokens": 52441,
+        "revision": {
+          "acceptance_digest": "dfea66bb875165ed6ea1bdc30554bf272bd2bf31c824d38b07e70b6eca146ef6",
+          "base": "256a47cb2863fc64d164e79b6b661cdf4c13550d",
+          "config_digest": "b17b10fd8952c6725ca48ef9d73fb6e0c637bb6855e80ba8c7dc51da9c56ec5e",
+          "head": "256a47cb2863fc64d164e79b6b661cdf4c13550d"
+        },
+        "at": 1795881511.6864874,
+        "intent": "5f9cff9a-8161-431c-9be5-a5351f470de4",
+        "session_id": "ses_0024781e03ea47fcb281bce95c2d9967",
+        "turn_id": "run_2c8e9f2efc534640beab2ba45dc3bfb9"
+      },
+      {
+        "owner": "1e5ed552-06d4-4481-9904-93583ed4dc3f",
+        "job": "22411eb3-9088-4843-a2b6-9a65efd42d8c",
+        "job_key": "1e5ed552-06d4-4481-9904-93583ed4dc3f:0:validating:0",
+        "state": "worker_completed",
+        "accepted": true,
+        "runtime_evidence": {
+          "agent_id": "agent_4c9ad221e4294286a9b82f194a5e2846",
+          "command_digest": "419021bec18b972b5b5e9ec44658eeb4996f504eeab3cda4c8f051a4bbd9f6b4",
+          "command_normalization": "same_python_ast_and_pinned_shell_frame",
+          "effort": "low",
+          "effort_verification": "explicit_launch_argument_and_supported_served_model",
+          "harness": "claude-code",
+          "harness_release": "claude-code-2.1.289-9162edd4",
+          "model": "sonnet",
+          "model_connection_id": "mcn_699c8e51528e4438a359acfd4dced40f",
+          "process_id": 7,
+          "proof_kind": "first_tool_claude_code_process_arguments",
+          "provider_internal_reasoning_verified": false,
+          "runtime": "aranarium-aws",
+          "served_model": "claude-sonnet-5-5",
+          "session_id": "ses_1144099ef4e54e3bb4a1fcd2701800ed",
+          "tool_result_event_id": "evt_01M8HECPB1B2D35YVDNTZYNAPX",
+          "tool_use_id": "toolu_01BCAM3rpsKuu1yddXYaYjDN",
+          "turn_id": "run_6638d2f5c31f42aa9573ccff8e1ccf69",
+          "verified_by_platform": true
+        },
+        "observed_tokens": 116399,
+        "revision": {
+          "acceptance_digest": "dfea66bb875165ed6ea1bdc30554bf272bd2bf31c824d38b07e70b6eca146ef6",
+          "base": "256a47cb2863fc64d164e79b6b661cdf4c13550d",
+          "config_digest": "b17b10fd8952c6725ca48ef9d73fb6e0c637bb6855e80ba8c7dc51da9c56ec5e",
+          "head": "e7a668640b2010cd5ab6823912081a7ac35f5c04"
+        },
+        "at": 1795881846.9325678,
+        "intent": "8d433edd-3732-4bb5-a3b9-7d0b9998dabe",
+        "session_id": "ses_1144099ef4e54e3bb4a1fcd2701800ed",
+        "turn_id": "run_6638d2f5c31f42aa9573ccff8e1ccf69"
+      },
+      {
+        "owner": "1e5ed552-06d4-4481-9904-93583ed4dc3f",
+        "job": "d263551c-3540-4922-8f3d-e98392ea4fe0",
+        "job_key": "1e5ed552-06d4-4481-9904-93583ed4dc3f:0:reviewing:0",
+        "state": "worker_completed",
+        "accepted": true,
+        "runtime_evidence": {
+          "agent_id": "agent_15d9dc28b6e24e42a97961dbc461648f",
+          "command_digest": "419021bec18b972b5b5e9ec44658eeb4996f504eeab3cda4c8f051a4bbd9f6b4",
+          "command_normalization": "same_python_ast_and_pinned_shell_frame",
+          "effort": "high",
+          "effort_verification": "explicit_launch_argument_and_supported_served_model",
+          "harness": "claude-code",
+          "harness_release": "claude-code-2.1.289-9162edd4",
+          "model": "opus",
+          "model_connection_id": "mcn_699c8e51528e4438a359acfd4dced40f",
+          "process_id": 7,
+          "proof_kind": "first_tool_claude_code_process_arguments",
+          "provider_internal_reasoning_verified": false,
+          "runtime": "aranarium-aws",
+          "served_model": "claude-opus-5-5",
+          "session_id": "ses_d67c9339112e41459bee0b4fb94adb29",
+          "tool_result_event_id": "evt_01M8HEJVBRD5A8QZNXSJXBW9E9",
+          "tool_use_id": "toolu_019LcQs14FFGVjxeb1KHaqXA",
+          "turn_id": "run_702db6cb901c44b8b3539fdd681f343f",
+          "verified_by_platform": true
+        },
+        "observed_tokens": 181484,
+        "revision": {
+          "acceptance_digest": "dfea66bb875165ed6ea1bdc30554bf272bd2bf31c824d38b07e70b6eca146ef6",
+          "base": "256a47cb2863fc64d164e79b6b661cdf4c13550d",
+          "config_digest": "b17b10fd8952c6725ca48ef9d73fb6e0c637bb6855e80ba8c7dc51da9c56ec5e",
+          "head": "e7a668640b2010cd5ab6823912081a7ac35f5c04"
+        },
+        "at": 1795882047.4591987,
+        "intent": "86bd40db-6a5b-47dd-b3aa-c12996184edd",
+        "session_id": "ses_d67c9339112e41459bee0b4fb94adb29",
+        "turn_id": "run_702db6cb901c44b8b3539fdd681f343f"
+      }
+    ],
+    "commit_receipts": [
+      {
+        "owner": "7d02691a-7835-4d31-af29-1bf821d62e6e",
+        "identity": "098037c832e9baa57ea9042a2b87639fd3c01d5a8a77af4331a24b3467449b17",
+        "key": "commit:0",
+        "result": {
+          "changes_digest": "854967c07ab1059743884e79ae71112fb2691b2a41444e4a2bbc9afe92670dd2",
+          "head": "3674ddd9de484d7c65669a69f2ba9804dd83e379",
+          "parent": "ed79efbdd3db3734ad901375ce0a99dc8795f230"
+        }
+      },
+      {
+        "owner": "b373fb41-031e-4886-bf5a-c2a9d6665865",
+        "identity": "29c60b63fb485e3eec7c3bf95e51a6d4d8857d10bd30539154e63634c2d2653d",
+        "key": "commit:0",
+        "result": {
+          "changes_digest": "f6c5373a681dc0db2dc2b7c2f6d60293f55500437d2ff1f4cc3afbb972b81a10",
+          "head": "cbbd6b4fbc6be5afb98acb6ecbd1293dad8c31b7",
+          "parent": "ed79efbdd3db3734ad901375ce0a99dc8795f230"
+        }
+      },
+      {
+        "owner": "1e5ed552-06d4-4481-9904-93583ed4dc3f",
+        "identity": "5576afc61e07afe3d231fffccd056a68236c7a81cdcdb8d761e2197b915d00b4",
+        "key": "commit:0",
+        "result": {
+          "changes_digest": "a88c17397938fc924d74ad99f8469f4cf36b681b3b1568667c4cd9dc49bf1e8d",
+          "head": "e7a668640b2010cd5ab6823912081a7ac35f5c04",
+          "parent": "256a47cb2863fc64d164e79b6b661cdf4c13550d"
+        }
+      }
+    ],
+    "pr_receipts": [
+      {
+        "owner": "7d02691a-7835-4d31-af29-1bf821d62e6e",
+        "identity": "0b0c991392d24e0d80d4e562ebee5bc7f68d84760588ada1fe61b44946e06aa4",
+        "key": "pr",
+        "result": {
+          "node_id": "PR_kwDOV-WVs88AAAABSlG48g",
+          "number": 7,
+          "url": "https://github.com/serhii-nochevnyi/collegium-pipeline/pull/7"
+        }
+      },
+      {
+        "owner": "b373fb41-031e-4886-bf5a-c2a9d6665865",
+        "identity": "453019396a75432541aecc23e25d8da7ece3a5d99e1556795062a0d8cc72250f",
+        "key": "pr",
+        "result": {
+          "node_id": "PR_kwDOV-WVs88AAAABSlF9xw",
+          "number": 6,
+          "url": "https://github.com/serhii-nochevnyi/collegium-pipeline/pull/6"
+        }
+      },
+      {
+        "owner": "1e5ed552-06d4-4481-9904-93583ed4dc3f",
+        "identity": "b68743e4294739beb41af018726f2d30d1413a159b4123810b70ddda0cd1ef76",
+        "key": "pr",
+        "result": {
+          "node_id": "PR_kwDOV-WVs88AAAABSlYKOQ",
+          "number": 8,
+          "url": "https://github.com/serhii-nochevnyi/collegium-pipeline/pull/8"
+        }
+      }
+    ],
+    "config_digest": "b17b10fd8952c6725ca48ef9d73fb6e0c637bb6855e80ba8c7dc51da9c56ec5e",
+    "pilot_selected": false,
+    "controller_host": "Collegium installed bundle",
+    "checkpoint_receipts": [
+      {
+        "checkpoint": "5212321a579a11b9f9feb9c246027f42685e839ce2b964d6f518897b63504521",
+        "origin": {
+          "attempt_id": "att_d8e188c7085c49a5bb26f6ee9cbee65f",
+          "automation_id": "aut_2ea6d08b772f41d5a9fa236cb19f93d8",
+          "run_id": "run_a6c4afa30e0a493482075314da24b620"
+        }
+      },
+      {
+        "checkpoint": "68c3b71d1efa724bfec1eb9c254e7b311a448edd9f650d521c51488196e87545",
+        "origin": {
+          "attempt_id": "att_86577291cd7c4c88998111c37e744cba",
+          "automation_id": "aut_2ea6d08b772f41d5a9fa236cb19f93d8",
+          "run_id": "run_a5de731c287d4038a4509cf495657fc2"
+        }
+      }
+    ],
+    "ready_receipts": {
+      "A": {
+        "body": {
+          "purpose": "ready",
+          "suite_id": "c5b7d3d9-9db7-4552-8e0e-fbfe99b27001",
+          "task_key": "A",
+          "child_id": "7d02691a-7835-4d31-af29-1bf821d62e6e",
+          "graph_digest": "6061dc970455e0cc373f0df7f32bdc74ca91b85da477cc4cab4665096ea47944",
+          "pr": {
+            "node_id": "PR_kwDOV-WVs88AAAABSlG48g",
+            "number": 7,
+            "url": "https://github.com/serhii-nochevnyi/collegium-pipeline/pull/7"
+          },
+          "head": "3674ddd9de484d7c65669a69f2ba9804dd83e379",
+          "branch": "collegium/7d02691a-7835-4d31-af29-1bf821d62e6e",
+          "base_branch": "collegium/c5b7d3d9-9db7-4552-8e0e-fbfe99b27001",
+          "validation_session": "ses_b2892938e43f426f8b9ada2c5816d16a",
+          "review_session": "ses_d3958c2542e04239b2fda9fb7b36409d"
+        },
+        "mac": "76098033c83e1987824c1bc2fc69cfd9039c78d991550d358df9a6f52946200e"
+      },
+      "B": {
+        "body": {
+          "purpose": "ready",
+          "suite_id": "c5b7d3d9-9db7-4552-8e0e-fbfe99b27001",
+          "task_key": "B",
+          "child_id": "b373fb41-031e-4886-bf5a-c2a9d6665865",
+          "graph_digest": "6061dc970455e0cc373f0df7f32bdc74ca91b85da477cc4cab4665096ea47944",
+          "pr": {
+            "node_id": "PR_kwDOV-WVs88AAAABSlF9xw",
+            "number": 6,
+            "url": "https://github.com/serhii-nochevnyi/collegium-pipeline/pull/6"
+          },
+          "head": "cbbd6b4fbc6be5afb98acb6ecbd1293dad8c31b7",
+          "branch": "collegium/b373fb41-031e-4886-bf5a-c2a9d6665865",
+          "base_branch": "collegium/c5b7d3d9-9db7-4552-8e0e-fbfe99b27001",
+          "validation_session": "ses_ad714a0c7dc24c5f9d7dbd5b243d7534",
+          "review_session": "ses_6b789c98f6854706a3fc4821d7787540"
+        },
+        "mac": "b5b68a5a3bbac7ba8128537644e8b8a10835e117da5b14bae7e5f8604fff8197"
+      },
+      "C": {
+        "body": {
+          "purpose": "ready",
+          "suite_id": "c5b7d3d9-9db7-4552-8e0e-fbfe99b27001",
+          "task_key": "C",
+          "child_id": "1e5ed552-06d4-4481-9904-93583ed4dc3f",
+          "graph_digest": "6061dc970455e0cc373f0df7f32bdc74ca91b85da477cc4cab4665096ea47944",
+          "pr": {
+            "node_id": "PR_kwDOV-WVs88AAAABSlYKOQ",
+            "number": 8,
+            "url": "https://github.com/serhii-nochevnyi/collegium-pipeline/pull/8"
+          },
+          "head": "e7a668640b2010cd5ab6823912081a7ac35f5c04",
+          "branch": "collegium/1e5ed552-06d4-4481-9904-93583ed4dc3f",
+          "base_branch": "collegium/c5b7d3d9-9db7-4552-8e0e-fbfe99b27001",
+          "validation_session": "ses_1144099ef4e54e3bb4a1fcd2701800ed",
+          "review_session": "ses_d67c9339112e41459bee0b4fb94adb29"
+        },
+        "mac": "9aea295dcb5c3c23d387d1c643d313213a90cb09d7c41697335cbd01f5727d85"
+      }
+    }
+  },
+  "controller_host": "Collegium installed bundle",
+  "controller_versions": [
+    19,
+    20,
+    21,
+    22
+  ],
+  "root": "d19e0950-cbb0-4f9a-98ce-324a3ecfaf87",
+  "source_commit": "90b289290bcdc0d6bb23c5e14d4315bdd250169c",
+  "main_unchanged": "dbe5e20955dee07fab2a7bc9ab93aa0bcd1b0451",
+  "service_base": "collegium/c5b7d3d9-9db7-4552-8e0e-fbfe99b27001",
+  "integration_head": "5805b160c9bc147ed2e530158b7b7bea9cd0e4b7",
+  "tickets": {
+    "A": {
+      "number": 7,
+      "url": "https://github.com/serhii-nochevnyi/collegium-pipeline/pull/7",
+      "head": "3674ddd9de484d7c65669a69f2ba9804dd83e379",
+      "base": "ed79efbdd3db3734ad901375ce0a99dc8795f230",
+      "branch": "collegium/7d02691a-7835-4d31-af29-1bf821d62e6e",
+      "merged_at": "2026-11-28T15:42:18Z",
+      "merge_commit_sha": "14c29e3271ebfc970ea3e9d92dce8f68512cf8a4",
+      "actual_merged": true
+    },
+    "B": {
+      "number": 6,
+      "url": "https://github.com/serhii-nochevnyi/collegium-pipeline/pull/6",
+      "head": "cbbd6b4fbc6be5afb98acb6ecbd1293dad8c31b7",
+      "base": "ed79efbdd3db3734ad901375ce0a99dc8795f230",
+      "branch": "collegium/b373fb41-031e-4886-bf5a-c2a9d6665865",
+      "merged_at": "2026-11-28T15:42:30Z",
+      "merge_commit_sha": "256a47cb2863fc64d164e79b6b661cdf4c13550d",
+      "actual_merged": true
+    },
+    "C": {
+      "number": 8,
+      "url": "https://github.com/serhii-nochevnyi/collegium-pipeline/pull/8",
+      "head": "e7a668640b2010cd5ab6823912081a7ac35f5c04",
+      "base": "256a47cb2863fc64d164e79b6b661cdf4c13550d",
+      "branch": "collegium/1e5ed552-06d4-4481-9904-93583ed4dc3f",
+      "merged_at": "2026-11-28T16:14:46Z",
+      "merge_commit_sha": "5805b160c9bc147ed2e530158b7b7bea9cd0e4b7",
+      "actual_merged": true
+    }
+  },
+  "first_c_started_at": "2026-11-28T15:52:21.438Z",
+  "worker_sessions_unique": 20,
+  "accepted_workers": 17,
+  "rejected_terminal_validation_attempts": 3,
+  "timeline": [
+    {
+      "owner": "d19e0950-cbb0-4f9a-98ce-324a3ecfaf87",
+      "job": "83304fee-462a-4009-a1cd-da8924e68584",
+      "job_key": "d19e0950-cbb0-4f9a-98ce-324a3ecfaf87:epic:5805b160c9bc147ed2e530158b7b7bea9cd0e4b7:validating",
+      "state": "failed",
+      "accepted": false,
+      "runtime_evidence": null,
+      "observed_tokens": null,
+      "revision": null,
+      "at": 1795882620.4279432,
+      "intent": "0e87a62f-2f78-4376-a0cd-e6c6916670b8",
+      "session_id": "ses_f69fa490ae6d4c749217a02107803d93",
+      "turn_id": "run_d5f455dfdc294e8fadbf6e0e98f6a1d1",
+      "native_started_at": "2026-11-28T16:16:59.816Z",
+      "native_finished_at": "2026-11-28T16:17:31.150Z"
+    },
+    {
+      "owner": "d19e0950-cbb0-4f9a-98ce-324a3ecfaf87",
+      "job": "cd015e3e-1b29-4ea2-88e9-11c8a642276d",
+      "job_key": "d19e0950-cbb0-4f9a-98ce-324a3ecfaf87:epic:5805b160c9bc147ed2e530158b7b7bea9cd0e4b7:validating:1",
+      "state": "worker_completed",
+      "accepted": true,
+      "runtime_evidence": {
+        "agent_id": "agent_4c9ad221e4294286a9b82f194a5e2846",
+        "command_digest": "419021bec18b972b5b5e9ec44658eeb4996f504eeab3cda4c8f051a4bbd9f6b4",
+        "command_normalization": "same_python_ast_and_pinned_shell_frame",
+        "effort": "low",
+        "effort_verification": "explicit_launch_argument_and_supported_served_model",
+        "harness": "claude-code",
+        "harness_release": "claude-code-2.1.289-9162edd4",
+        "model": "sonnet",
+        "model_connection_id": "mcn_699c8e51528e4438a359acfd4dced40f",
+        "process_id": 7,
+        "proof_kind": "first_tool_claude_code_process_arguments",
+        "provider_internal_reasoning_verified": false,
+        "runtime": "aranarium-aws",
+        "served_model": "claude-sonnet-5-5",
+        "session_id": "ses_ae0128b477fb410196f29a44b0ebdfc4",
+        "tool_result_event_id": "evt_01M8HFS5SP4GTZX3DKYHQES0ZF",
+        "tool_use_id": "toolu_012nN93y9eGt2UqxxHWCShVi",
+        "turn_id": "run_421a5817d2994fc0b1be298b73fa9f3d",
+        "verified_by_platform": true
+      },
+      "observed_tokens": 77918,
+      "revision": {
+        "acceptance_digest": "ece7e6764bd99007e943e4c2f7fc650cca8c3262a6980179c113cbf097044277",
+        "base": "ed79efbdd3db3734ad901375ce0a99dc8795f230",
+        "config_digest": "b17b10fd8952c6725ca48ef9d73fb6e0c637bb6855e80ba8c7dc51da9c56ec5e",
+        "head": "5805b160c9bc147ed2e530158b7b7bea9cd0e4b7"
+      },
+      "at": 1795883304.2825124,
+      "intent": "cc63d274-92e7-4bad-b0f2-ca847fc09f21",
+      "session_id": "ses_ae0128b477fb410196f29a44b0ebdfc4",
+      "turn_id": "run_421a5817d2994fc0b1be298b73fa9f3d",
+      "native_started_at": "2026-11-28T16:28:23.843Z",
+      "native_finished_at": "2026-11-28T16:28:54.463Z"
+    },
+    {
+      "owner": "d19e0950-cbb0-4f9a-98ce-324a3ecfaf87",
+      "job": "a19361a4-e77e-4fb6-82e6-f443961d9890",
+      "job_key": "d19e0950-cbb0-4f9a-98ce-324a3ecfaf87:epic:5805b160c9bc147ed2e530158b7b7bea9cd0e4b7:reviewing:1",
+      "state": "worker_completed",
+      "accepted": true,
+      "runtime_evidence": {
+        "agent_id": "agent_15d9dc28b6e24e42a97961dbc461648f",
+        "command_digest": "419021bec18b972b5b5e9ec44658eeb4996f504eeab3cda4c8f051a4bbd9f6b4",
+        "command_normalization": "same_python_ast_and_pinned_shell_frame",
+        "effort": "high",
+        "effort_verification": "explicit_launch_argument_and_supported_served_model",
+        "harness": "claude-code",
+        "harness_release": "claude-code-2.1.289-9162edd4",
+        "model": "opus",
+        "model_connection_id": "mcn_699c8e51528e4438a359acfd4dced40f",
+        "process_id": 7,
+        "proof_kind": "first_tool_claude_code_process_arguments",
+        "provider_internal_reasoning_verified": false,
+        "runtime": "aranarium-aws",
+        "served_model": "claude-opus-5-5",
+        "session_id": "ses_93760bb4822f497d8d9b22c553faa9e5",
+        "tool_result_event_id": "evt_01M8HG0EA4K7BE2FNY46813XH2",
+        "tool_use_id": "toolu_01AYWAx9pvgg8LtzXykQtUxZ",
+        "turn_id": "run_31f39e60c86344b7868062e39767ea94",
+        "verified_by_platform": true
+      },
+      "observed_tokens": 137260,
+      "revision": {
+        "acceptance_digest": "ece7e6764bd99007e943e4c2f7fc650cca8c3262a6980179c113cbf097044277",
+        "base": "ed79efbdd3db3734ad901375ce0a99dc8795f230",
+        "config_digest": "b17b10fd8952c6725ca48ef9d73fb6e0c637bb6855e80ba8c7dc51da9c56ec5e",
+        "head": "5805b160c9bc147ed2e530158b7b7bea9cd0e4b7"
+      },
+      "at": 1795883541.6884518,
+      "intent": "7ac53671-382e-45b9-bd61-e2b9a545acf6",
+      "session_id": "ses_93760bb4822f497d8d9b22c553faa9e5",
+      "turn_id": "run_31f39e60c86344b7868062e39767ea94",
+      "native_started_at": "2026-11-28T16:32:21.269Z",
+      "native_finished_at": "2026-11-28T16:33:12.495Z"
+    },
+    {
+      "owner": "7d02691a-7835-4d31-af29-1bf821d62e6e",
+      "job": "76f90f3f-ed98-4a20-9f61-f855940d0860",
+      "job_key": "7d02691a-7835-4d31-af29-1bf821d62e6e:0:planning:0",
+      "state": "worker_completed",
+      "accepted": true,
+      "runtime_evidence": {
+        "agent_id": "agent_9c74ac49c7fa4989843c984ed2cd40a1",
+        "command_digest": "419021bec18b972b5b5e9ec44658eeb4996f504eeab3cda4c8f051a4bbd9f6b4",
+        "command_normalization": "same_python_ast_and_pinned_shell_frame",
+        "effort": "high",
+        "effort_verification": "explicit_launch_argument_and_supported_served_model",
+        "harness": "claude-code",
+        "harness_release": "claude-code-2.1.289-9162edd4",
+        "model": "opus",
+        "model_connection_id": "mcn_699c8e51528e4438a359acfd4dced40f",
+        "process_id": 7,
+        "proof_kind": "first_tool_claude_code_process_arguments",
+        "provider_internal_reasoning_verified": false,
+        "runtime": "aranarium-aws",
+        "served_model": "claude-opus-5-5",
+        "session_id": "ses_ce09691d947649e69a61b256bd2f5e3b",
+        "tool_result_event_id": "evt_01M8HBBSV4SG6PDF3VQTMFB8H9",
+        "tool_use_id": "toolu_01KRdfe5nQMD6bPfQzyutvC2",
+        "turn_id": "run_d466f3416a4d44c295d803f8562bf97a",
+        "verified_by_platform": true
+      },
+      "observed_tokens": 182443,
+      "revision": {
+        "acceptance_digest": "12b159e002f0df761c7b9f485828f9d3454f83d20d5e0096e78a0183555c0270",
+        "base": "ed79efbdd3db3734ad901375ce0a99dc8795f230",
+        "config_digest": "b17b10fd8952c6725ca48ef9d73fb6e0c637bb6855e80ba8c7dc51da9c56ec5e",
+        "head": "ed79efbdd3db3734ad901375ce0a99dc8795f230"
+      },
+      "at": 1795878669.3544528,
+      "intent": "eca80205-7b01-4bab-808a-edb29dd7524d",
+      "session_id": "ses_ce09691d947649e69a61b256bd2f5e3b",
+      "turn_id": "run_d466f3416a4d44c295d803f8562bf97a",
+      "native_started_at": "2026-11-28T15:11:08.929Z",
+      "native_finished_at": "2026-11-28T15:13:59.938Z"
+    },
+    {
+      "owner": "7d02691a-7835-4d31-af29-1bf821d62e6e",
+      "job": "d4d939c4-787f-4ca5-bb2c-db864d45c709",
+      "job_key": "7d02691a-7835-4d31-af29-1bf821d62e6e:0:plan_review:0",
+      "state": "worker_completed",
+      "accepted": true,
+      "runtime_evidence": {
+        "agent_id": "agent_8eade93c03414f50bd6eb40263d8beb3",
+        "command_digest": "419021bec18b972b5b5e9ec44658eeb4996f504eeab3cda4c8f051a4bbd9f6b4",
+        "command_normalization": "same_python_ast_and_pinned_shell_frame",
+        "effort": "high",
+        "effort_verification": "explicit_launch_argument_and_supported_served_model",
+        "harness": "claude-code",
+        "harness_release": "claude-code-2.1.289-9162edd4",
+        "model": "opus",
+        "model_connection_id": "mcn_699c8e51528e4438a359acfd4dced40f",
+        "process_id": 8,
+        "proof_kind": "first_tool_claude_code_process_arguments",
+        "provider_internal_reasoning_verified": false,
+        "runtime": "aranarium-aws",
+        "served_model": "claude-opus-5-5",
+        "session_id": "ses_57cdfd38bed14302978dd8f2d2becc59",
+        "tool_result_event_id": "evt_01M8HBKTPCZ7853D0MSSWQ38TE",
+        "tool_use_id": "toolu_01LagUHiXmsGSMfRDvdpJN8x",
+        "turn_id": "run_2bd2638d47a04ac09f4e8b39923c7f15",
+        "verified_by_platform": true
+      },
+      "observed_tokens": 132619,
+      "revision": {
+        "acceptance_digest": "12b159e002f0df761c7b9f485828f9d3454f83d20d5e0096e78a0183555c0270",
+        "base": "ed79efbdd3db3734ad901375ce0a99dc8795f230",
+        "config_digest": "b17b10fd8952c6725ca48ef9d73fb6e0c637bb6855e80ba8c7dc51da9c56ec5e",
+        "head": "ed79efbdd3db3734ad901375ce0a99dc8795f230"
+      },
+      "at": 1795878933.1074326,
+      "intent": "86601f9d-9b8b-438f-82dd-5ca57f9b1936",
+      "session_id": "ses_57cdfd38bed14302978dd8f2d2becc59",
+      "turn_id": "run_2bd2638d47a04ac09f4e8b39923c7f15",
+      "native_started_at": "2026-11-28T15:15:32.780Z",
+      "native_finished_at": "2026-11-28T15:16:13.118Z"
+    },
+    {
+      "owner": "7d02691a-7835-4d31-af29-1bf821d62e6e",
+      "job": "838f94f9-f700-4ba7-b07d-c6d71a525220",
+      "job_key": "7d02691a-7835-4d31-af29-1bf821d62e6e:0:implementing:0",
+      "state": "worker_completed",
+      "accepted": true,
+      "runtime_evidence": {
+        "agent_id": "agent_4c9ad221e4294286a9b82f194a5e2846",
+        "command_digest": "419021bec18b972b5b5e9ec44658eeb4996f504eeab3cda4c8f051a4bbd9f6b4",
+        "command_normalization": "same_python_ast_and_pinned_shell_frame",
+        "effort": "low",
+        "effort_verification": "explicit_launch_argument_and_supported_served_model",
+        "harness": "claude-code",
+        "harness_release": "claude-code-2.1.289-9162edd4",
+        "model": "sonnet",
+        "model_connection_id": "mcn_699c8e51528e4438a359acfd4dced40f",
+        "process_id": 8,
+        "proof_kind": "first_tool_claude_code_process_arguments",
+        "provider_internal_reasoning_verified": false,
+        "runtime": "aranarium-aws",
+        "served_model": "claude-sonnet-5-5",
+        "session_id": "ses_be07ebe78f074ee5ad85f30b93547679",
+        "tool_result_event_id": "evt_01M8HBS80FF1G18HYCYQQ3V78W",
+        "tool_use_id": "toolu_0145LDkD1t4Whsed4YrJzEfS",
+        "turn_id": "run_f4b674816a804d83b90498c33544d753",
+        "verified_by_platform": true
+      },
+      "observed_tokens": 51282,
+      "revision": {
+        "acceptance_digest": "12b159e002f0df761c7b9f485828f9d3454f83d20d5e0096e78a0183555c0270",
+        "base": "ed79efbdd3db3734ad901375ce0a99dc8795f230",
+        "config_digest": "b17b10fd8952c6725ca48ef9d73fb6e0c637bb6855e80ba8c7dc51da9c56ec5e",
+        "head": "ed79efbdd3db3734ad901375ce0a99dc8795f230"
+      },
+      "at": 1795879111.7326238,
+      "intent": "e7bd9e7e-6d3c-4577-9872-db1f6bbd019f",
+      "session_id": "ses_be07ebe78f074ee5ad85f30b93547679",
+      "turn_id": "run_f4b674816a804d83b90498c33544d753",
+      "native_started_at": "2026-11-28T15:18:31.300Z",
+      "native_finished_at": "2026-11-28T15:18:44.812Z"
+    },
+    {
+      "owner": "7d02691a-7835-4d31-af29-1bf821d62e6e",
+      "job": "3ba92922-cf1c-4053-96d0-e99af8705da1",
+      "job_key": "7d02691a-7835-4d31-af29-1bf821d62e6e:0:validating:0",
+      "state": "failed",
+      "accepted": false,
+      "runtime_evidence": null,
+      "observed_tokens": null,
+      "revision": null,
+      "at": 1795879397.2952003,
+      "intent": "09898ba6-9866-447c-aa87-4a03e61ccad0",
+      "session_id": "ses_c2a927f1e9864294b427eb79a1a797ee",
+      "turn_id": "run_c60ca309bc494e6da13baf0211dcae09",
+      "native_started_at": "2026-11-28T15:23:16.887Z",
+      "native_finished_at": "2026-11-28T15:23:47.150Z"
+    },
+    {
+      "owner": "7d02691a-7835-4d31-af29-1bf821d62e6e",
+      "job": "e1f04f1c-ea19-4ee1-a87a-e6ecb3f48855",
+      "job_key": "7d02691a-7835-4d31-af29-1bf821d62e6e:0:validating:1",
+      "state": "worker_completed",
+      "accepted": true,
+      "runtime_evidence": {
+        "agent_id": "agent_4c9ad221e4294286a9b82f194a5e2846",
+        "command_digest": "419021bec18b972b5b5e9ec44658eeb4996f504eeab3cda4c8f051a4bbd9f6b4",
+        "command_normalization": "same_python_ast_and_pinned_shell_frame",
+        "effort": "low",
+        "effort_verification": "explicit_launch_argument_and_supported_served_model",
+        "harness": "claude-code",
+        "harness_release": "claude-code-2.1.289-9162edd4",
+        "model": "sonnet",
+        "model_connection_id": "mcn_699c8e51528e4438a359acfd4dced40f",
+        "process_id": 7,
+        "proof_kind": "first_tool_claude_code_process_arguments",
+        "provider_internal_reasoning_verified": false,
+        "runtime": "aranarium-aws",
+        "served_model": "claude-sonnet-5-5",
+        "session_id": "ses_b2892938e43f426f8b9ada2c5816d16a",
+        "tool_result_event_id": "evt_01M8HCKR7B16C4M1M2HZDQFX8Q",
+        "tool_use_id": "toolu_01RzJbeAAEvnRzDhM1C3KfZs",
+        "turn_id": "run_dfeb0ae723b0471ea97e2301774a5d58",
+        "verified_by_platform": true
+      },
+      "observed_tokens": 109750,
+      "revision": {
+        "acceptance_digest": "12b159e002f0df761c7b9f485828f9d3454f83d20d5e0096e78a0183555c0270",
+        "base": "ed79efbdd3db3734ad901375ce0a99dc8795f230",
+        "config_digest": "b17b10fd8952c6725ca48ef9d73fb6e0c637bb6855e80ba8c7dc51da9c56ec5e",
+        "head": "3674ddd9de484d7c65669a69f2ba9804dd83e379"
+      },
+      "at": 1795879980.5203564,
+      "intent": "01ef0a03-18b9-478e-85ed-f22dcb08b71b",
+      "session_id": "ses_b2892938e43f426f8b9ada2c5816d16a",
+      "turn_id": "run_dfeb0ae723b0471ea97e2301774a5d58",
+      "native_started_at": "2026-11-28T15:32:59.990Z",
+      "native_finished_at": "2026-11-28T15:33:35.361Z"
+    },
+    {
+      "owner": "7d02691a-7835-4d31-af29-1bf821d62e6e",
+      "job": "599a6370-8ec6-4b0e-a5b8-4831010c336f",
+      "job_key": "7d02691a-7835-4d31-af29-1bf821d62e6e:0:reviewing:1",
+      "state": "worker_completed",
+      "accepted": true,
+      "runtime_evidence": {
+        "agent_id": "agent_15d9dc28b6e24e42a97961dbc461648f",
+        "command_digest": "419021bec18b972b5b5e9ec44658eeb4996f504eeab3cda4c8f051a4bbd9f6b4",
+        "command_normalization": "same_python_ast_and_pinned_shell_frame",
+        "effort": "high",
+        "effort_verification": "explicit_launch_argument_and_supported_served_model",
+        "harness": "claude-code",
+        "harness_release": "claude-code-2.1.289-9162edd4",
+        "model": "opus",
+        "model_connection_id": "mcn_699c8e51528e4438a359acfd4dced40f",
+        "process_id": 7,
+        "proof_kind": "first_tool_claude_code_process_arguments",
+        "provider_internal_reasoning_verified": false,
+        "runtime": "aranarium-aws",
+        "served_model": "claude-opus-5-5",
+        "session_id": "ses_d3958c2542e04239b2fda9fb7b36409d",
+        "tool_result_event_id": "evt_01M8HCSMFBHZC4BRZDSKTQ8Q1S",
+        "tool_use_id": "toolu_01UZWWJBnZzqK3wGubZzBK9f",
+        "turn_id": "run_7c70396bebca467f88ba2c8d0d63ea75",
+        "verified_by_platform": true
+      },
+      "observed_tokens": 204417,
+      "revision": {
+        "acceptance_digest": "12b159e002f0df761c7b9f485828f9d3454f83d20d5e0096e78a0183555c0270",
+        "base": "ed79efbdd3db3734ad901375ce0a99dc8795f230",
+        "config_digest": "b17b10fd8952c6725ca48ef9d73fb6e0c637bb6855e80ba8c7dc51da9c56ec5e",
+        "head": "3674ddd9de484d7c65669a69f2ba9804dd83e379"
+      },
+      "at": 1795880172.6550016,
+      "intent": "78d07c70-5a9d-4242-bc9e-baf6d6949cff",
+      "session_id": "ses_d3958c2542e04239b2fda9fb7b36409d",
+      "turn_id": "run_7c70396bebca467f88ba2c8d0d63ea75",
+      "native_started_at": "2026-11-28T15:36:12.373Z",
+      "native_finished_at": "2026-11-28T15:37:06.342Z"
+    },
+    {
+      "owner": "b373fb41-031e-4886-bf5a-c2a9d6665865",
+      "job": "d389ae23-113c-4534-82eb-ad82d3c364f1",
+      "job_key": "b373fb41-031e-4886-bf5a-c2a9d6665865:0:planning:0",
+      "state": "worker_completed",
+      "accepted": true,
+      "runtime_evidence": {
+        "agent_id": "agent_9c74ac49c7fa4989843c984ed2cd40a1",
+        "command_digest": "419021bec18b972b5b5e9ec44658eeb4996f504eeab3cda4c8f051a4bbd9f6b4",
+        "command_normalization": "same_python_ast_and_pinned_shell_frame",
+        "effort": "high",
+        "effort_verification": "explicit_launch_argument_and_supported_served_model",
+        "harness": "claude-code",
+        "harness_release": "claude-code-2.1.289-9162edd4",
+        "model": "opus",
+        "model_connection_id": "mcn_699c8e51528e4438a359acfd4dced40f",
+        "process_id": 7,
+        "proof_kind": "first_tool_claude_code_process_arguments",
+        "provider_internal_reasoning_verified": false,
+        "runtime": "aranarium-aws",
+        "served_model": "claude-opus-5-5",
+        "session_id": "ses_6f7743c17da145209348d8bed7e9cd22",
+        "tool_result_event_id": "evt_01M8HBCAHPSSF8HYZCS7KG5ZQ5",
+        "tool_use_id": "toolu_01J1w2adf7U7asSJSNQ76cN6",
+        "turn_id": "run_577b2dd8032548418c2a61ad3cf2ea91",
+        "verified_by_platform": true
+      },
+      "observed_tokens": 152140,
+      "revision": {
+        "acceptance_digest": "bb66559a5b033c733fb7d4ea834e672359a6070ea1a619e832a6edd994edef77",
+        "base": "ed79efbdd3db3734ad901375ce0a99dc8795f230",
+        "config_digest": "b17b10fd8952c6725ca48ef9d73fb6e0c637bb6855e80ba8c7dc51da9c56ec5e",
+        "head": "ed79efbdd3db3734ad901375ce0a99dc8795f230"
+      },
+      "at": 1795878703.5336597,
+      "intent": "314aecfc-95a8-4605-922f-78a55d5a2c36",
+      "session_id": "ses_6f7743c17da145209348d8bed7e9cd22",
+      "turn_id": "run_577b2dd8032548418c2a61ad3cf2ea91",
+      "native_started_at": "2026-11-28T15:11:27.122Z",
+      "native_finished_at": "2026-11-28T15:14:08.939Z"
+    },
+    {
+      "owner": "b373fb41-031e-4886-bf5a-c2a9d6665865",
+      "job": "f7f4050f-4905-4bae-b54e-29c5c0709b6c",
+      "job_key": "b373fb41-031e-4886-bf5a-c2a9d6665865:0:plan_review:0",
+      "state": "worker_completed",
+      "accepted": true,
+      "runtime_evidence": {
+        "agent_id": "agent_8eade93c03414f50bd6eb40263d8beb3",
+        "command_digest": "419021bec18b972b5b5e9ec44658eeb4996f504eeab3cda4c8f051a4bbd9f6b4",
+        "command_normalization": "same_python_ast_and_pinned_shell_frame",
+        "effort": "high",
+        "effort_verification": "explicit_launch_argument_and_supported_served_model",
+        "harness": "claude-code",
+        "harness_release": "claude-code-2.1.289-9162edd4",
+        "model": "opus",
+        "model_connection_id": "mcn_699c8e51528e4438a359acfd4dced40f",
+        "process_id": 7,
+        "proof_kind": "first_tool_claude_code_process_arguments",
+        "provider_internal_reasoning_verified": false,
+        "runtime": "aranarium-aws",
+        "served_model": "claude-opus-5-5",
+        "session_id": "ses_92687ededd454126a12162e5e68f5eec",
+        "tool_result_event_id": "evt_01M8HBK8E2VV6YVHHAY54AH2X9",
+        "tool_use_id": "toolu_01W1VuhzLfj2VB9kPZA2JztV",
+        "turn_id": "run_ccbe93cf95b64bdeaf829beb15d730af",
+        "verified_by_platform": true
+      },
+      "observed_tokens": 133132,
+      "revision": {
+        "acceptance_digest": "bb66559a5b033c733fb7d4ea834e672359a6070ea1a619e832a6edd994edef77",
+        "base": "ed79efbdd3db3734ad901375ce0a99dc8795f230",
+        "config_digest": "b17b10fd8952c6725ca48ef9d73fb6e0c637bb6855e80ba8c7dc51da9c56ec5e",
+        "head": "ed79efbdd3db3734ad901375ce0a99dc8795f230"
+      },
+      "at": 1795878914.9857075,
+      "intent": "7165862e-91ee-4b65-9f1b-4a3a4de2df8b",
+      "session_id": "ses_92687ededd454126a12162e5e68f5eec",
+      "turn_id": "run_ccbe93cf95b64bdeaf829beb15d730af",
+      "native_started_at": "2026-11-28T15:15:14.557Z",
+      "native_finished_at": "2026-11-28T15:15:52.099Z"
+    },
+    {
+      "owner": "b373fb41-031e-4886-bf5a-c2a9d6665865",
+      "job": "8b17bf26-7d2d-4899-ae6e-16d52dd84e35",
+      "job_key": "b373fb41-031e-4886-bf5a-c2a9d6665865:0:implementing:0",
+      "state": "worker_completed",
+      "accepted": true,
+      "runtime_evidence": {
+        "agent_id": "agent_4c9ad221e4294286a9b82f194a5e2846",
+        "command_digest": "419021bec18b972b5b5e9ec44658eeb4996f504eeab3cda4c8f051a4bbd9f6b4",
+        "command_normalization": "same_python_ast_and_pinned_shell_frame",
+        "effort": "low",
+        "effort_verification": "explicit_launch_argument_and_supported_served_model",
+        "harness": "claude-code",
+        "harness_release": "claude-code-2.1.289-9162edd4",
+        "model": "sonnet",
+        "model_connection_id": "mcn_699c8e51528e4438a359acfd4dced40f",
+        "process_id": 7,
+        "proof_kind": "first_tool_claude_code_process_arguments",
+        "provider_internal_reasoning_verified": false,
+        "runtime": "aranarium-aws",
+        "served_model": "claude-sonnet-5-5",
+        "session_id": "ses_1bd907e535524f669277aaa3d79daf52",
+        "tool_result_event_id": "evt_01M8HBQ7DD2P2JKZHK886ZRRC2",
+        "tool_use_id": "toolu_01DAVc1cu7BuJdubwhWW7W7e",
+        "turn_id": "run_fb7f3eb376e2448084bb6a5cedb4ec80",
+        "verified_by_platform": true
+      },
+      "observed_tokens": 77069,
+      "revision": {
+        "acceptance_digest": "bb66559a5b033c733fb7d4ea834e672359a6070ea1a619e832a6edd994edef77",
+        "base": "ed79efbdd3db3734ad901375ce0a99dc8795f230",
+        "config_digest": "b17b10fd8952c6725ca48ef9d73fb6e0c637bb6855e80ba8c7dc51da9c56ec5e",
+        "head": "ed79efbdd3db3734ad901375ce0a99dc8795f230"
+      },
+      "at": 1795879046.3483005,
+      "intent": "18bcb099-c1db-48b9-bf50-5bb860af842e",
+      "session_id": "ses_1bd907e535524f669277aaa3d79daf52",
+      "turn_id": "run_fb7f3eb376e2448084bb6a5cedb4ec80",
+      "native_started_at": "2026-11-28T15:17:25.932Z",
+      "native_finished_at": "2026-11-28T15:17:38.691Z"
+    },
+    {
+      "owner": "b373fb41-031e-4886-bf5a-c2a9d6665865",
+      "job": "b7369b7c-b836-4ca7-8334-e0b8d930799e",
+      "job_key": "b373fb41-031e-4886-bf5a-c2a9d6665865:0:validating:0",
+      "state": "failed",
+      "accepted": false,
+      "runtime_evidence": null,
+      "observed_tokens": null,
+      "revision": null,
+      "at": 1795879324.4353316,
+      "intent": "d8bd590a-c64b-429a-96d6-5686c5b37199",
+      "session_id": "ses_03f2265c70ca44f48447030712959b21",
+      "turn_id": "run_cebe1551f31d438ab04fdde7ff1af870",
+      "native_started_at": "2026-11-28T15:22:04.025Z",
+      "native_finished_at": "2026-11-28T15:22:36.048Z"
+    },
+    {
+      "owner": "b373fb41-031e-4886-bf5a-c2a9d6665865",
+      "job": "5e90c4b1-ea73-479d-a904-0e209f0ab383",
+      "job_key": "b373fb41-031e-4886-bf5a-c2a9d6665865:0:validating:1",
+      "state": "worker_completed",
+      "accepted": true,
+      "runtime_evidence": {
+        "agent_id": "agent_4c9ad221e4294286a9b82f194a5e2846",
+        "command_digest": "419021bec18b972b5b5e9ec44658eeb4996f504eeab3cda4c8f051a4bbd9f6b4",
+        "command_normalization": "same_python_ast_and_pinned_shell_frame",
+        "effort": "low",
+        "effort_verification": "explicit_launch_argument_and_supported_served_model",
+        "harness": "claude-code",
+        "harness_release": "claude-code-2.1.289-9162edd4",
+        "model": "sonnet",
+        "model_connection_id": "mcn_699c8e51528e4438a359acfd4dced40f",
+        "process_id": 7,
+        "proof_kind": "first_tool_claude_code_process_arguments",
+        "provider_internal_reasoning_verified": false,
+        "runtime": "aranarium-aws",
+        "served_model": "claude-sonnet-5-5",
+        "session_id": "ses_ad714a0c7dc24c5f9d7dbd5b243d7534",
+        "tool_result_event_id": "evt_01M8HCMMZ71W750C82MAXHBSMV",
+        "tool_use_id": "toolu_01NaaNQL3xAcWrDFwdKqafj6",
+        "turn_id": "run_a70cf41f87224f1793d2466912a96712",
+        "verified_by_platform": true
+      },
+      "observed_tokens": 112041,
+      "revision": {
+        "acceptance_digest": "bb66559a5b033c733fb7d4ea834e672359a6070ea1a619e832a6edd994edef77",
+        "base": "ed79efbdd3db3734ad901375ce0a99dc8795f230",
+        "config_digest": "b17b10fd8952c6725ca48ef9d73fb6e0c637bb6855e80ba8c7dc51da9c56ec5e",
+        "head": "cbbd6b4fbc6be5afb98acb6ecbd1293dad8c31b7"
+      },
+      "at": 1795880008.8671696,
+      "intent": "8b8106b3-840f-4571-90c3-f245eb78cf03",
+      "session_id": "ses_ad714a0c7dc24c5f9d7dbd5b243d7534",
+      "turn_id": "run_a70cf41f87224f1793d2466912a96712",
+      "native_started_at": "2026-11-28T15:33:28.578Z",
+      "native_finished_at": "2026-11-28T15:34:05.496Z"
+    },
+    {
+      "owner": "b373fb41-031e-4886-bf5a-c2a9d6665865",
+      "job": "5e521e91-0dbc-4053-aa7a-17ad83d45226",
+      "job_key": "b373fb41-031e-4886-bf5a-c2a9d6665865:0:reviewing:1",
+      "state": "worker_completed",
+      "accepted": true,
+      "runtime_evidence": {
+        "agent_id": "agent_15d9dc28b6e24e42a97961dbc461648f",
+        "command_digest": "419021bec18b972b5b5e9ec44658eeb4996f504eeab3cda4c8f051a4bbd9f6b4",
+        "command_normalization": "same_python_ast_and_pinned_shell_frame",
+        "effort": "high",
+        "effort_verification": "explicit_launch_argument_and_supported_served_model",
+        "harness": "claude-code",
+        "harness_release": "claude-code-2.1.289-9162edd4",
+        "model": "opus",
+        "model_connection_id": "mcn_699c8e51528e4438a359acfd4dced40f",
+        "process_id": 7,
+        "proof_kind": "first_tool_claude_code_process_arguments",
+        "provider_internal_reasoning_verified": false,
+        "runtime": "aranarium-aws",
+        "served_model": "claude-opus-5-5",
+        "session_id": "ses_6b789c98f6854706a3fc4821d7787540",
+        "tool_result_event_id": "evt_01M8HCRR3J7X909A1564P0QKWD",
+        "tool_use_id": "toolu_01MeianTDGs9xkfxGzwerMtd",
+        "turn_id": "run_984c23702fc44bef9a2ae81af9ea1179",
+        "verified_by_platform": true
+      },
+      "observed_tokens": 177843,
+      "revision": {
+        "acceptance_digest": "bb66559a5b033c733fb7d4ea834e672359a6070ea1a619e832a6edd994edef77",
+        "base": "ed79efbdd3db3734ad901375ce0a99dc8795f230",
+        "config_digest": "b17b10fd8952c6725ca48ef9d73fb6e0c637bb6855e80ba8c7dc51da9c56ec5e",
+        "head": "cbbd6b4fbc6be5afb98acb6ecbd1293dad8c31b7"
+      },
+      "at": 1795880142.5981452,
+      "intent": "6bddf00c-4669-4ff0-9a7e-997a52d9b1e9",
+      "session_id": "ses_6b789c98f6854706a3fc4821d7787540",
+      "turn_id": "run_984c23702fc44bef9a2ae81af9ea1179",
+      "native_started_at": "2026-11-28T15:35:42.153Z",
+      "native_finished_at": "2026-11-28T15:36:38.869Z"
+    },
+    {
+      "owner": "1e5ed552-06d4-4481-9904-93583ed4dc3f",
+      "job": "32bf802d-742a-475a-945f-545bcafbde78",
+      "job_key": "1e5ed552-06d4-4481-9904-93583ed4dc3f:0:planning:0",
+      "state": "worker_completed",
+      "accepted": true,
+      "runtime_evidence": {
+        "agent_id": "agent_9c74ac49c7fa4989843c984ed2cd40a1",
+        "command_digest": "419021bec18b972b5b5e9ec44658eeb4996f504eeab3cda4c8f051a4bbd9f6b4",
+        "command_normalization": "same_python_ast_and_pinned_shell_frame",
+        "effort": "high",
+        "effort_verification": "explicit_launch_argument_and_supported_served_model",
+        "harness": "claude-code",
+        "harness_release": "claude-code-2.1.289-9162edd4",
+        "model": "opus",
+        "model_connection_id": "mcn_699c8e51528e4438a359acfd4dced40f",
+        "process_id": 7,
+        "proof_kind": "first_tool_claude_code_process_arguments",
+        "provider_internal_reasoning_verified": false,
+        "runtime": "aranarium-aws",
+        "served_model": "claude-opus-5-5",
+        "session_id": "ses_16beec59ddef453ca5cb1419fbd9fe31",
+        "tool_result_event_id": "evt_01M8HDQ8D1636ZRBXPJ5DWHNCM",
+        "tool_use_id": "toolu_01FG8e1bj4uCwz55ff16JbtX",
+        "turn_id": "run_1ac68c2158ac4bcdbad9ab2d362caccf",
+        "verified_by_platform": true
+      },
+      "observed_tokens": 157388,
+      "revision": {
+        "acceptance_digest": "dfea66bb875165ed6ea1bdc30554bf272bd2bf31c824d38b07e70b6eca146ef6",
+        "base": "256a47cb2863fc64d164e79b6b661cdf4c13550d",
+        "config_digest": "b17b10fd8952c6725ca48ef9d73fb6e0c637bb6855e80ba8c7dc51da9c56ec5e",
+        "head": "256a47cb2863fc64d164e79b6b661cdf4c13550d"
+      },
+      "at": 1795881141.859362,
+      "intent": "6d2e62e2-f159-4872-b34f-89b0749626b8",
+      "session_id": "ses_16beec59ddef453ca5cb1419fbd9fe31",
+      "turn_id": "run_1ac68c2158ac4bcdbad9ab2d362caccf",
+      "native_started_at": "2026-11-28T15:52:21.438Z",
+      "native_finished_at": "2026-11-28T15:53:10.761Z"
+    },
+    {
+      "owner": "1e5ed552-06d4-4481-9904-93583ed4dc3f",
+      "job": "5b5bd697-86a7-4a5e-a7a0-9ea700a8d8f7",
+      "job_key": "1e5ed552-06d4-4481-9904-93583ed4dc3f:0:plan_review:0",
+      "state": "worker_completed",
+      "accepted": true,
+      "runtime_evidence": {
+        "agent_id": "agent_8eade93c03414f50bd6eb40263d8beb3",
+        "command_digest": "419021bec18b972b5b5e9ec44658eeb4996f504eeab3cda4c8f051a4bbd9f6b4",
+        "command_normalization": "same_python_ast_and_pinned_shell_frame",
+        "effort": "high",
+        "effort_verification": "explicit_launch_argument_and_supported_served_model",
+        "harness": "claude-code",
+        "harness_release": "claude-code-2.1.289-9162edd4",
+        "model": "opus",
+        "model_connection_id": "mcn_699c8e51528e4438a359acfd4dced40f",
+        "process_id": 7,
+        "proof_kind": "first_tool_claude_code_process_arguments",
+        "provider_internal_reasoning_verified": false,
+        "runtime": "aranarium-aws",
+        "served_model": "claude-opus-5-5",
+        "session_id": "ses_b5cc87f297004091967f61fa257b1cbe",
+        "tool_result_event_id": "evt_01M8HDWTD6R59PKHQRGBHGK0XX",
+        "tool_use_id": "toolu_01Ce7DppgrDcj91As6zRL8cq",
+        "turn_id": "run_5a8eb2d883cd4302b1876b2ccbfe5aa3",
+        "verified_by_platform": true
+      },
+      "observed_tokens": 136694,
+      "revision": {
+        "acceptance_digest": "dfea66bb875165ed6ea1bdc30554bf272bd2bf31c824d38b07e70b6eca146ef6",
+        "base": "256a47cb2863fc64d164e79b6b661cdf4c13550d",
+        "config_digest": "b17b10fd8952c6725ca48ef9d73fb6e0c637bb6855e80ba8c7dc51da9c56ec5e",
+        "head": "256a47cb2863fc64d164e79b6b661cdf4c13550d"
+      },
+      "at": 1795881325.0572503,
+      "intent": "0a5330f2-0dae-4748-b88b-0121755b9101",
+      "session_id": "ses_b5cc87f297004091967f61fa257b1cbe",
+      "turn_id": "run_5a8eb2d883cd4302b1876b2ccbfe5aa3",
+      "native_started_at": "2026-11-28T15:55:24.639Z",
+      "native_finished_at": "2026-11-28T15:56:08.344Z"
+    },
+    {
+      "owner": "1e5ed552-06d4-4481-9904-93583ed4dc3f",
+      "job": "2ad05ae6-cfab-4e4f-8050-4b5ff474958c",
+      "job_key": "1e5ed552-06d4-4481-9904-93583ed4dc3f:0:implementing:0",
+      "state": "worker_completed",
+      "accepted": true,
+      "runtime_evidence": {
+        "agent_id": "agent_4c9ad221e4294286a9b82f194a5e2846",
+        "command_digest": "419021bec18b972b5b5e9ec44658eeb4996f504eeab3cda4c8f051a4bbd9f6b4",
+        "command_normalization": "same_python_ast_and_pinned_shell_frame",
+        "effort": "low",
+        "effort_verification": "explicit_launch_argument_and_supported_served_model",
+        "harness": "claude-code",
+        "harness_release": "claude-code-2.1.289-9162edd4",
+        "model": "sonnet",
+        "model_connection_id": "mcn_699c8e51528e4438a359acfd4dced40f",
+        "process_id": 7,
+        "proof_kind": "first_tool_claude_code_process_arguments",
+        "provider_internal_reasoning_verified": false,
+        "runtime": "aranarium-aws",
+        "served_model": "claude-sonnet-5-5",
+        "session_id": "ses_0024781e03ea47fcb281bce95c2d9967",
+        "tool_result_event_id": "evt_01M8HE2F0F6847KZXP7TN4WXCZ",
+        "tool_use_id": "toolu_01EqDpTeTNWFfJKXV4s32Pis",
+        "turn_id": "run_2c8e9f2efc534640beab2ba45dc3bfb9",
+        "verified_by_platform": true
+      },
+      "observed_tokens": 52441,
+      "revision": {
+        "acceptance_digest": "dfea66bb875165ed6ea1bdc30554bf272bd2bf31c824d38b07e70b6eca146ef6",
+        "base": "256a47cb2863fc64d164e79b6b661cdf4c13550d",
+        "config_digest": "b17b10fd8952c6725ca48ef9d73fb6e0c637bb6855e80ba8c7dc51da9c56ec5e",
+        "head": "256a47cb2863fc64d164e79b6b661cdf4c13550d"
+      },
+      "at": 1795881511.6864874,
+      "intent": "5f9cff9a-8161-431c-9be5-a5351f470de4",
+      "session_id": "ses_0024781e03ea47fcb281bce95c2d9967",
+      "turn_id": "run_2c8e9f2efc534640beab2ba45dc3bfb9",
+      "native_started_at": "2026-11-28T15:58:31.190Z",
+      "native_finished_at": "2026-11-28T15:58:44.674Z"
+    },
+    {
+      "owner": "1e5ed552-06d4-4481-9904-93583ed4dc3f",
+      "job": "22411eb3-9088-4843-a2b6-9a65efd42d8c",
+      "job_key": "1e5ed552-06d4-4481-9904-93583ed4dc3f:0:validating:0",
+      "state": "worker_completed",
+      "accepted": true,
+      "runtime_evidence": {
+        "agent_id": "agent_4c9ad221e4294286a9b82f194a5e2846",
+        "command_digest": "419021bec18b972b5b5e9ec44658eeb4996f504eeab3cda4c8f051a4bbd9f6b4",
+        "command_normalization": "same_python_ast_and_pinned_shell_frame",
+        "effort": "low",
+        "effort_verification": "explicit_launch_argument_and_supported_served_model",
+        "harness": "claude-code",
+        "harness_release": "claude-code-2.1.289-9162edd4",
+        "model": "sonnet",
+        "model_connection_id": "mcn_699c8e51528e4438a359acfd4dced40f",
+        "process_id": 7,
+        "proof_kind": "first_tool_claude_code_process_arguments",
+        "provider_internal_reasoning_verified": false,
+        "runtime": "aranarium-aws",
+        "served_model": "claude-sonnet-5-5",
+        "session_id": "ses_1144099ef4e54e3bb4a1fcd2701800ed",
+        "tool_result_event_id": "evt_01M8HECPB1B2D35YVDNTZYNAPX",
+        "tool_use_id": "toolu_01BCAM3rpsKuu1yddXYaYjDN",
+        "turn_id": "run_6638d2f5c31f42aa9573ccff8e1ccf69",
+        "verified_by_platform": true
+      },
+      "observed_tokens": 116399,
+      "revision": {
+        "acceptance_digest": "dfea66bb875165ed6ea1bdc30554bf272bd2bf31c824d38b07e70b6eca146ef6",
+        "base": "256a47cb2863fc64d164e79b6b661cdf4c13550d",
+        "config_digest": "b17b10fd8952c6725ca48ef9d73fb6e0c637bb6855e80ba8c7dc51da9c56ec5e",
+        "head": "e7a668640b2010cd5ab6823912081a7ac35f5c04"
+      },
+      "at": 1795881846.9325678,
+      "intent": "8d433edd-3732-4bb5-a3b9-7d0b9998dabe",
+      "session_id": "ses_1144099ef4e54e3bb4a1fcd2701800ed",
+      "turn_id": "run_6638d2f5c31f42aa9573ccff8e1ccf69",
+      "native_started_at": "2026-11-28T16:04:06.480Z",
+      "native_finished_at": "2026-11-28T16:04:41.956Z"
+    },
+    {
+      "owner": "1e5ed552-06d4-4481-9904-93583ed4dc3f",
+      "job": "d263551c-3540-4922-8f3d-e98392ea4fe0",
+      "job_key": "1e5ed552-06d4-4481-9904-93583ed4dc3f:0:reviewing:0",
+      "state": "worker_completed",
+      "accepted": true,
+      "runtime_evidence": {
+        "agent_id": "agent_15d9dc28b6e24e42a97961dbc461648f",
+        "command_digest": "419021bec18b972b5b5e9ec44658eeb4996f504eeab3cda4c8f051a4bbd9f6b4",
+        "command_normalization": "same_python_ast_and_pinned_shell_frame",
+        "effort": "high",
+        "effort_verification": "explicit_launch_argument_and_supported_served_model",
+        "harness": "claude-code",
+        "harness_release": "claude-code-2.1.289-9162edd4",
+        "model": "opus",
+        "model_connection_id": "mcn_699c8e51528e4438a359acfd4dced40f",
+        "process_id": 7,
+        "proof_kind": "first_tool_claude_code_process_arguments",
+        "provider_internal_reasoning_verified": false,
+        "runtime": "aranarium-aws",
+        "served_model": "claude-opus-5-5",
+        "session_id": "ses_d67c9339112e41459bee0b4fb94adb29",
+        "tool_result_event_id": "evt_01M8HEJVBRD5A8QZNXSJXBW9E9",
+        "tool_use_id": "toolu_019LcQs14FFGVjxeb1KHaqXA",
+        "turn_id": "run_702db6cb901c44b8b3539fdd681f343f",
+        "verified_by_platform": true
+      },
+      "observed_tokens": 181484,
+      "revision": {
+        "acceptance_digest": "dfea66bb875165ed6ea1bdc30554bf272bd2bf31c824d38b07e70b6eca146ef6",
+        "base": "256a47cb2863fc64d164e79b6b661cdf4c13550d",
+        "config_digest": "b17b10fd8952c6725ca48ef9d73fb6e0c637bb6855e80ba8c7dc51da9c56ec5e",
+        "head": "e7a668640b2010cd5ab6823912081a7ac35f5c04"
+      },
+      "at": 1795882047.4591987,
+      "intent": "86bd40db-6a5b-47dd-b3aa-c12996184edd",
+      "session_id": "ses_d67c9339112e41459bee0b4fb94adb29",
+      "turn_id": "run_702db6cb901c44b8b3539fdd681f343f",
+      "native_started_at": "2026-11-28T16:07:27.010Z",
+      "native_finished_at": "2026-11-28T16:08:24.283Z"
+    }
+  ],
+  "quality": {
+    "id": 141037721550,
+    "name": "quality",
+    "status": "completed",
+    "conclusion": "success",
+    "head_sha": "5805b160c9bc147ed2e530158b7b7bea9cd0e4b7",
+    "details_url": "https://github.com/serhii-nochevnyi/collegium-pipeline/actions/runs/46164109999/job/141037721550"
+  },
+  "paused_automations": 20,
+  "pilot_selected": false,
+  "jira_writes": 0,
+  "runtime_limit": "Process model/effort and served model verified; provider-internal reasoning is not observable.",
+  "crash": {
+    "run_id": "d19e0950-cbb0-4f9a-98ce-324a3ecfaf87",
+    "base": "ed79efbdd3db3734ad901375ce0a99dc8795f230",
+    "cursor": 1,
+    "delivered": false,
+    "graph_digest": "6061dc970455e0cc373f0df7f32bdc74ca91b85da477cc4cab4665096ea47944",
+    "integration_attempt": 0,
+    "integration_head": null,
+    "nodes": {
+      "A": {
+        "merged": null,
+        "reason": "waiting_worker",
+        "run_id": "7d02691a-7835-4d31-af29-1bf821d62e6e",
+        "state": "planning"
+      },
+      "B": {
+        "merged": null,
+        "reason": "waiting_worker",
+        "run_id": "b373fb41-031e-4886-bf5a-c2a9d6665865",
+        "state": "planning"
+      },
+      "C": {
+        "merged": null,
+        "reason": "prerequisite must be merged, not merely PR-ready",
+        "run_id": "1e5ed552-06d4-4481-9904-93583ed4dc3f",
+        "state": "queued"
+      }
+    },
+    "paused": false,
+    "state": "running",
+    "tokens": 0,
+    "version": 1,
+    "dependencies": {
+      "A": [],
+      "B": [],
+      "C": [
+        "A",
+        "B"
+      ]
+    },
+    "deliveries": {
+      "7d02691a-7835-4d31-af29-1bf821d62e6e": {
+        "state": "planning",
+        "head": "ed79efbdd3db3734ad901375ce0a99dc8795f230",
+        "base": "ed79efbdd3db3734ad901375ce0a99dc8795f230",
+        "branch": "collegium/7d02691a-7835-4d31-af29-1bf821d62e6e",
+        "pr": null,
+        "tokens": 0,
+        "used_jobs": []
+      },
+      "b373fb41-031e-4886-bf5a-c2a9d6665865": {
+        "state": "planning",
+        "head": "ed79efbdd3db3734ad901375ce0a99dc8795f230",
+        "base": "ed79efbdd3db3734ad901375ce0a99dc8795f230",
+        "branch": "collegium/b373fb41-031e-4886-bf5a-c2a9d6665865",
+        "pr": null,
+        "tokens": 0,
+        "used_jobs": []
+      }
+    },
+    "workers": [
+      {
+        "owner": "7d02691a-7835-4d31-af29-1bf821d62e6e",
+        "job": "76f90f3f-ed98-4a20-9f61-f855940d0860",
+        "job_key": "7d02691a-7835-4d31-af29-1bf821d62e6e:0:planning:0",
+        "state": "planning",
+        "accepted": false,
+        "runtime_evidence": null,
+        "observed_tokens": null,
+        "revision": null,
+        "at": 1795878669.3544528,
+        "intent": "eca80205-7b01-4bab-808a-edb29dd7524d",
+        "session_id": "ses_ce09691d947649e69a61b256bd2f5e3b",
+        "turn_id": "run_d466f3416a4d44c295d803f8562bf97a"
+      },
+      {
+        "owner": "b373fb41-031e-4886-bf5a-c2a9d6665865",
+        "job": "d389ae23-113c-4534-82eb-ad82d3c364f1",
+        "job_key": "b373fb41-031e-4886-bf5a-c2a9d6665865:0:planning:0",
+        "state": "planning",
+        "accepted": false,
+        "runtime_evidence": null,
+        "observed_tokens": null,
+        "revision": null,
+        "at": 1795878687.422729,
+        "intent": "314aecfc-95a8-4605-922f-78a55d5a2c36",
+        "session_id": "ses_6f7743c17da145209348d8bed7e9cd22",
+        "turn_id": "run_577b2dd8032548418c2a61ad3cf2ea91"
+      }
+    ],
+    "commit_receipts": [],
+    "pr_receipts": [],
+    "config_digest": "b17b10fd8952c6725ca48ef9d73fb6e0c637bb6855e80ba8c7dc51da9c56ec5e",
+    "pilot_selected": false,
+    "controller_host": "Collegium installed bundle",
+    "checkpoint_receipts": [
+      {
+        "checkpoint": "5212321a579a11b9f9feb9c246027f42685e839ce2b964d6f518897b63504521",
+        "origin": {
+          "attempt_id": "att_d8e188c7085c49a5bb26f6ee9cbee65f",
+          "automation_id": "aut_2ea6d08b772f41d5a9fa236cb19f93d8",
+          "run_id": "run_a6c4afa30e0a493482075314da24b620"
+        }
+      }
+    ],
+    "ready_receipts": {},
+    "overlap": {
+      "observed_at": 1795878687.5993738,
+      "a_before": {
+        "id": "run_d466f3416a4d44c295d803f8562bf97a",
+        "session_id": "ses_ce09691d947649e69a61b256bd2f5e3b",
+        "status": "running",
+        "started_at": "2026-11-28T15:11:08.929Z",
+        "finished_at": null
+      },
+      "b": {
+        "id": "run_577b2dd8032548418c2a61ad3cf2ea91",
+        "session_id": "ses_6f7743c17da145209348d8bed7e9cd22",
+        "status": "running",
+        "started_at": "2026-11-28T15:11:27.122Z",
+        "finished_at": null
+      },
+      "a_after": {
+        "id": "run_d466f3416a4d44c295d803f8562bf97a",
+        "session_id": "ses_ce09691d947649e69a61b256bd2f5e3b",
+        "status": "running",
+        "started_at": "2026-11-28T15:11:08.929Z",
+        "finished_at": null
+      }
+    }
+  },
+  "recovery": {
+    "run_id": "d19e0950-cbb0-4f9a-98ce-324a3ecfaf87",
+    "base": "ed79efbdd3db3734ad901375ce0a99dc8795f230",
+    "cursor": 2,
+    "delivered": false,
+    "graph_digest": "6061dc970455e0cc373f0df7f32bdc74ca91b85da477cc4cab4665096ea47944",
+    "integration_attempt": 0,
+    "integration_head": null,
+    "nodes": {
+      "A": {
+        "merged": null,
+        "reason": "waiting_worker",
+        "run_id": "7d02691a-7835-4d31-af29-1bf821d62e6e",
+        "state": "planning"
+      },
+      "B": {
+        "merged": null,
+        "reason": "waiting_worker",
+        "run_id": "b373fb41-031e-4886-bf5a-c2a9d6665865",
+        "state": "planning"
+      },
+      "C": {
+        "merged": null,
+        "reason": "prerequisite must be merged, not merely PR-ready",
+        "run_id": "1e5ed552-06d4-4481-9904-93583ed4dc3f",
+        "state": "queued"
+      }
+    },
+    "paused": false,
+    "state": "running",
+    "tokens": 0,
+    "version": 1,
+    "dependencies": {
+      "A": [],
+      "B": [],
+      "C": [
+        "A",
+        "B"
+      ]
+    },
+    "deliveries": {
+      "7d02691a-7835-4d31-af29-1bf821d62e6e": {
+        "state": "planning",
+        "head": "ed79efbdd3db3734ad901375ce0a99dc8795f230",
+        "base": "ed79efbdd3db3734ad901375ce0a99dc8795f230",
+        "branch": "collegium/7d02691a-7835-4d31-af29-1bf821d62e6e",
+        "pr": null,
+        "tokens": 0,
+        "used_jobs": []
+      },
+      "b373fb41-031e-4886-bf5a-c2a9d6665865": {
+        "state": "planning",
+        "head": "ed79efbdd3db3734ad901375ce0a99dc8795f230",
+        "base": "ed79efbdd3db3734ad901375ce0a99dc8795f230",
+        "branch": "collegium/b373fb41-031e-4886-bf5a-c2a9d6665865",
+        "pr": null,
+        "tokens": 0,
+        "used_jobs": []
+      }
+    },
+    "workers": [
+      {
+        "owner": "7d02691a-7835-4d31-af29-1bf821d62e6e",
+        "job": "76f90f3f-ed98-4a20-9f61-f855940d0860",
+        "job_key": "7d02691a-7835-4d31-af29-1bf821d62e6e:0:planning:0",
+        "state": "planning",
+        "accepted": false,
+        "runtime_evidence": null,
+        "observed_tokens": null,
+        "revision": null,
+        "at": 1795878669.3544528,
+        "intent": "eca80205-7b01-4bab-808a-edb29dd7524d",
+        "session_id": "ses_ce09691d947649e69a61b256bd2f5e3b",
+        "turn_id": "run_d466f3416a4d44c295d803f8562bf97a"
+      },
+      {
+        "owner": "b373fb41-031e-4886-bf5a-c2a9d6665865",
+        "job": "d389ae23-113c-4534-82eb-ad82d3c364f1",
+        "job_key": "b373fb41-031e-4886-bf5a-c2a9d6665865:0:planning:0",
+        "state": "planning",
+        "accepted": false,
+        "runtime_evidence": null,
+        "observed_tokens": null,
+        "revision": null,
+        "at": 1795878703.5336597,
+        "intent": "314aecfc-95a8-4605-922f-78a55d5a2c36",
+        "session_id": "ses_6f7743c17da145209348d8bed7e9cd22",
+        "turn_id": "run_577b2dd8032548418c2a61ad3cf2ea91"
+      }
+    ],
+    "commit_receipts": [],
+    "pr_receipts": [],
+    "config_digest": "b17b10fd8952c6725ca48ef9d73fb6e0c637bb6855e80ba8c7dc51da9c56ec5e",
+    "pilot_selected": false,
+    "controller_host": "Collegium installed bundle",
+    "checkpoint_receipts": [
+      {
+        "checkpoint": "5212321a579a11b9f9feb9c246027f42685e839ce2b964d6f518897b63504521",
+        "origin": {
+          "attempt_id": "att_d8e188c7085c49a5bb26f6ee9cbee65f",
+          "automation_id": "aut_2ea6d08b772f41d5a9fa236cb19f93d8",
+          "run_id": "run_a6c4afa30e0a493482075314da24b620"
+        }
+      },
+      {
+        "checkpoint": "68c3b71d1efa724bfec1eb9c254e7b311a448edd9f650d521c51488196e87545",
+        "origin": {
+          "attempt_id": "att_86577291cd7c4c88998111c37e744cba",
+          "automation_id": "aut_2ea6d08b772f41d5a9fa236cb19f93d8",
+          "run_id": "run_a5de731c287d4038a4509cf495657fc2"
+        }
+      }
+    ],
+    "ready_receipts": {}
+  },
+  "installed_audit": {
+    "source_commit": "90b289290bcdc0d6bb23c5e14d4315bdd250169c",
+    "controller_version": 22,
+    "code_matches_bundle": true,
+    "code_files": 7,
+    "code_bytes": 197912,
+    "private_workers_unchanged": 8,
+    "profiles_disabled": 3,
+    "historical_service_profile_preserved": true,
+    "component_pins": {
+      "aut_5b17ddca92424243b1feb5aa8732a7a0": {
+        "name": "pipeline-native-broker-1474663859-v1",
+        "pin": "23b418abee71bcbccd04f0b490e2472730085a9f713f1f77607f2501ccf9ca81"
+      },
+      "aut_3a938ace3b15451585f1ed87f166625f": {
+        "name": "pipeline-recovery-store-v1",
+        "pin": "92c41331de0f14cd8999a58c6483580121f29b404e282d154331a25086ac2af0"
+      },
+      "aut_25092aee432946ceade2ea4c6bc2a2d7": {
+        "name": "pipeline-native-broker-1474663859-v8",
+        "pin": "66dd3ffb35d5010244ca4a9ab303a86f4ff0d0ab7da4711e792651e04a99e69c"
+      },
+      "aut_0631ecd7ec2b4ae9a166f9f9b2b9ed77": {
+        "name": "pipeline-native-broker-1474663859-v10-staged",
+        "pin": "04c341be9d0a8d9c6078514ee52676176928b9bf210aa0603141537cad557877"
+      },
+      "aut_56e599d0747448479acb75f385baf23e": {
+        "name": "pipeline-epic-service-recovery-v1-staged",
+        "pin": "8c92a7ea707234d9e9f6b2bce63f8b5103ddeedd8d66fca68defc71e6c9f22e4"
+      }
+    },
+    "automations": [
+      {
+        "id": "aut_a4c51e456cf34206b0f6424f7f000359",
+        "name": "pipeline-github-app-read-probe-v1",
+        "status": "paused"
+      },
+      {
+        "id": "aut_5b17ddca92424243b1feb5aa8732a7a0",
+        "name": "pipeline-native-broker-1474663859-v1",
+        "status": "paused"
+      },
+      {
+        "id": "aut_c7077fff758947d2b9413f5eb9ddbd8d",
+        "name": "pipeline-native-broker-1474663859-v2",
+        "status": "paused"
+      },
+      {
+        "id": "aut_144094f5a49446a1b4de7f8f531d55d9",
+        "name": "pipeline-native-broker-1474663859-v3",
+        "status": "paused"
+      },
+      {
+        "id": "aut_2ea6d08b772f41d5a9fa236cb19f93d8",
+        "name": "pipeline-controller",
+        "status": "paused"
+      },
+      {
+        "id": "aut_e98e1ccb28594a938ec7d9815bda7cd5",
+        "name": "pipeline-native-broker-1474663859-v4",
+        "status": "paused"
+      },
+      {
+        "id": "aut_3a938ace3b15451585f1ed87f166625f",
+        "name": "pipeline-recovery-store-v1",
+        "status": "paused"
+      },
+      {
+        "id": "aut_f7e1268b1afe4af5a24d942a5e993166",
+        "name": "pipeline-native-broker-1474663859-v5",
+        "status": "paused"
+      },
+      {
+        "id": "aut_c6f07e880ec84a5b89be65fcfdf2ecf0",
+        "name": "pipeline-native-broker-1474663859-v6",
+        "status": "paused"
+      },
+      {
+        "id": "aut_f9fdd52da91645df87973a0030ddec26",
+        "name": "pipeline-native-broker-1474663859-v7",
+        "status": "paused"
+      },
+      {
+        "id": "aut_25092aee432946ceade2ea4c6bc2a2d7",
+        "name": "pipeline-native-broker-1474663859-v8",
+        "status": "paused"
+      },
+      {
+        "id": "aut_be7d79c9081f4cbcaabdc088e601b151",
+        "name": "pipeline-native-broker-1474663859-v9",
+        "status": "paused"
+      },
+      {
+        "id": "aut_0631ecd7ec2b4ae9a166f9f9b2b9ed77",
+        "name": "pipeline-native-broker-1474663859-v10-staged",
+        "status": "paused"
+      },
+      {
+        "id": "aut_56e599d0747448479acb75f385baf23e",
+        "name": "pipeline-epic-service-recovery-v1-staged",
+        "status": "paused"
+      },
+      {
+        "id": "aut_7fd83fe573ae469e9cc85078a08d9b22",
+        "name": "pipeline-native-broker-1474663859-v11",
+        "status": "paused"
+      },
+      {
+        "id": "aut_36f681afc0314a1da669c65c0f7e2232",
+        "name": "pipeline-plan-read-diagnostic-v1",
+        "status": "paused"
+      },
+      {
+        "id": "aut_1ee6cbd4ae774aa78ee66f8cc8c99277",
+        "name": "pipeline-native-broker-1474663859-v12",
+        "status": "paused"
+      },
+      {
+        "id": "aut_36b47cb10c754e6bae7dc15d670e0fee",
+        "name": "pipeline-native-broker-1474663859-v13",
+        "status": "paused"
+      },
+      {
+        "id": "aut_87f62b4cfdb54045ac7449685191853e",
+        "name": "pipeline-native-broker-1474663859-v14",
+        "status": "paused"
+      },
+      {
+        "id": "aut_33e6c3a8267041e4ba26326d2dcf93bb",
+        "name": "pipeline-native-broker-1474663859-v15",
+        "status": "paused"
+      }
+    ],
+    "service_profile": {
+      "base_branch": "collegium/c5b7d3d9-9db7-4552-8e0e-fbfe99b27001",
+      "allowed_paths": [
+        "tests/test_epic_service_a.py",
+        "tests/test_epic_service_b.py",
+        "tests/test_epic_service_c.py"
+      ],
+      "epic_service_test": {
+        "baseline": "ed79efbdd3db3734ad901375ce0a99dc8795f230",
+        "expires_at": 1795961938,
+        "hold_seconds": 120,
+        "main_sha": "dbe5e20955dee07fab2a7bc9ab93aa0bcd1b0451",
+        "revision": 2,
+        "suite_id": "c5b7d3d9-9db7-4552-8e0e-fbfe99b27001"
+      },
+      "native_broker": {
+        "approved_digest": "04c341be9d0a8d9c6078514ee52676176928b9bf210aa0603141537cad557877",
+        "automation_id": "aut_0631ecd7ec2b4ae9a166f9f9b2b9ed77"
+      },
+      "recovery_store": {
+        "approved_digest": "8c92a7ea707234d9e9f6b2bce63f8b5103ddeedd8d66fca68defc71e6c9f22e4",
+        "automation_id": "aut_56e599d0747448479acb75f385baf23e",
+        "owner": "aut_2ea6d08b772f41d5a9fa236cb19f93d8"
+      }
+    }
+  },
+  "controller_runs": [
+    {
+      "number": 1,
+      "mode": "preflight",
+      "remote_run": "run_f6f3d7eb9b644a0c841ecf3352c4cf9c",
+      "status": "succeeded",
+      "cancel_requested": null
+    },
+    {
+      "number": 2,
+      "mode": "crash",
+      "remote_run": "run_a6c4afa30e0a493482075314da24b620",
+      "status": "cancelled",
+      "cancel_requested": true
+    },
+    {
+      "number": 3,
+      "mode": "run",
+      "remote_run": "run_75c2662a0ec944ce95636d8d7dbae824",
+      "status": "succeeded",
+      "cancel_requested": null
+    },
+    {
+      "number": 4,
+      "mode": "retire",
+      "remote_run": "run_4be06f0866cd4380a4e3f82ff3bdd3af",
+      "status": "succeeded",
+      "cancel_requested": null
+    },
+    {
+      "number": 5,
+      "mode": "crash",
+      "remote_run": "run_a5de731c287d4038a4509cf495657fc2",
+      "status": "cancelled",
+      "cancel_requested": true
+    },
+    {
+      "number": 6,
+      "mode": "run",
+      "remote_run": "run_e759400fef8f4f49980e31a3a4862033",
+      "status": "succeeded",
+      "cancel_requested": null
+    },
+    {
+      "number": 7,
+      "mode": "run",
+      "remote_run": "run_8152db3db26748dc98c50c9decd15de7",
+      "status": "succeeded",
+      "cancel_requested": null
+    },
+    {
+      "number": 8,
+      "mode": "run",
+      "remote_run": "run_1dd4a20b61834a8a970d7b8101401bbe",
+      "status": "succeeded",
+      "cancel_requested": null
+    },
+    {
+      "number": 9,
+      "mode": "run",
+      "remote_run": "run_5f7b9c049a144619bfec1d9a8d59212e",
+      "status": "succeeded",
+      "cancel_requested": null
+    },
+    {
+      "number": 10,
+      "mode": "run",
+      "remote_run": "run_81942fcb101c4d69943cf32c9befbe76",
+      "status": "succeeded",
+      "cancel_requested": null
+    },
+    {
+      "number": 11,
+      "mode": "run",
+      "remote_run": "run_1c9f33c6bf8240d09b78a5af93c42688",
+      "status": "succeeded",
+      "cancel_requested": null
+    },
+    {
+      "number": 12,
+      "mode": "run",
+      "remote_run": "run_8ca6506858df436486a460fd6d407fc0",
+      "status": "succeeded",
+      "cancel_requested": null
+    },
+    {
+      "number": 13,
+      "mode": "run",
+      "remote_run": "run_32784c1334fc4116bbc168c8aafc675d",
+      "status": "succeeded",
+      "cancel_requested": null
+    },
+    {
+      "number": 14,
+      "mode": "run",
+      "remote_run": "run_d5987c0358ad4d61ab3dc8eb66ba42e6",
+      "status": "succeeded",
+      "cancel_requested": null
+    },
+    {
+      "number": 15,
+      "mode": "run",
+      "remote_run": "run_d40f979b624b4dce8a2cbb16e83b985f",
+      "status": "succeeded",
+      "cancel_requested": null
+    },
+    {
+      "number": 16,
+      "mode": "retry-output",
+      "remote_run": "run_b508264b5ab6403a9bd715eaba3a27a4",
+      "status": "succeeded",
+      "cancel_requested": null
+    },
+    {
+      "number": 17,
+      "mode": "retry-output",
+      "remote_run": "run_4aecd0dc010b452d865c058a2d949b0f",
+      "status": "succeeded",
+      "cancel_requested": null
+    },
+    {
+      "number": 18,
+      "mode": "run",
+      "remote_run": "run_e929c1e2e1574bd9bb9d5d5dc6f27c90",
+      "status": "succeeded",
+      "cancel_requested": null
+    },
+    {
+      "number": 19,
+      "mode": "run",
+      "remote_run": "run_d5a4c43152a84e9eaf45cf9986e08b38",
+      "status": "succeeded",
+      "cancel_requested": null
+    },
+    {
+      "number": 20,
+      "mode": "run",
+      "remote_run": "run_08db84f1a6ea431eb03b1d73e79337cb",
+      "status": "succeeded",
+      "cancel_requested": null
+    },
+    {
+      "number": 21,
+      "mode": "run",
+      "remote_run": "run_4f4eec7d41a94d4ebd7b71f8e660bcf5",
+      "status": "succeeded",
+      "cancel_requested": null
+    },
+    {
+      "number": 22,
+      "mode": "run",
+      "remote_run": "run_fae865597ff64377aaa47711425a5218",
+      "status": "succeeded",
+      "cancel_requested": null
+    },
+    {
+      "number": 23,
+      "mode": "run",
+      "remote_run": "run_36214bb2a1d14fffb8daaf4a271a0c25",
+      "status": "succeeded",
+      "cancel_requested": null
+    },
+    {
+      "number": 24,
+      "mode": "run",
+      "remote_run": "run_d64c069f46014fd2ace1635810a48051",
+      "status": "succeeded",
+      "cancel_requested": null
+    },
+    {
+      "number": 25,
+      "mode": "run",
+      "remote_run": "run_8d4fd7d184e94520b89a1cd5af1045bf",
+      "status": "succeeded",
+      "cancel_requested": null
+    },
+    {
+      "number": 26,
+      "mode": "reconcile-merges",
+      "remote_run": "run_6ad2984b107f4d15a3d59ca10a0a4b16",
+      "status": "succeeded",
+      "cancel_requested": null
+    },
+    {
+      "number": 27,
+      "mode": "run",
+      "remote_run": "run_eaf6c398b1c34a13932aed8d800fe490",
+      "status": "succeeded",
+      "cancel_requested": null
+    },
+    {
+      "number": 28,
+      "mode": "run",
+      "remote_run": "run_79461f44d12b46d2aa57767b12bfbdb9",
+      "status": "succeeded",
+      "cancel_requested": null
+    },
+    {
+      "number": 29,
+      "mode": "run",
+      "remote_run": "run_e89366af0df44f67993fb9169741830d",
+      "status": "succeeded",
+      "cancel_requested": null
+    },
+    {
+      "number": 30,
+      "mode": "run",
+      "remote_run": "run_3f0e076ba91c442a8b55a2b2fed1d4a5",
+      "status": "succeeded",
+      "cancel_requested": null
+    },
+    {
+      "number": 31,
+      "mode": "run",
+      "remote_run": "run_64ad2488eff54b388babd67058572124",
+      "status": "succeeded",
+      "cancel_requested": null
+    },
+    {
+      "number": 32,
+      "mode": "run",
+      "remote_run": "run_d83e27bddbfb4ed288da57faa2d240e3",
+      "status": "succeeded",
+      "cancel_requested": null
+    },
+    {
+      "number": 33,
+      "mode": "run",
+      "remote_run": "run_82cc4d83d8ce4efe9bcdf37f3a97b639",
+      "status": "succeeded",
+      "cancel_requested": null
+    },
+    {
+      "number": 34,
+      "mode": "run",
+      "remote_run": "run_28d6c5c1bf4b4e3fab314607c4c1abd8",
+      "status": "succeeded",
+      "cancel_requested": null
+    },
+    {
+      "number": 35,
+      "mode": "run",
+      "remote_run": "run_d46517371c394af78c7470ee6596227c",
+      "status": "succeeded",
+      "cancel_requested": null
+    },
+    {
+      "number": 36,
+      "mode": "run",
+      "remote_run": "run_ed526eecf841404db03322815d816c03",
+      "status": "succeeded",
+      "cancel_requested": null
+    },
+    {
+      "number": 37,
+      "mode": "run",
+      "remote_run": "run_0729f8e59dc04d76bb581e9fbb44ab3f",
+      "status": "succeeded",
+      "cancel_requested": null
+    },
+    {
+      "number": 38,
+      "mode": "run",
+      "remote_run": "run_8d5d490290c14be09c0c69bd85450bd1",
+      "status": "succeeded",
+      "cancel_requested": null
+    },
+    {
+      "number": 39,
+      "mode": "run",
+      "remote_run": "run_c854822f0a104ecfb008a818b5a15129",
+      "status": "succeeded",
+      "cancel_requested": null
+    },
+    {
+      "number": 40,
+      "mode": "run",
+      "remote_run": "run_e7122c51fcad48709cc6b5698386a8cc",
+      "status": "succeeded",
+      "cancel_requested": null
+    },
+    {
+      "number": 41,
+      "mode": "run",
+      "remote_run": "run_6cc3ac1177f64b118d66e6e9eb961496",
+      "status": "succeeded",
+      "cancel_requested": null
+    },
+    {
+      "number": 42,
+      "mode": "run",
+      "remote_run": "run_63ee47989e964318897681efebbe83e8",
+      "status": "succeeded",
+      "cancel_requested": null
+    },
+    {
+      "number": 43,
+      "mode": "retry-integration",
+      "remote_run": "run_a72ab622f36141918d5ca91e4003c766",
+      "status": "succeeded",
+      "cancel_requested": null
+    },
+    {
+      "number": 44,
+      "mode": "run",
+      "remote_run": "run_595070ca2e894c65ba495f0eed1ea6d3",
+      "status": "succeeded",
+      "cancel_requested": null
+    },
+    {
+      "number": 45,
+      "mode": "run",
+      "remote_run": "run_90bed51dd2a34bbbbe7551a98f9e5d4f",
+      "status": "succeeded",
+      "cancel_requested": null
+    },
+    {
+      "number": 46,
+      "mode": "run",
+      "remote_run": "run_603b11bf07e1414fbe96b8345cbb5c9b",
+      "status": "succeeded",
+      "cancel_requested": null
+    },
+    {
+      "number": 47,
+      "mode": "run",
+      "remote_run": "run_e6d8d773e5f84b04a8bb0f0251b90226",
+      "status": "succeeded",
+      "cancel_requested": null
+    },
+    {
+      "number": 48,
+      "mode": "run",
+      "remote_run": "run_d7f3fc195e7f4c139eb0a9d3dc086b2d",
+      "status": "succeeded",
+      "cancel_requested": null
+    },
+    {
+      "number": 49,
+      "mode": "run",
+      "remote_run": "run_578efe111aa541ec9d5b252337aac09d",
+      "status": "succeeded",
+      "cancel_requested": null
+    },
+    {
+      "number": 50,
+      "mode": "run",
+      "remote_run": "run_a5317cc127204097ad049a719eda0adf",
+      "status": "succeeded",
+      "cancel_requested": null
+    }
+  ],
+  "final_replays_without_new_effects": 2,
+  "ci_probe_closed_unmerged": true,
+  "source_quality_url": "https://github.com/serhii-nochevnyi/collegium-pipeline/actions/runs/46164987292/job/141040446183",
+  "local_tests_passed": 289,
+  "limitations": [
+    "The live graph uses fixed text service tasks, not a Jira pilot.",
+    "For REST2026 responses lacking merge SHA, squash/rebase with no accepted-head ancestry remains blocked."
+  ]
+}
