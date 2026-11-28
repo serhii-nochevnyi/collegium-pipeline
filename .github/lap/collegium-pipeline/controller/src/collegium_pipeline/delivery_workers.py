@@ -143,8 +143,8 @@ class NativeJobs:
                 root, "rejected_usage", {"child": job, "tokens": usage["observed_tokens"]}
             )
 
-    def binding(self, selection):
-        key = (
+    def binding(self, selection, *, key=None):
+        key = key or (
             selection.role
             if selection.reason == "base"
             else selection.role + ":" + selection.effort
@@ -255,6 +255,35 @@ class NativeJobs:
                 "payload": {},
             },
         }
+        return self.execute_packet(
+            root,
+            job_key,
+            stage,
+            head,
+            base,
+            packet,
+            binding,
+            selection,
+            checkout,
+            repaired=repaired,
+        )
+
+    def execute_packet(
+        self,
+        root,
+        job_key,
+        stage,
+        head,
+        base,
+        packet,
+        binding,
+        selection,
+        checkout,
+        *,
+        repaired=False,
+    ):
+        """Shared immutable launch/observation contract; caller constructs the stage packet."""
+        task = Task(**json.loads(self.journal.get(root)["task"]))
         job = self.journal.admit(
             Task(
                 "text",

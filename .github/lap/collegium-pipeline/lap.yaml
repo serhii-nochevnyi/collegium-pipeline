@@ -221,12 +221,216 @@
         "backstage-prod",
         "ak-dev"
       ]
+    },
+    {
+      "name": "pipeline-investigation-assessor-sonnet-low-v1",
+      "system_file": "agents/investigation-assessor-sonnet-low.md",
+      "harness": "claude-code",
+      "model": "sonnet",
+      "effort": "low",
+      "model_connection": "claude-code-subscription",
+      "max_runtime_minutes": 5,
+      "rules": [
+        "pipeline-investigation-quality"
+      ],
+      "mcp_servers": [],
+      "repositories": [
+        {
+          "url": "https://github.com/serhii-nochevnyi/collegium-pipeline",
+          "connection": "ghc_7de07519a1e3437a95f98edc4545022d",
+          "access": "read"
+        }
+      ]
+    },
+    {
+      "name": "pipeline-investigation-researcher-sonnet-low-v1",
+      "system_file": "agents/investigation-researcher-sonnet-low.md",
+      "harness": "claude-code",
+      "model": "sonnet",
+      "effort": "low",
+      "model_connection": "claude-code-subscription",
+      "max_runtime_minutes": 5,
+      "rules": [
+        "pipeline-investigation-quality"
+      ],
+      "mcp_servers": [],
+      "repositories": [
+        {
+          "url": "https://github.com/serhii-nochevnyi/collegium-pipeline",
+          "connection": "ghc_7de07519a1e3437a95f98edc4545022d",
+          "access": "read"
+        }
+      ]
+    },
+    {
+      "name": "pipeline-investigation-researcher-sonnet-high-v1",
+      "system_file": "agents/investigation-researcher-sonnet-high.md",
+      "harness": "claude-code",
+      "model": "sonnet",
+      "effort": "high",
+      "model_connection": "claude-code-subscription",
+      "max_runtime_minutes": 5,
+      "rules": [
+        "pipeline-investigation-quality"
+      ],
+      "mcp_servers": [],
+      "repositories": [
+        {
+          "url": "https://github.com/serhii-nochevnyi/collegium-pipeline",
+          "connection": "ghc_7de07519a1e3437a95f98edc4545022d",
+          "access": "read"
+        }
+      ]
+    },
+    {
+      "name": "pipeline-investigation-researcher-opus-high-v1",
+      "system_file": "agents/investigation-researcher-opus-high.md",
+      "harness": "claude-code",
+      "model": "opus",
+      "effort": "high",
+      "model_connection": "claude-code-subscription",
+      "max_runtime_minutes": 5,
+      "rules": [
+        "pipeline-investigation-quality"
+      ],
+      "mcp_servers": [],
+      "repositories": [
+        {
+          "url": "https://github.com/serhii-nochevnyi/collegium-pipeline",
+          "connection": "ghc_7de07519a1e3437a95f98edc4545022d",
+          "access": "read"
+        }
+      ]
+    },
+    {
+      "name": "pipeline-investigation-researcher-opus-max-v1",
+      "system_file": "agents/investigation-researcher-opus-max.md",
+      "harness": "claude-code",
+      "model": "opus",
+      "effort": "max",
+      "model_connection": "claude-code-subscription",
+      "max_runtime_minutes": 5,
+      "rules": [
+        "pipeline-investigation-quality"
+      ],
+      "mcp_servers": [],
+      "repositories": [
+        {
+          "url": "https://github.com/serhii-nochevnyi/collegium-pipeline",
+          "connection": "ghc_7de07519a1e3437a95f98edc4545022d",
+          "access": "read"
+        }
+      ]
+    },
+    {
+      "name": "pipeline-investigation-synthesizer-sonnet-high-v1",
+      "system_file": "agents/investigation-synthesizer-sonnet-high.md",
+      "harness": "claude-code",
+      "model": "sonnet",
+      "effort": "high",
+      "model_connection": "claude-code-subscription",
+      "max_runtime_minutes": 5,
+      "rules": [
+        "pipeline-investigation-quality"
+      ],
+      "mcp_servers": [],
+      "repositories": [
+        {
+          "url": "https://github.com/serhii-nochevnyi/collegium-pipeline",
+          "connection": "ghc_7de07519a1e3437a95f98edc4545022d",
+          "access": "read"
+        }
+      ]
+    },
+    {
+      "name": "pipeline-investigation-synthesizer-opus-high-v1",
+      "system_file": "agents/investigation-synthesizer-opus-high.md",
+      "harness": "claude-code",
+      "model": "opus",
+      "effort": "high",
+      "model_connection": "claude-code-subscription",
+      "max_runtime_minutes": 5,
+      "rules": [
+        "pipeline-investigation-quality"
+      ],
+      "mcp_servers": [],
+      "repositories": [
+        {
+          "url": "https://github.com/serhii-nochevnyi/collegium-pipeline",
+          "connection": "ghc_7de07519a1e3437a95f98edc4545022d",
+          "access": "read"
+        }
+      ]
+    },
+    {
+      "name": "pipeline-investigation-synthesizer-opus-max-v1",
+      "system_file": "agents/investigation-synthesizer-opus-max.md",
+      "harness": "claude-code",
+      "model": "opus",
+      "effort": "max",
+      "model_connection": "claude-code-subscription",
+      "max_runtime_minutes": 5,
+      "rules": [
+        "pipeline-investigation-quality"
+      ],
+      "mcp_servers": [],
+      "repositories": [
+        {
+          "url": "https://github.com/serhii-nochevnyi/collegium-pipeline",
+          "connection": "ghc_7de07519a1e3437a95f98edc4545022d",
+          "access": "read"
+        }
+      ]
+    },
+    {
+      "name": "pipeline-investigation-reviewer-opus-high-v1",
+      "system_file": "agents/investigation-investigation_reviewer-opus-high.md",
+      "harness": "claude-code",
+      "model": "opus",
+      "effort": "high",
+      "model_connection": "claude-code-subscription",
+      "max_runtime_minutes": 5,
+      "rules": [
+        "pipeline-investigation-quality"
+      ],
+      "mcp_servers": [],
+      "repositories": [
+        {
+          "url": "https://github.com/serhii-nochevnyi/collegium-pipeline",
+          "connection": "ghc_7de07519a1e3437a95f98edc4545022d",
+          "access": "read"
+        }
+      ]
+    },
+    {
+      "name": "pipeline-investigation-reviewer-opus-max-v1",
+      "system_file": "agents/investigation-investigation_reviewer-opus-max.md",
+      "harness": "claude-code",
+      "model": "opus",
+      "effort": "max",
+      "model_connection": "claude-code-subscription",
+      "max_runtime_minutes": 5,
+      "rules": [
+        "pipeline-investigation-quality"
+      ],
+      "mcp_servers": [],
+      "repositories": [
+        {
+          "url": "https://github.com/serhii-nochevnyi/collegium-pipeline",
+          "connection": "ghc_7de07519a1e3437a95f98edc4545022d",
+          "access": "read"
+        }
+      ]
     }
   ],
   "rules": [
     {
       "name": "pipeline-quality",
       "file": "rules/quality.md"
+    },
+    {
+      "name": "pipeline-investigation-quality",
+      "file": "rules/investigation-quality.md"
     }
   ],
   "model_connections": [
@@ -506,6 +710,56 @@
         "secrets": [
           "PIPELINE_CONTROL_KEY"
         ]
+      }
+    },
+    {
+      "name": "pipeline-investigate",
+      "start": "paused",
+      "schedule": "0 0 1 1 *",
+      "notify": "none",
+      "script": {
+        "executor": "aranarium",
+        "environment_ref": "custom",
+        "environment": "base",
+        "size": "small",
+        "secrets": [
+          "PIPELINE_CONTROL_KEY"
+        ],
+        "files": [
+          "controller/entry.py",
+          "controller/investigation_entry.py",
+          "controller/runtime.b64",
+          "controller/settings.json",
+          "controller/investigation-settings.json"
+        ],
+        "command": "python3 controller/investigation_entry.py",
+        "repositories": [
+          {
+            "url": "https://github.com/serhii-nochevnyi/collegium-pipeline",
+            "connection": "ghc_7de07519a1e3437a95f98edc4545022d",
+            "access": "read"
+          }
+        ]
+      }
+    },
+    {
+      "name": "pipeline-investigation-recovery-v1",
+      "start": "paused",
+      "schedule": "0 0 1 1 *",
+      "notify": "none",
+      "script": {
+        "executor": "aranarium",
+        "environment_ref": "custom",
+        "environment": "base",
+        "size": "small",
+        "secrets": [
+          "PIPELINE_CONTROL_KEY"
+        ],
+        "files": [
+          "investigation-recovery/recovery_store.py",
+          "investigation-recovery/recovery_scope.json"
+        ],
+        "command": "cd investigation-recovery && python3 recovery_store.py"
       }
     }
   ]

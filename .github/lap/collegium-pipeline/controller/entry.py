@@ -5,7 +5,7 @@ import os
 import sys
 from pathlib import Path
 
-_BUNDLE_RUNTIME_SHA256 = "8c679b2d99dba9e4df06ce80d598d6aa47e2087f6566939ca95a349f193d06ab"
+_BUNDLE_RUNTIME_SHA256 = "10e86a2edf23e3c84a91762714cb2a8ae835f8caf1526c5b93660d2b49d055d0"
 _BUNDLE_RUNTIME = None
 
 
@@ -311,7 +311,15 @@ def recovered_attempts_accounted(prior, state, automation):
 
 
 def cloud_fence(
-    event, state, environ, http, *, diagnostic=False, service=False, epic_service=False
+    event,
+    state,
+    environ,
+    http,
+    *,
+    diagnostic=False,
+    service=False,
+    epic_service=False,
+    investigation=False,
 ):
     """Refuse replay when the platform discarded a previous attempt's journal.
 
@@ -389,6 +397,11 @@ def cloud_fence(
             unsafe = data.get("action") == "epic-service" and data.get("mode") not in {
                 "preflight",
                 "inspect",
+            }
+        if investigation:
+            unsafe = data.get("action") == "investigate" and data.get("operation") not in {
+                "preflight",
+                "status",
             }
         if unsafe and not (
             not diagnostic
@@ -1149,6 +1162,16 @@ def main(event=None, *, root=None, environ=None, http=None):
         raise PolicyError("Controller event data must be an object")
     action = event.get("action", "preflight")
     state = Path(environ.get("ARANARIUM_STATE_DIR", "/state")) / "collegium-pipeline"
+    if action == "investigate":
+        from collegium_pipeline.investigation_cloud import dispatch
+        from collegium_pipeline.transport import JsonHttp
+
+        investigation_config = load_config(root / "investigation-settings.json")
+        key = environ.get("PIPELINE_CONTROL_KEY")
+        http = http or (
+            JsonHttp(investigation_config["server"], {"X-Api-Key": key}) if key else None
+        )
+        return dispatch(event, state, investigation_config, environ, http, globals())
     if action in {"epic", "deliver", "reconcile"}:
         from collegium_pipeline.recovery import recovery_profiles
 

@@ -27,7 +27,11 @@ class ExternalRecoveryRequired(PolicyError):
 
 
 def intended_execution(config):
-    return {**config, "execution_enabled": True, "broker_enabled": True}
+    return {
+        **config,
+        "execution_enabled": True,
+        "broker_enabled": False if config.get("investigation") else True,
+    }
 
 
 def recovery_profiles(*configs):
@@ -130,6 +134,13 @@ class Checkpoints:
         row, _ = self.http.request("GET", self.path)
         code, _ = self.http.request("GET", self.path + "/code")
         target = row["target"]
+        scope_files = [
+            n
+            for n in code["current"]["files"]
+            if n == "recovery_scope.json" or n.endswith("/recovery_scope.json")
+        ]
+        if len(scope_files) != 1:
+            raise PolicyError("Recovery store needs one unambiguous owner scope file")
         if (
             binding_digest(row, code) != self.binding["approved_digest"]
             or row["project_id"] != self.config["project_id"]
@@ -137,7 +148,7 @@ class Checkpoints:
             or target.get("kind") != "script"
             or target.get("secrets") != ["project/PIPELINE_CONTROL_KEY"]
             or any(target.get(k) for k in ("repositories", "mcp_servers", "variables"))
-            or json.loads(code["current"]["files"]["recovery_scope.json"])
+            or json.loads(code["current"]["files"][scope_files[0]])
             != {"owner": self.binding["owner"]}
         ):
             raise PolicyError("Recovery store scope/code differs from its binding")
@@ -644,6 +655,11 @@ def restore_checkpoint(
             and data.get("mode")
             in {"run", "crash", "retire", "retry-output", "reconcile-merges", "retry-integration"}
         )
+    allowed = allowed or (
+        bool(config.get("investigation"))
+        and data.get("action") == "investigate"
+        and data.get("operation") in {"prepare", "tick", "pause", "resume"}
+    )
     if getattr(checkpoints, "namespace", "delivery") == "service":
         allowed = data in (
             {"action": "service-test", "mode": "run"},
