@@ -250,7 +250,9 @@ class Journal:
             if any(e["kind"] == "launched" and e["data"]["intent"] == intent for e in prior):
                 raise PolicyError("Launch already recorded; reconcile existing identity")
             self._event(
-                run_id, "launched", {"intent": intent, "session_id": session_id, "turn_id": turn_id}
+                run_id,
+                "launched",
+                {"intent": intent, "session_id": session_id, "turn_id": turn_id, "at": time.time()},
             )
 
     def unknown_launch(self, run_id: str, intent: str):

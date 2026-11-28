@@ -430,6 +430,45 @@ class DeliveryTests(unittest.TestCase):
         self.assertEqual(self.http.created, 4)
         self.assertEqual(self.github.writes, [])
 
+    def test_worker_runtime_budget_uses_actual_turn_start_after_long_admission_wait(self):
+        def mutate(packet, observed):
+            observed["turn"].update(status="running", started_at="1970-01-01T00:16:40+00:00")
+
+        self.http.mutate = mutate
+        self.driver.step(self.run)
+        self.now = 1001
+        result = self.driver.step(self.run)
+        self.assertEqual(result["state"], "planning")
+        self.assertEqual(self.http.created, 1)
+        child = self.journal.connection.execute(
+            "SELECT id FROM runs WHERE id!=?", (self.run,)
+        ).fetchone()[0]
+        self.assertFalse(any(e["kind"] == "job_timeout" for e in self.journal.events(child)))
+
+    def test_timed_out_turn_must_be_definitively_terminal_before_bounded_retry(self):
+        def mutate(packet, observed):
+            observed["turn"].update(status="running", started_at="1970-01-01T00:01:40+00:00")
+
+        self.http.mutate = mutate
+        self.driver.step(self.run)
+        self.now = 400
+        with self.assertRaisesRegex(PolicyError, "timed out"):
+            self.driver.step(self.run)
+        with self.assertRaisesRegex(PolicyError, "still uncertain"):
+            self.driver.step(self.run)
+        self.assertEqual(self.http.created, 1)
+        observed = self.http.sessions["session-1"]["observation"]
+        observed["turn"].update(
+            status="failed", error="aborted", finished_at="1970-01-01T00:06:41+00:00"
+        )
+        result = self.driver.step(self.run)
+        self.assertEqual(result["protocol_failures"], 1)
+        self.assertEqual(result["plan_attempt"], 1)
+        self.assertEqual(self.http.created, 1)
+        self.http.mutate = lambda packet, observed: None
+        self.until("plan_review")
+        self.assertEqual(self.http.created, 2)
+
     def rejected_validation(self):
         self.until("validating")
 

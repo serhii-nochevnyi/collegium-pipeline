@@ -4,6 +4,7 @@ import base64
 import json
 import time
 from dataclasses import asdict
+from datetime import datetime
 
 from .domain import PolicyError, Selection, Task, select_model
 from .effort import probe_command, runtime_evidence, tool_result
@@ -172,7 +173,12 @@ class NativeJobs:
             e["kind"] == "checkout_rejected" for e in self.journal.events(job)
         ):
             raise CheckoutProtocolError("Completed worker checkout was rejected: " + job)
-        if run["state"] in {"failed", "reconciling"}:
+        events = self.journal.events(job)
+        timed_out = any(e["kind"] == "job_timeout" for e in events)
+        confirmed = any(e["kind"] == "launched" for e in events)
+        if run["state"] == "failed" or (
+            run["state"] == "reconciling" and not (timed_out and confirmed)
+        ):
             raise PolicyError("Worker needs reconciliation: " + job)
         if not run["pending_intent"]:
             agent, _ = self.http.request("GET", "/api/agents/" + binding.agent_id)
@@ -218,6 +224,44 @@ class NativeJobs:
             e["data"]["at"] for e in self.journal.events(job) if e["kind"] == "job_started"
         )
         observed = self.platform.observations(launch["session_id"], launch["turn_id"])
+        # Admission may precede a checkpoint outage by hours. A stage execution
+        # budget starts at its actual turn, never at an unstarted admission.
+        started = launch.get("at", started)
+        if observed["turn"].get("started_at"):
+            started = datetime.fromisoformat(
+                observed["turn"]["started_at"].replace("Z", "+00:00")
+            ).timestamp()
+        if (
+            timed_out
+            and observed["turn"]["status"] in {"failed", "cancelled"}
+            and observed["turn"].get("finished_at")
+        ):
+            if (
+                observed["session"].get("id") != launch["session_id"]
+                or observed["session"].get("agent_id") != binding.agent_id
+                or observed["session"].get("project_id") != binding.project_id
+                or observed["turn"].get("id") != launch["turn_id"]
+                or observed["turn"].get("session_id") != launch["session_id"]
+            ):
+                raise PolicyError("Timed-out worker terminal identity differs")
+            evidence = {
+                "observation_digest": self.artifacts.put(observed),
+                "reason": "Recorded timed-out turn is definitively terminal",
+                "session_id": launch["session_id"],
+                "turn_id": launch["turn_id"],
+            }
+            with self.journal.transaction():
+                if self.journal.get(job) != run:
+                    raise PolicyError("Timed-out worker changed during reconciliation")
+                self.journal.connection.execute(
+                    "UPDATE runs SET state='failed',pending_intent=NULL,version=version+1 "
+                    "WHERE id=?",
+                    (job,),
+                )
+                self.journal._event(job, "checkout_rejected", evidence)
+            raise CheckoutProtocolError("Definitively terminated timed-out worker: " + job)
+        if run["state"] == "reconciling":
+            raise PolicyError("Timed-out worker is still uncertain; no replacement allowed")
         if observed["turn"]["status"] in {"starting", "running"}:
             if self.clock() - started > self.config.get("max_stage_seconds", 180):
                 self.journal.record(job, "job_timeout", {})
