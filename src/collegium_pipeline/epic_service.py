@@ -409,6 +409,7 @@ def _run(event, state, config, environ, http, hooks, guard, legacy):
         "crash",
         "retire",
         "retry-output",
+        "reconcile-merges",
     }:
         raise PolicyError("Fixed epic service mode accepts no arbitrary event fields")
     if config["execution_enabled"] or config["broker_enabled"]:
@@ -493,6 +494,48 @@ def _run(event, state, config, environ, http, hooks, guard, legacy):
                 )
                 root = engine.admit(graph(scoped))["run_id"]
                 verified_base = baseline(engine, root, key)
+                if event["mode"] == "reconcile-merges":
+                    doc = engine.load(root)
+                    if doc.get("merge_metadata_reconciled"):
+                        print(
+                            "COLLEGIUM_EPIC_SERVICE_RESULT=" + json.dumps(inspect(engine, root)),
+                            flush=True,
+                        )
+                        return 0
+                    if doc["nodes"]["C"]["state"] not in {"queued", "blocked_dependency"}:
+                        raise PolicyError("Merge metadata correction cannot rewind active C")
+                    verified = {}
+                    for name in "AB":
+                        node = doc["nodes"][name]
+                        if (
+                            node["state"] != "blocked"
+                            or node["reason"] != "Merged prerequisite identity differs"
+                        ):
+                            raise PolicyError(
+                                "Merge correction requires the recorded metadata failure"
+                            )
+                        driver = engine.driver(node["run_id"])
+                        verified[name] = engine.merged(
+                            node["run_id"], driver._load(node["run_id"]), verified_base
+                        )
+                        if not verified[name]:
+                            raise PolicyError(
+                                "Original accepted prerequisite is not actually merged"
+                            )
+                    if engine.github_factory(root).ref(scoped["base_branch"]) != verified_base:
+                        raise PolicyError("Base moved while reconciling merge metadata")
+                    for name, evidence in verified.items():
+                        doc["nodes"][name].update(state="merged", reason=None, merged=evidence)
+                        engine.capacity.release(doc["nodes"][name]["run_id"])
+                    doc["nodes"]["C"].update(state="queued", reason="dependencies")
+                    doc.update(state="running", merge_metadata_reconciled=True)
+                    engine.save(root, doc)
+                    journal.checkpoint({"kind": "tick", "run_id": root})
+                    print(
+                        "COLLEGIUM_EPIC_SERVICE_RESULT=" + json.dumps(inspect(engine, root)),
+                        flush=True,
+                    )
+                    return 0
                 if event["mode"] == "retry-output":
                     doc = engine.load(root)
                     if spec.get("revision") != 2:

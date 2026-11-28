@@ -694,6 +694,32 @@ class EpicTests(unittest.TestCase):
         self.assertIn("closed without merge", result["nodes"]["A"]["reason"])
         self.assertEqual(result["nodes"]["C"]["state"], "blocked_dependency")
 
+    def test_removed_rest_merge_sha_requires_actual_merged_lifecycle_and_head_ancestry(self):
+        self.admit()
+        self.ready_ab()
+        for key in "AB":
+            self.merge(key)
+            child = self.engine.load(self.root)["nodes"][key]["run_id"]
+            self.repo(child).pr.pop("merge_commit_sha")
+        result = self.engine.step(self.root)
+        for key in "AB":
+            evidence = result["nodes"][key]["merged"]
+            self.assertIsNone(evidence["merge_commit"])
+            self.assertEqual(evidence["ancestry_proof"], "accepted_head")
+            self.assertEqual(evidence["contained_commit"], evidence["head"])
+        self.assertEqual(result["nodes"]["C"]["state"], "planning")
+
+    def test_removed_rest_merge_sha_never_accepts_uncontained_head(self):
+        self.admit()
+        self.ready_ab()
+        child = self.engine.load(self.root)["nodes"]["A"]["run_id"]
+        repo = self.repo(child)
+        repo.pr.update(state="closed", merged=True, merged_at="2026-11-28T12:00:00Z")
+        repo.pr.pop("merge_commit_sha", None)
+        result = self.engine.step(self.root)
+        self.assertEqual(result["nodes"]["A"]["state"], "blocked")
+        self.assertEqual(result["nodes"]["C"]["state"], "blocked_dependency")
+
     def test_shared_resource_stays_owned_until_merge_without_consuming_active_slot(self):
         self.graph["tickets"][1]["paths"] = self.graph["tickets"][0]["paths"]
         self.admit()
