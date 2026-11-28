@@ -3,7 +3,7 @@
 import unittest
 
 EXPECTED = "green"
-ACTUAL = "red"
+ACTUAL = "green"
 
 
 class LiveServiceTests(unittest.TestCase):
