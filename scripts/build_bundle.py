@@ -127,8 +127,12 @@ def build(config_path, integrations_path, output=DEFAULT_OUTPUT):
         "broker_allow_paused_triggers": True,
         "broker_compress_requests": True,
     }
-    data("controller/settings.json", settings)
-    data("controller/integrations.json", integrations)
+    # Generated runtime data stays compact within the executor's code.files ceiling.
+    write("controller/settings.json", json.dumps(settings, sort_keys=True, separators=(",", ":")))
+    write(
+        "controller/integrations.json",
+        json.dumps(integrations, sort_keys=True, separators=(",", ":")),
+    )
     script_files += [
         "controller/entry.py",
         "controller/settings.json",

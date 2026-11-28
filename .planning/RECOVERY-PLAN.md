@@ -62,3 +62,20 @@ to scope/models/CI gates through this operation. Correct service argv with PYTHO
 retain the complete test discovery. Explicit manual budget amendment records1m->1.5m.
 The real diagnostic then completed: PR3, initial red46073983075, repaired green46074131032;
 native fixer and fresh independent reviewer, main unchanged, all automations paused.
+
+Final result: full live repair acceptance completed and receipt persisted. Source fix27f71f5
+passed independent native Opus/high review and source CI46075020097, then shown plan
+d9ac1b08ea5746d1689ccbaed16a8daed46e4818c4afb01ff1b26e7a1c3d0067 applied.
+Installed exact23files/245022bytes/version9; all8 automations paused,8 worker and6 MCP
+bindings unchanged, production execution/broker false. No product pilot or merge.
+
+
+## Installed-bundle red/fix/green acceptance
+
+Current scope: execute the same full service cycle in Collegium, no local Delivery engine.
+Fixed service-test manual entry, isolated service state/checkpoint namespace, strict event
+ceiling and production flagsfalse. Existing native App gains only Actions run/job/log reads;
+no write ceiling/credentials change. Bound compressed log evidence and verify raw hashes.
+First prove read access without workers, then run bounded cloud slices manually while all
+automations remain paused; collect native model/effort, actual initial red assertion, fixer,
+fresh full validation/independent review and samePR green. Preserve all prior service proofs.

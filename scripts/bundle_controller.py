@@ -154,7 +154,7 @@ def cloud_delivery(event, state, config, config_path, environ, http, controller)
                 )
 
 
-def reconcile_controller(config, state, http, key):
+def reconcile_controller(config, state, http, key, *, namespace="delivery"):
     from collegium_pipeline.config import config_digest
     from collegium_pipeline.domain import Task
     from collegium_pipeline.native_broker import NativeGithubApp
@@ -180,7 +180,7 @@ def reconcile_controller(config, state, http, key):
             config_digest(config),
         )
         github = NativeGithubApp(config, http, scratch, root)
-        checkpoints = Checkpoints(config, http, key)
+        checkpoints = Checkpoints(config, http, key, namespace=namespace)
         head = checkpoints.head()
         downloaded = checkpoints.get() if head else None
         if downloaded and (state / "journal.sqlite3").is_file():
@@ -253,7 +253,7 @@ def recovered_attempts_accounted(prior, state, automation):
     return True
 
 
-def cloud_fence(event, state, environ, http, *, diagnostic=False):
+def cloud_fence(event, state, environ, http, *, diagnostic=False, service=False):
     """Refuse replay when the platform discarded a previous attempt's journal.
 
     Platform run history is outside the attempt snapshot. A receipt inside the
@@ -312,7 +312,11 @@ def cloud_fence(event, state, environ, http, *, diagnostic=False):
         unsafe = (
             data.get("action") == "state-probe" and data.get("mode") == "fenced-hold"
             if diagnostic
-            else data.get("action") == "deliver"
+            else (
+                data == {"action": "service-test", "mode": "run"}
+                if service
+                else data.get("action") == "deliver"
+            )
         )
         if unsafe and not (
             not diagnostic
@@ -334,6 +338,251 @@ def save_receipt(path, value):
     temporary = path.with_suffix(".tmp")
     temporary.write_text(json.dumps(value, sort_keys=True))
     temporary.replace(path)
+
+
+def cloud_service(event, state, config, environ, http):
+    """Manual, fixed one-file diagnostic; the same Delivery engine runs in Collegium."""
+    import time
+
+    from collegium_pipeline.config import config_digest
+    from collegium_pipeline.delivery import Delivery, serial_lock
+    from collegium_pipeline.domain import PolicyError, Task, digest
+    from collegium_pipeline.native_broker import NativeGithubApp
+    from collegium_pipeline.recovery import Checkpoints, ExternalRecoveryRequired, WriteAhead
+    from collegium_pipeline.store import Journal
+
+    if (
+        set(event) != {"action", "mode"}
+        or event["mode"] not in {"preflight", "run", "inspect"}
+        or config["execution_enabled"]
+        or config["broker_enabled"]
+        or config["allowed_paths"] != ["tests/test_live_service.py"]
+    ):
+        raise PolicyError("Only the fixed service diagnostic with disabled production is permitted")
+    identity = cloud_identity(environ)
+    owner = config["recovery_store"]["owner"]
+    automation, _ = http.request("GET", "/api/automations/" + owner)
+    if identity["automation_id"] != owner or automation["status"] != "paused":
+        raise PolicyError("Service diagnostic requires its paused installed controller")
+    scoped = {
+        **config,
+        "execution_enabled": True,
+        "broker_enabled": True,
+        "broker_reads": "native_script",
+    }
+    fixture = (
+        '"""Temporary PR-only fault injection for the Collegium delivery conveyor."""\n\n'
+        'import unittest\n\nEXPECTED = "green"\nACTUAL = "red"\n\n\n'
+        "class LiveServiceTests(unittest.TestCase):\n"
+        "    def test_service_phase(self):\n        self.assertEqual(ACTUAL, EXPECTED)\n"
+    )
+    for phase, content in (
+        ("initial", fixture),
+        ("repaired", fixture.replace('ACTUAL = "red"', 'ACTUAL = "green"')),
+    ):
+        if (
+            digest({"tests/test_live_service.py": content})
+            != config["service_test"][phase + "_changes_digest"]
+        ):
+            raise PolicyError("Installed service fixture digest differs")
+    requirements = (
+        "Authorized SERVICE diagnostic only; no Jira or product pilot. "
+        "Only change tests/test_live_service.py. Initial implementation MUST be byte-identical "
+        "to the following fixture, intentionally red. "
+        "Initial compile-only validation and reviews MUST accept this required fault injection. "
+        "Do not fix it before actual red Actions evidence appears in context.service_red.\n"
+        + fixture
+        + '\nAfter actual red CI evidence, fixing changes ONLY ACTUAL = "red" to ACTUAL = "green". '
+        "Preserve all other bytes and the assertion. Fresh full validation and independent review "
+        "accept only this repaired green variant at the exact head. Coordinator owns publication "
+        "and CI observation through its App. Same PR, leave open/non-draft/unmerged. "
+        "Never alter workflows, permissions, other files or create Jira. "
+        "Run both pinned commands VERBATIM as first two "
+        "tools; return only result_schema JSON without prose. This packet is authoritative even "
+        "when the checked-out baseline predates the installed coordinator."
+    )
+    state.mkdir(mode=0o700, parents=True, exist_ok=True)
+    key = environ["PIPELINE_CONTROL_KEY"]
+    if event["mode"] == "preflight":
+        journal = Journal(state / "reads.sqlite3")
+        try:
+            root = journal.admit(
+                Task(
+                    "text",
+                    "cloud-ci-reads-v1",
+                    config["repository"],
+                    "Service read preflight",
+                    "Read existing Actions logs only",
+                ),
+                config_digest(scoped),
+            )
+            github = NativeGithubApp(scoped, http, journal, root)
+            github.scope()
+            job = github.read("/actions/jobs/140757275431")
+            logs = github.logs(job["id"])
+            if (
+                job["conclusion"] != "failure"
+                or config["service_test"]["failure_signature"] not in logs
+            ):
+                raise PolicyError("Native App cannot verify the existing red assertion")
+            print(
+                json.dumps(
+                    {
+                        "native_ci_read_verified": True,
+                        "logs_digest": digest(logs),
+                        "job_id": job["id"],
+                        "agent_started": False,
+                    }
+                )
+            )
+            return 0
+        finally:
+            journal.close()
+    try:
+        receipt_path, receipt = cloud_fence(event, state, environ, http, service=True)
+    except ExternalRecoveryRequired:
+        reconcile_controller(scoped, state, http, key, namespace="service")
+        receipt_path, receipt = cloud_fence(event, state, environ, http, service=True)
+    with serial_lock(state / "journal.sqlite3"):
+        journal = Journal(state / "journal.sqlite3")
+        try:
+            if event["mode"] == "inspect":
+                rows = journal.connection.execute(
+                    "SELECT id FROM runs WHERE source_id='cloud-ci-repair-v1'"
+                ).fetchall()
+                if len(rows) != 1:
+                    raise PolicyError("No canonical cloud service admission to inspect")
+                root = rows[0][0]
+                if journal.get(root)["config_digest"] != config_digest(scoped):
+                    raise PolicyError("Cloud service configuration changed")
+            else:
+                root = journal.admit(
+                    Task(
+                        "text",
+                        "cloud-ci-repair-v1",
+                        config["repository"],
+                        "[Service diagnostic] Installed bundle red CI to green CI",
+                        requirements,
+                    ),
+                    config_digest(scoped),
+                )
+            driver = Delivery(
+                scoped,
+                journal,
+                NativeGithubApp(scoped, http, journal, root),
+                http,
+                state / "artifacts",
+            )
+            if event["mode"] == "run":
+                journal.before_effect = WriteAhead(
+                    scoped,
+                    journal,
+                    state / "artifacts",
+                    Checkpoints(scoped, http, key, namespace="service"),
+                    identity,
+                ).save
+                until = time.monotonic() + 480
+                while time.monotonic() < until:
+                    journal.before_effect({"kind": "tick", "run_id": root})
+                    result = driver.step(root)
+                    print(
+                        json.dumps(
+                            {
+                                k: result.get(k)
+                                for k in (
+                                    "run_id",
+                                    "state",
+                                    "head",
+                                    "cycle",
+                                    "repairs",
+                                    "pr",
+                                    "tokens",
+                                )
+                            }
+                        ),
+                        flush=True,
+                    )
+                    if result["state"] in {"ready_for_acceptance", "blocked", "failed"}:
+                        break
+                    time.sleep(3)
+                journal.before_effect({"kind": "tick", "run_id": root})
+            result = driver._load(root)
+            if not result:
+                raise PolicyError("Cloud service has no accepted delivery tick yet")
+            workers = []
+            for row in journal.connection.execute(
+                "SELECT id FROM runs WHERE source_id LIKE ?", (root + ":%",)
+            ):
+                child_events = journal.events(row[0])
+                for e in child_events:
+                    if e["kind"] == "worker_completed":
+                        r = driver.artifacts.get(e["data"]["artifact_digest"])
+                        workers.append(
+                            {
+                                "sequences": {
+                                    x["kind"]: x["sequence"]
+                                    for x in child_events
+                                    if x["kind"] in {"job_started", "launched", "worker_completed"}
+                                },
+                                **{
+                                    k: r.get(k)
+                                    for k in (
+                                        "job_key",
+                                        "stage",
+                                        "verdict",
+                                        "revision",
+                                        "commands",
+                                        "runtime_evidence",
+                                        "observed_tokens",
+                                    )
+                                },
+                            }
+                        )
+            summary = {
+                k: result.get(k)
+                for k in (
+                    "state",
+                    "head",
+                    "base",
+                    "branch",
+                    "cycle",
+                    "repairs",
+                    "pr",
+                    "tokens",
+                    "delivered",
+                    "ci_green",
+                    "service_red",
+                    "service_initial_head",
+                    "reason",
+                )
+            }
+            root_events = journal.events(root)
+            red = [e for e in root_events if e["kind"] == "service_red_verified"]
+            summary["red_verified_sequence"] = red[0]["sequence"] if red else None
+            ci = [e for e in root_events if e["kind"] == "delivery_ci_observed"]
+            if ci:
+                summary["ci_receipt"] = ci[-1]["data"]
+            print(
+                "COLLEGIUM_SERVICE_RESULT="
+                + json.dumps(
+                    {
+                        **summary,
+                        "run_id": root,
+                        "config_digest": config_digest(scoped),
+                        "workers": workers,
+                        "cloud_identity": identity,
+                        "controller_host": "Collegium installed bundle",
+                        "integrity": journal.connection.execute(
+                            "PRAGMA integrity_check"
+                        ).fetchone()[0],
+                    }
+                ),
+                flush=True,
+            )
+            return 2 if result["state"] in {"blocked", "failed"} else 0
+        finally:
+            save_receipt(receipt_path, receipt)
+            journal.close()
 
 
 def state_probe(event, state, config, environ, http):
@@ -825,6 +1074,14 @@ def main(event=None, *, root=None, environ=None, http=None):
             raise PolicyError("Controller Vault key is required for recovery probe")
         http = http or JsonHttp(config["server"], {"X-Api-Key": key})
         return recovery_probe(event, state / "recovery-diagnostics", config, environ, http)
+    if action == "service-test":
+        from collegium_pipeline.transport import JsonHttp
+
+        key = environ.get("PIPELINE_CONTROL_KEY")
+        if not key:
+            raise PolicyError("Service diagnostic requires the controller Vault key")
+        http = http or JsonHttp(config["server"], {"X-Api-Key": key})
+        return cloud_service(event, state / "cloud-service", config, environ, http)
     if action == "reconcile":
         if event != {"action": "reconcile"}:
             raise PolicyError("Reconciliation accepts no event-selected identities or payloads")

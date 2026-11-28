@@ -2,7 +2,7 @@
 
 import unittest
 from types import SimpleNamespace
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 from collegium_pipeline.domain import PolicyError
 from collegium_pipeline.service_test import failure_evidence
@@ -59,6 +59,17 @@ class ServiceFailureTests(unittest.TestCase):
         self.assertEqual((result["pr_number"], result["head"]), (4, self.head))
         self.assertEqual((result["run_id"], result["job_id"]), (7, 8))
         self.assertEqual(len(result["logs_digest"]), 64)
+
+    def test_cloud_uses_only_native_app_reads_and_logs(self):
+        app = Mock()
+        app.read.side_effect = [self.job, self.run]
+        app.logs.return_value = "test_service_phase: AssertionError: red"
+        self.config["broker_reads"] = "native_script"
+        with patch("collegium_pipeline.service_test.subprocess.run") as local:
+            result = failure_evidence(self.config, self.doc, [self.check], self.ci, github=app)
+        local.assert_not_called()
+        app.logs.assert_called_once_with(8)
+        self.assertEqual(result["head"], self.head)
 
     def test_other_assertion_or_wrong_job_revision_cannot_authorize_repair(self):
         with self.assertRaises(PolicyError):

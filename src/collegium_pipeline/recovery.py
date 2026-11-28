@@ -48,7 +48,7 @@ class Checkpoints:
         self, config, http, key, *, namespace="delivery", clock=time.monotonic, pause=time.sleep
     ):
         self.config, self.http, self.key = config, http, key
-        if namespace not in {"delivery", "diagnostic"}:
+        if namespace not in {"delivery", "diagnostic", "service"}:
             raise PolicyError("Unknown recovery namespace")
         self.namespace = namespace
         self.binding = config.get("recovery_store")
@@ -538,6 +538,8 @@ def restore_checkpoint(
     prior, _ = http.request("GET", "/api/automations/" + owner + "/runs/" + identity["run_id"])
     data = prior.get("item", {}).get("event", {}).get("data") or {}
     allowed = data.get("action") == ("recovery-probe" if diagnostic else "deliver")
+    if getattr(checkpoints, "namespace", "delivery") == "service":
+        allowed = data == {"action": "service-test", "mode": "run"}
     attempts = prior.get("attempts") or []
     if (
         prior.get("automation_id") != owner

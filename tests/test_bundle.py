@@ -80,6 +80,146 @@ class BundleTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertFalse(json.loads(result.stdout)["agent_started"])
 
+    def test_cloud_service_rejects_scope_payload_before_any_network(self):
+        config = json.loads((self.path / "controller/settings.json").read_text())
+        for event in (
+            {"action": "service-test", "mode": "run", "changes": {}},
+            {"action": "service-test", "mode": "unknown"},
+        ):
+            http = unittest.mock.Mock()
+            with self.assertRaises(PolicyError):
+                ENTRY_MODULE["cloud_service"](event, self.path / "state", config, {}, http)
+            http.request.assert_not_called()
+
+    def test_manual_cloud_service_uses_delivery_engine_and_inspects_without_duplicates(self):
+        from test_delivery import DeliveryTests as Harness
+
+        from collegium_pipeline.domain import digest
+
+        fixture = Harness()
+        fixture.setUp()
+        try:
+            config = copy.deepcopy(fixture.config)
+            config.update(
+                execution_enabled=False,
+                broker_enabled=False,
+                allowed_paths=["tests/test_live_service.py"],
+                recovery_store={"owner": "aut_owner"},
+            )
+            # This diagnostic uses the approved immutable red/green fixture.
+            text = (
+                '"""Temporary PR-only fault injection for the Collegium delivery conveyor."""\n\n'
+                'import unittest\n\nEXPECTED = "green"\nACTUAL = "red"\n\n\n'
+                "class LiveServiceTests(unittest.TestCase):\n"
+                "    def test_service_phase(self):\n        self.assertEqual(ACTUAL, EXPECTED)\n"
+            )
+            config["service_test"] = {
+                "initial_changes_digest": digest({"tests/test_live_service.py": text}),
+                "repaired_changes_digest": digest(
+                    {
+                        "tests/test_live_service.py": text.replace(
+                            'ACTUAL = "red"', 'ACTUAL = "green"'
+                        )
+                    }
+                ),
+                "failure_signature": "AssertionError",
+                "test_name": "test_service_phase",
+                "check_name": "test",
+            }
+
+            def mutate(packet, observed):
+                if packet["stage"] in {"implementing", "fixing"}:
+                    r = json.loads(observed["turn"]["answer"])
+                    content = (
+                        text
+                        if packet["stage"] == "implementing"
+                        else text.replace('ACTUAL = "red"', 'ACTUAL = "green"')
+                    )
+                    r["payload"]["changes"] = {"tests/test_live_service.py": content}
+                    observed["turn"]["answer"] = json.dumps(r)
+
+            fixture.http.mutate = mutate
+            event = {"action": "service-test", "mode": "run"}
+            environ = {
+                "LAP_AUTOMATION_ID": "aut_owner",
+                "LAP_RUN_ID": "run_cloud",
+                "LAP_ATTEMPT_ID": "att_cloud",
+                "PIPELINE_CONTROL_KEY": "fixture-only",
+            }
+
+            class Cloud:
+                history = []
+
+                def request(self, method, path, payload=None, **kwargs):
+                    if path == "/api/automations/aut_owner":
+                        return {"status": "paused"}, {}
+                    row = {
+                        "id": environ["LAP_RUN_ID"],
+                        "automation_id": "aut_owner",
+                        "status": "running",
+                        "attempts": [
+                            {"id": environ["LAP_ATTEMPT_ID"], "n": 1, "status": "running"}
+                        ],
+                        "item": {"event": {"data": event.copy()}},
+                    }
+                    if path == "/api/automations/aut_owner/runs?limit=100":
+                        return {"runs": [row, *self.history]}, {}
+                    if path == "/api/automations/aut_owner/runs/" + row["id"]:
+                        return row, {}
+                    for old in self.history:
+                        if path.endswith("/runs/" + old["id"]):
+                            return old, {}
+                    return fixture.http.request(method, path, payload, **kwargs)
+
+            http, snapshots = Cloud(), []
+            with (
+                patch(
+                    "collegium_pipeline.native_broker.NativeGithubApp", return_value=fixture.github
+                ),
+                patch("collegium_pipeline.recovery.Checkpoints"),
+                patch(
+                    "collegium_pipeline.recovery.WriteAhead",
+                    return_value=unittest.mock.Mock(save=snapshots.append),
+                ),
+                patch("collegium_pipeline.delivery.failure_evidence", fixture.service_failure),
+                patch("time.sleep"),
+                contextlib.redirect_stdout(io.StringIO()) as output,
+            ):
+                result = ENTRY_MODULE["cloud_service"](
+                    event, self.path / "state", config, environ, http
+                )
+                self.assertEqual(result, 0)
+                summary = json.loads(output.getvalue().split("COLLEGIUM_SERVICE_RESULT=")[-1])
+                self.assertEqual(summary["state"], "ready_for_acceptance")
+                self.assertEqual(summary["repairs"], 1)
+                self.assertEqual(len(summary["workers"]), 8)
+                self.assertGreater(len(snapshots), 8)
+                created, writes = fixture.http.created, len(fixture.github.writes)
+                http.history = [
+                    {
+                        "id": "run_cloud",
+                        "automation_id": "aut_owner",
+                        "status": "succeeded",
+                        "attempts": [{"id": "att_cloud", "n": 1, "status": "succeeded"}],
+                        "item": {"event": {"data": event.copy()}},
+                    }
+                ]
+                event["mode"] = "inspect"
+                environ.update(LAP_RUN_ID="run_inspect", LAP_ATTEMPT_ID="att_inspect")
+                self.assertEqual(
+                    ENTRY_MODULE["cloud_service"](
+                        event, self.path / "state", config, environ, http
+                    ),
+                    0,
+                )
+                self.assertEqual(
+                    (fixture.http.created, len(fixture.github.writes)), (created, writes)
+                )
+            self.assertFalse(config["execution_enabled"])
+            self.assertFalse(config["broker_enabled"])
+        finally:
+            fixture.tearDown()
+
     def test_github_probe_rejects_caller_selected_payloads_before_network(self):
         for event in (
             {"action": "recovery-probe", "mode": "github-commit", "changes": {"bad": "data"}},

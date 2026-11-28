@@ -1,7 +1,10 @@
+import base64
 import copy
+import hashlib
 import json
 import tempfile
 import unittest
+import zlib
 from pathlib import Path
 from unittest.mock import patch
 
@@ -115,6 +118,24 @@ class NativeTransportTests(unittest.TestCase):
         self.assertEqual(row["id"], 123)
         self.assertEqual(self.transport.scope()["credential_location"], "native_egress_proxy")
         self.assertEqual(self.platform.submissions, 1)
+
+    def test_native_logs_verify_digest_expansion_and_no_gh_fallback(self):
+        app = NativeGithubApp(self.config, self.platform, self.journal, self.run)
+        raw = b"test_service_phase: AssertionError: red"
+        self.platform.reply = {
+            "encoding": "zlib-base64",
+            "data": base64.b64encode(zlib.compress(raw)).decode(),
+            "sha256": hashlib.sha256(raw).hexdigest(),
+        }
+        with patch("subprocess.run") as local:
+            self.assertEqual(app.logs(12), raw.decode())
+            local.assert_not_called()
+        self.platform.reply["sha256"] = "0" * 64
+        with self.assertRaises(PolicyError):
+            app.logs(12)
+        self.platform.reply["data"] = base64.b64encode(zlib.compress(b"x" * 2_000_001)).decode()
+        with self.assertRaises(PolicyError):
+            app.logs(12)
 
     def test_code_or_connection_drift_blocks_before_dispatch(self):
         self.platform.code["current"]["files"]["native_github_broker.py"] = "changed"

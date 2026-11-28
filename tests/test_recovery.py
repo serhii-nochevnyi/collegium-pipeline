@@ -141,6 +141,26 @@ class AgentsHttp:
 
 
 class RecoveryTests(unittest.TestCase):
+    def test_service_checkpoint_namespace_is_isolated_and_unknown_names_refused(self):
+        with tempfile.TemporaryDirectory() as folder:
+            for namespace in ("delivery", "diagnostic", "service"):
+                event = {
+                    "action": "head",
+                    "namespace": namespace,
+                    "owner": "aut_owner",
+                    "request_id": uuid4().hex,
+                }
+                result = STORE(
+                    {**event, "mac": mac(event, "fixture-key")}, folder, "aut_owner", "fixture-key"
+                )
+                self.assertIsNone(result["head"])
+                self.assertTrue((Path(folder) / namespace).is_dir())
+            event = {**event, "namespace": "../delivery"}
+            with self.assertRaises(ValueError):
+                STORE(
+                    {**event, "mac": mac(event, "fixture-key")}, folder, "aut_owner", "fixture-key"
+                )
+
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()
         self.path = Path(self.tmp.name)

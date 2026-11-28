@@ -321,7 +321,7 @@ class DeliveryTests(unittest.TestCase):
         )
 
     @staticmethod
-    def service_failure(config, doc, checks, ci):
+    def service_failure(config, doc, checks, ci, **kwargs):
         return {
             "pr_number": doc["pr"]["number"],
             "head": doc["head"],

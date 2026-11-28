@@ -1,3 +1,32 @@
+# In progress: installed Collegium bundle red/fix/green acceptance (no local controller)
+
+User explicitly authorized actual cloud service cycle, no pilot, all automations paused.
+Fixed service-test preflight/run/inspect entry reuses Delivery inside installed controller;
+all state/stage decisions/native workers/App writes/CI reads stay in Collegium. Manual
+Run now repeats bounded eight-minute slices only when the prior cloud run has ended.
+Service journal/fence/checkpoint namespace isolated from production and earlier diagnostics.
+Native App gains only read-only Actions run/job/log endpoints; bounded compressed logs
+with SHA256 and exact failing assertion, no gh/host-credential fallback in cloud.
+Production flagsfalse. Original App write path, worker/model/MCP scopes unchanged.
+Predicted new broker/store code digests frozen in source config; install must update
+controller+broker+store together before executing the new service. Local tests156 green
+including full same-engine cloud fixture/replay, strict payload scope, native-only log
+evidence and tamper/expansion limits, namespace isolation; real bundle validation passed.
+Packaged JSON compacted (same values) to keep code.files <=256000 bytes.
+Source publication/review/installation pending. No new service admission/worker/PR yet.
+
+--- Previous completed proof below ---
+
+# Completed: live red CI -> native fixer -> green CI; corrected bundle installed paused
+
+Current installed source27f71f50a2ffd2ad296f40017406f4d89512fc37, installation ins_c70812fb10c042028e414bb01285f56b synced, plan d9ac1b08ea5746d1689ccbaed16a8daed46e4818c4afb01ff1b26e7a1c3d0067 applied after it was shown. Exact live controller code match23files/245022bytes/version9.8 worker fingerprints/private model connection and6 read-only MCP bindings verified, native App scope unchanged. All8 automations paused; production execution/brokerfalse. No pilot/Jira/merge/deploy/main write. Native independent source-fix review PASS at exact27f71f5, Opus5.5/high, ses_e3b03f5e523d4a5ba45b1311ab65fa86/run_8b20bd659098467a85b951900a73442f.150 local tests,41 delivery regressions, Ruff and real bundle validator pass; source PR1 green CI46075020097, still open/unmerged.
+
+Primary receipt reports/ci-repair-live-verification.json includes actual red/fixer/green, rejected validation+config amendment, exact singlePR/twocommits, source review and installed verification. Service PR3 remains open/non-draft/unmerged at afcbfb4f53a7cd2214cd187fec7b482f36436515, green CI46074131032 after initial red46073983075 at c5276ea200baf08d5982f9c4a6bf94d856d935a9. Root d604c82e-1571-49fd-96de-c31dbedab7aa ready_for_acceptance/deliveredfalse. Native Sonnet5.5/low fixer after confirmed red, new74-test validator, independent Opus5.5/high review. Real controller was MANUAL LOCAL Delivery with native cloud workers/App and local gh CI reads; do not claim scheduled cloud execution or cloud CI-log reading. Original frozen config and bad validator preserved; explicit validated operator correction records PYTHONPATH=src and service budget1m->1.5m with rejected98925 usage, same root/branch/PR. Final usage1302278 including cache. Original9attempts =8accepted/1rejected; no replacement on unknown launch. Source-fix review is a separate explicit read-only review.
+
+Source update used existing exact93-path v5 App publisher, original aa342ea3-1f93-482c-bda3-50d0eb480bbc in .local/bundle-publish.sqlite3, immutable cycle7 payload .local/ci-repair-source-changes.json. Next cycle8 only for NEW changes. Never alter completed identities, source publisher scopes or historical frozen admissions. Local final report/this STATE supplement were written after publication; no new source commit needed just to update their self-reference.
+
+--- Historical snapshots below ---
+
 # Completed live PR red -> native fixer -> green CI; bundle correction pending publication
 
 Service root d604c82e-1571-49fd-96de-c31dbedab7aa reached ready_for_acceptance, delivered=false. SAME PR3 https://github.com/serhii-nochevnyi/collegium-pipeline/pull/3 remains open/unmerged, App actor, exactly two commits and one PR across all states. Initial c5276ea200baf08d5982f9c4a6bf94d856d935a9 quality46073983075 failed with expected assertion; green afcbfb4f53a7cd2214cd187fec7b482f36436515 quality46074131032 passed. One-line ACTUAL red->green only, main unchanged. Fixer native Sonnet5.5/low started AFTER actual red proof; independent native Opus5.5/high reviewer passed repaired head. Full74 baseline tests passed in new native validator. Manual local Delivery coordinator, native private-Claude workers, native App writes, local gh read-only CI observation. All8 automations paused, installed execution/broker flagsfalse, no pilot/Jira/merge. Receipt reports/ci-repair-live-verification.json.

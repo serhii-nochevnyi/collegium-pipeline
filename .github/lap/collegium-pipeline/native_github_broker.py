@@ -89,7 +89,7 @@ def check_scope(scope, request):
     suffix = decoded[len(prefix) :]
     if method == "GET":
         if not re.fullmatch(
-            r"(?:|/git/(?:ref/heads/.+|commits/[0-9a-f]{40}|trees/[0-9a-f]{40})|/pulls(?:/\d+)?|/commits/[0-9a-f]{40}/(?:check-runs|statuses)|/check-runs/\d+/annotations)",
+            r"(?:|/git/(?:ref/heads/.+|commits/[0-9a-f]{40}|trees/[0-9a-f]{40})|/pulls(?:/\d+)?|/commits/[0-9a-f]{40}/(?:check-runs|statuses)|/check-runs/\d+/annotations|/actions/(?:runs/\d+|jobs/\d+(?:/logs)?))",
             suffix,
         ):
             raise ValueError("Read endpoint is not permitted")
@@ -141,6 +141,54 @@ def http_request(method, path, payload=None):
     )
     body, status = result.stdout.rsplit("\n", 1)
     return int(status), json.loads(body) if body else {}
+
+
+def job_logs(path):
+    # curl never forwards credentials on redirects; the native egress proxy owns auth.
+    # Only this fixed Actions endpoint may return text instead of JSON.
+    with tempfile.TemporaryDirectory(prefix="collegium-logs-") as folder:
+        target = Path(folder) / "logs"
+        result = subprocess.run(
+            [
+                "curl",
+                "--silent",
+                "--show-error",
+                "--location",
+                "--max-redirs",
+                "3",
+                "--proto",
+                "=https",
+                "--proto-redir",
+                "=https",
+                "--max-time",
+                "45",
+                "--max-filesize",
+                "2000000",
+                "--output",
+                str(target),
+                "--write-out",
+                "%{http_code}",
+                "https://api.github.com" + path,
+            ],
+            capture_output=True,
+            text=True,
+            timeout=50,
+            check=True,
+        )
+        status = int(result.stdout)
+        if status != 200:
+            return status, {"code": "actions_logs_unavailable"}
+        raw = target.read_bytes()
+        if len(raw) > 2_000_000:
+            raise ValueError("Actions logs exceed the diagnostic limit")
+        packed = base64.b64encode(zlib.compress(raw, 9)).decode()
+        if len(packed) > 50_000:
+            raise ValueError("Compressed Actions logs exceed the response limit")
+        return 200, {
+            "encoding": "zlib-base64",
+            "data": packed,
+            "sha256": hashlib.sha256(raw).hexdigest(),
+        }
 
 
 def decode_changes(scope, payload):
@@ -251,6 +299,8 @@ def publish_commit(scope, payload):
 
 def execute(scope, request):
     check_scope(scope, request)
+    if request["method"] == "GET" and request["path"].endswith("/logs"):
+        return job_logs(request["path"])
     if request["method"] == "GIT_COMMIT":
         return publish_commit(scope, request["payload"])
     return http_request(request["method"], request["path"], request.get("payload"))

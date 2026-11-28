@@ -20,7 +20,7 @@ def candidate_gate(config, doc, changes):
         )
 
 
-def failure_evidence(config, doc, checks, ci):
+def failure_evidence(config, doc, checks, ci, *, github=None):
     """Read-only gh diagnostics; all writes still use the separate native App broker."""
     gate = config["service_test"]
     failed_ids = {f["id"] for f in ci["failures"]}
@@ -41,7 +41,8 @@ def failure_evidence(config, doc, checks, ci):
     if not match:
         raise PolicyError("Service failing job has an unverified GitHub Actions URL")
     run_id, job_id = map(int, match.groups())
-    github = Github(config["repository"])
+    native = github is not None and config.get("broker_reads") != "local_gh"
+    github = github if native else Github(config["repository"])
     job = github.read(f"/actions/jobs/{job_id}")
     run = github.read(f"/actions/runs/{run_id}")
     if (
@@ -57,16 +58,22 @@ def failure_evidence(config, doc, checks, ci):
         or run.get("event") != "pull_request"
     ):
         raise PolicyError("Service failure job/run/repository revision differs")
-    result = subprocess.run(
-        ["gh", "api", f"repos/{config['repository']}/actions/jobs/{job_id}/logs"],
-        capture_output=True,
-        text=True,
-        timeout=45,
-        check=False,
-    )
-    if result.returncode or len(result.stdout) > 2_000_000:
-        raise PolicyError("Service failure logs unavailable or exceed the diagnostic limit")
-    if not all(s in result.stdout for s in (gate["failure_signature"], gate["test_name"])):
+    if native:
+        logs = github.logs(job_id)
+    else:
+        result = subprocess.run(
+            ["gh", "api", f"repos/{config['repository']}/actions/jobs/{job_id}/logs"],
+            capture_output=True,
+            text=True,
+            timeout=45,
+            check=False,
+        )
+        if result.returncode:
+            raise PolicyError("Service failure logs unavailable")
+        logs = result.stdout
+    if len(logs.encode()) > 2_000_000:
+        raise PolicyError("Service failure logs exceed the diagnostic limit")
+    if not all(s in logs for s in (gate["failure_signature"], gate["test_name"])):
         raise PolicyError("Red CI did not fail on the authorized service assertion")
     return {
         "pr_number": doc["pr"]["number"],
@@ -74,7 +81,7 @@ def failure_evidence(config, doc, checks, ci):
         "run_id": run_id,
         "job_id": job_id,
         "check_id": check["id"],
-        "logs_digest": digest(result.stdout),
+        "logs_digest": digest(logs),
         "failure_signature": gate["failure_signature"],
         "url": check["details_url"],
     }

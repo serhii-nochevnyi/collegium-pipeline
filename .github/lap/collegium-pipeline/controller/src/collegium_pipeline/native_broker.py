@@ -1,6 +1,7 @@
 """GitHub App brokerage through a pinned, manual-only Collegium script executor."""
 
 import base64
+import hashlib
 import json
 import time
 import zlib
@@ -197,6 +198,24 @@ class NativeGithubApp(GithubApp):
 
     def read(self, path=""):
         return self.reader.read(path) if self.reader else super().read(path)
+
+    def logs(self, job_id):
+        if type(job_id) is not int or job_id <= 0 or self.reader:
+            raise PolicyError("Cloud Actions logs require the native App reader")
+        value = self.read(f"/actions/jobs/{job_id}/logs")
+        if value.get("encoding") != "zlib-base64" or len(value.get("data", "")) > 50_000:
+            raise PolicyError("Invalid native log response")
+        decoder = zlib.decompressobj()
+        raw = decoder.decompress(base64.b64decode(value["data"], validate=True), 2_000_001)
+        if (
+            len(raw) > 2_000_000
+            or not decoder.eof
+            or decoder.unused_data
+            or decoder.unconsumed_tail
+            or hashlib.sha256(raw).hexdigest() != value["sha256"]
+        ):
+            raise PolicyError("Native Actions logs are incomplete or changed")
+        return raw.decode("utf-8")
 
     def ref(self, branch):
         if not self.reader:

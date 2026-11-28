@@ -37,7 +37,7 @@ def handle(event, root, owner, key):
     ):
         raise ValueError("Checkpoint owner or request identity differs")
     namespace = event.get("namespace")
-    if namespace not in {"delivery", "diagnostic"}:
+    if namespace not in {"delivery", "diagnostic", "service"}:
         raise ValueError("Invalid checkpoint namespace")
     root = Path(root) / namespace
     root.mkdir(mode=0o700, parents=True, exist_ok=True)

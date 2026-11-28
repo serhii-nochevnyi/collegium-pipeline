@@ -490,7 +490,9 @@ class Delivery:
                 if config.get("service_test") and doc["cycle"] == 0:
                     if doc["head"] != doc.get("service_initial_head"):
                         raise PolicyError("Service initial PR revision changed")
-                    doc["service_red"] = failure_evidence(config, doc, checks, ci)
+                    doc["service_red"] = failure_evidence(
+                        config, doc, checks, ci, github=self.github
+                    )
                     self.journal.record(run_id, "service_red_verified", doc["service_red"])
                     ci["service_assertion"] = doc["service_red"]
                 self._repair(run_id, doc, ci, ci["fingerprint"])

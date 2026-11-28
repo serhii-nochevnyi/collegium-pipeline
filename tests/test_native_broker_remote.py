@@ -64,6 +64,15 @@ class NativeBrokerScopeTests(unittest.TestCase):
             with self.subTest(path=path), self.assertRaises(ValueError):
                 broker.check_scope(SCOPE, {"method": "GET", "path": path})
 
+    def test_actions_read_scope_does_not_allow_mutations_or_secrets(self):
+        for path in ("/actions/jobs/12", "/actions/jobs/12/logs", "/actions/runs/13"):
+            broker.check_scope(SCOPE, {"method": "GET", "path": "/repos/owner/repo" + path})
+            with self.assertRaises(ValueError):
+                broker.check_scope(SCOPE, {"method": "POST", "path": "/repos/owner/repo" + path})
+        for path in ("/actions/secrets", "/actions/runs/13/rerun", "/actions/jobs/../logs"):
+            with self.assertRaises(ValueError):
+                broker.check_scope(SCOPE, {"method": "GET", "path": "/repos/owner/repo" + path})
+
     def test_default_branch_and_arbitrary_mutations_are_refused(self):
         for request in (
             {

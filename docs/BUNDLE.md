@@ -189,3 +189,26 @@ correction before admitting a fresh validation attempt on the same candidate and
 Running, unknown or unobserved launches cannot be replaced. Task, scope, worker bindings,
 credentials and CI requirements cannot change through this command. This is an explicit
 operator correction, not automatic acceptance or an automatic budget increase.
+
+
+## Manual installed-bundle CI repair diagnostic
+
+On the paused installed controller, invoke `{"action":"service-test","mode":"preflight"}`
+to prove actual native GitHub App access to an existing failing Actions job and bounded logs,
+without launching a worker. `mode: "run"` runs the fixed one-file red/fix/green contract
+using the normal Delivery engine entirely in Collegium. No event-selected task, payload,
+model, command or scope is accepted. Global execution/broker settings must remain false.
+The controller itself derives authority only for this fixed service diagnostic.
+
+A cloud run works for a bounded eight-minute slice and emits `COLLEGIUM_SERVICE_RESULT`.
+If still running, invoke the same manual input again after the previous run has ended;
+state, stage decisions, workers, App writes, Actions observation and signed write-ahead
+checkpoints remain in Collegium. `mode: "inspect"` reads the canonical admission without
+launching workers or publishing. The service state/checkpoint namespace is isolated from
+production delivery and prior interruption diagnostics. Lost attempts require the same
+external reconciliation and replay fence as ordinary cloud delivery. Never resume schedules
+or choose a product pilot to run this diagnostic.
+
+CI job/run metadata and compressed logs are read through the native App broker with
+repository/endpoint restrictions, bounded decoding and SHA-256 verification. The cloud
+path has no host gh fallback, exported GitHub token or desktop state machine.

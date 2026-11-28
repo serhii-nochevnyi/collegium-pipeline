@@ -168,7 +168,7 @@
   "broker_transport": "collegium_script",
   "native_broker": {
     "automation_id": "aut_5b17ddca92424243b1feb5aa8732a7a0",
-    "approved_digest": "fe91045a1fe7a7175953233af7e6d4944e81cd94fc276147d0d917fa2b144a65"
+    "approved_digest": "7951aec41a4da709b17de119457b9149a821ec34620bd9023395d40f73867038"
   },
   "model_policy": "claude",
   "model_connection": "project/claude-code-subscription",
@@ -198,6 +198,6 @@
   "recovery_store": {
     "automation_id": "aut_3a938ace3b15451585f1ed87f166625f",
     "owner": "aut_2ea6d08b772f41d5a9fa236cb19f93d8",
-    "approved_digest": "cd7736107a49d5858c8b7e7e5fb21b1d5d1176d54797cee76bafa62228cf4ed8"
+    "approved_digest": "92c41331de0f14cd8999a58c6483580121f29b404e282d154331a25086ac2af0"
   }
 }
