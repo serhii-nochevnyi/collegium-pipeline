@@ -559,7 +559,7 @@ def cloud_service(event, state, config, environ, http):
             root_events = journal.events(root)
             red = [e for e in root_events if e["kind"] == "service_red_verified"]
             summary["red_verified_sequence"] = red[0]["sequence"] if red else None
-            ci = [e for e in root_events if e["kind"] == "delivery_ci_observed"]
+            ci = [e for e in root_events if e["kind"] == "ci_observed"]
             if ci:
                 summary["ci_receipt"] = ci[-1]["data"]
             print(

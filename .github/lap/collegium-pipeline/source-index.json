@@ -30,7 +30,7 @@
     "controller/src/collegium_pipeline/service_test.py": "8d806f188c1f735349ba984bcd609ef052d2e5367517efb28bfcfd8d2ea52699",
     "controller/src/collegium_pipeline/store.py": "133bb02cae7ec38bfab0f04531b4a6224cd236741cbb302d5792aff490c33f03",
     "controller/src/collegium_pipeline/transport.py": "33c56e666dc263974739c4f7f3e83601e0724898a8c98bedfa95f97709fd816c",
-    "controller/entry.py": "4b46f9a901a10ef5ef10144b3e7711320f991aed427b77e5f94177a0e7e35ebb",
+    "controller/entry.py": "788cf6d2853bcc18d2145eed09aafdb12caeb539f85ca016eee135c256a4d568",
     "controller/settings.json": "100e4c20dc24ed67124cfd1bb9eeff25a91c1540f87fcf0057f3ab5707213684",
     "controller/integrations.json": "98252ae6efb7e386e2d9669c9b6a90c3f79e68baba70bbd8c6bb7efb2d3a9fe0",
     "native_github_broker.py": "696da141e58e0d0e97d1d58f2db0d0475a08136775cb8b7bb9d308bf609f54b7",
