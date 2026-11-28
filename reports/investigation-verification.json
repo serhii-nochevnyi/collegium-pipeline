@@ -1,0 +1,2860 @@
+{
+  "schema_version": "investigation-verification/v1",
+  "status": "verified",
+  "installed": {
+    "source_commit": "a85e025938a775d1a293ab59ef7503a9ea6e2313",
+    "installation_id": "ins_c70812fb10c042028e414bb01285f56b",
+    "controllers": {
+      "pipeline-controller": {
+        "id": "aut_2ea6d08b772f41d5a9fa236cb19f93d8",
+        "version": 26,
+        "files": 7,
+        "bytes": 217758,
+        "code_matches_bundle": true
+      },
+      "pipeline-investigate": {
+        "id": "aut_3725cac20b4a46e398a005b0199da7bf",
+        "version": 5,
+        "files": 5,
+        "bytes": 199910,
+        "code_matches_bundle": true
+      },
+      "pipeline-investigation-recovery-v1": {
+        "id": "aut_be700e7e2ba241e99dc611f6025db54d",
+        "version": 1,
+        "files": 2,
+        "bytes": 5947,
+        "code_matches_bundle": true
+      }
+    },
+    "workers": {
+      "code_reviewer": {
+        "id": "agent_15d9dc28b6e24e42a97961dbc461648f",
+        "model": "opus",
+        "effort": "high",
+        "harness": "claude-code",
+        "digest": "e3bbc0bdd165f392819b6a195f5a511cd4b4ebeaa171e6abfc824beaa2923a0a"
+      },
+      "executor": {
+        "id": "agent_4c9ad221e4294286a9b82f194a5e2846",
+        "model": "sonnet",
+        "effort": "low",
+        "harness": "claude-code",
+        "digest": "505ee317dc997083ae96e68afaffdfe829a87649795d83ec316ac6a18463ab64"
+      },
+      "fixer": {
+        "id": "agent_127613e3ee2e456b9c3ac97dfcd409a1",
+        "model": "sonnet",
+        "effort": "low",
+        "harness": "claude-code",
+        "digest": "85a98cb2628de0cec813a26c18539e411d96159e2b072dffbc8749f0103b1d83"
+      },
+      "fixer:high": {
+        "id": "agent_22d9cdd3069a43048729138f8fc28077",
+        "model": "sonnet",
+        "effort": "high",
+        "harness": "claude-code",
+        "digest": "a78559d242b8f4b9ababb179e96d8c3e503be7395c0649573c8d6fe1350964c7"
+      },
+      "fixer:max": {
+        "id": "agent_1251aa2533df492e9029bd922a59718b",
+        "model": "opus",
+        "effort": "max",
+        "harness": "claude-code",
+        "digest": "b799f016d3cbabde00fa3a36607cb145f77d6e88001f4632545d685701aaa9f9"
+      },
+      "plan_reviewer": {
+        "id": "agent_8eade93c03414f50bd6eb40263d8beb3",
+        "model": "opus",
+        "effort": "high",
+        "harness": "claude-code",
+        "digest": "43c0c430face8815823c9405abcdbc9aa75294c3a7a5fdd196ed8c8693b041d4"
+      },
+      "planner": {
+        "id": "agent_9c74ac49c7fa4989843c984ed2cd40a1",
+        "model": "opus",
+        "effort": "high",
+        "harness": "claude-code",
+        "digest": "4f839e27d4975dfd96345cb130a631581c98865f0394a54d4483a45f1eda7e69"
+      },
+      "sentinel": {
+        "id": "agent_b717ef1a1fdd453baf06086731aa2861",
+        "model": "sonnet",
+        "effort": "medium",
+        "harness": "claude-code",
+        "digest": "9dc2a685909ec1fea3ca7481fd32f401dab21b81652005cbe887945ee1534676"
+      },
+      "assessor:sonnet:low": {
+        "id": "agent_e6c4312d769542c7991a1e929cb747e2",
+        "model": "sonnet",
+        "effort": "low",
+        "harness": "claude-code",
+        "digest": "10107e61204f154aaa8f3aef364fb232c82d3020c0a382f6aca1d27d3fcf67f3"
+      },
+      "investigation_reviewer:opus:high": {
+        "id": "agent_837fd64a4a404e4cb7083dcd96b8d1be",
+        "model": "opus",
+        "effort": "high",
+        "harness": "claude-code",
+        "digest": "2df363f2aae6a618be2c9a1af7162d5a470e5931251644c0a6c1dd72eea3d0d4"
+      },
+      "investigation_reviewer:opus:max": {
+        "id": "agent_9962745668164f2da7f67cde66b7f01b",
+        "model": "opus",
+        "effort": "max",
+        "harness": "claude-code",
+        "digest": "363dfa87ad24f364c9fd5e22f0bc18198c19cc64d23d1f486034fa76df1a048f"
+      },
+      "researcher:opus:high": {
+        "id": "agent_14af9e044c694ef2a000403697e1d34a",
+        "model": "opus",
+        "effort": "high",
+        "harness": "claude-code",
+        "digest": "e5ca2adbf7db701ad2fade7b1408fcb3307a777729650258d0285503f94215c7"
+      },
+      "researcher:opus:max": {
+        "id": "agent_539f3ea98be843ae8661836e21709d73",
+        "model": "opus",
+        "effort": "max",
+        "harness": "claude-code",
+        "digest": "7bfe056e3cddc811196553d20621c250f5e84bd5b6252c8d33216b3527aaeccc"
+      },
+      "researcher:sonnet:high": {
+        "id": "agent_97d920664bc94c17b5af2e94d7f4c69c",
+        "model": "sonnet",
+        "effort": "high",
+        "harness": "claude-code",
+        "digest": "aca29cdb317bf0e51a12e68e5192d4418b81eb81429832d784ee287e478331c6"
+      },
+      "researcher:sonnet:low": {
+        "id": "agent_b52cb7974bfc43ca870eb62dbc3bd6cf",
+        "model": "sonnet",
+        "effort": "low",
+        "harness": "claude-code",
+        "digest": "926ea8436c2629fe2e08755ba8e38459a752bf621b364efe1e491b51860697f8"
+      },
+      "synthesizer:opus:high": {
+        "id": "agent_41793dad7afe41b8bf8841823b89a4c6",
+        "model": "opus",
+        "effort": "high",
+        "harness": "claude-code",
+        "digest": "4daf32fd2cf790bc88a2811aa13420eddda70d802940786c2fd67fa88cb93e06"
+      },
+      "synthesizer:opus:max": {
+        "id": "agent_f4f165760f6b455a8e15b6bcb862101a",
+        "model": "opus",
+        "effort": "max",
+        "harness": "claude-code",
+        "digest": "b86e15ddbb7bc9774d76cca32dda6568b1cec67bbb55568704fe47258b782a26"
+      },
+      "synthesizer:sonnet:high": {
+        "id": "agent_696712237d5e4d31b1f156fc6d9147da",
+        "model": "sonnet",
+        "effort": "high",
+        "harness": "claude-code",
+        "digest": "6ddbce676f54206f6a64988f28cc5f9b821e5c857787876d635c9e46c6593916"
+      }
+    },
+    "component_pins": {
+      "aut_5b17ddca92424243b1feb5aa8732a7a0": "23b418abee71bcbccd04f0b490e2472730085a9f713f1f77607f2501ccf9ca81",
+      "aut_3a938ace3b15451585f1ed87f166625f": "92c41331de0f14cd8999a58c6483580121f29b404e282d154331a25086ac2af0",
+      "aut_25092aee432946ceade2ea4c6bc2a2d7": "66dd3ffb35d5010244ca4a9ab303a86f4ff0d0ab7da4711e792651e04a99e69c",
+      "aut_0631ecd7ec2b4ae9a166f9f9b2b9ed77": "04c341be9d0a8d9c6078514ee52676176928b9bf210aa0603141537cad557877",
+      "aut_56e599d0747448479acb75f385baf23e": "8c92a7ea707234d9e9f6b2bce63f8b5103ddeedd8d66fca68defc71e6c9f22e4",
+      "aut_be700e7e2ba241e99dc611f6025db54d": "72a79a648ae335ef09776b3cd698a5f1c582bf86cfe2852d255d938f5096247c"
+    },
+    "historical_service_profile_preserved": true,
+    "execution_enabled": false,
+    "broker_enabled": false,
+    "automations": [
+      {
+        "id": "aut_a4c51e456cf34206b0f6424f7f000359",
+        "name": "pipeline-github-app-read-probe-v1",
+        "status": "paused"
+      },
+      {
+        "id": "aut_5b17ddca92424243b1feb5aa8732a7a0",
+        "name": "pipeline-native-broker-1474663859-v1",
+        "status": "paused"
+      },
+      {
+        "id": "aut_c7077fff758947d2b9413f5eb9ddbd8d",
+        "name": "pipeline-native-broker-1474663859-v2",
+        "status": "paused"
+      },
+      {
+        "id": "aut_144094f5a49446a1b4de7f8f531d55d9",
+        "name": "pipeline-native-broker-1474663859-v3",
+        "status": "paused"
+      },
+      {
+        "id": "aut_2ea6d08b772f41d5a9fa236cb19f93d8",
+        "name": "pipeline-controller",
+        "status": "paused"
+      },
+      {
+        "id": "aut_e98e1ccb28594a938ec7d9815bda7cd5",
+        "name": "pipeline-native-broker-1474663859-v4",
+        "status": "paused"
+      },
+      {
+        "id": "aut_3a938ace3b15451585f1ed87f166625f",
+        "name": "pipeline-recovery-store-v1",
+        "status": "paused"
+      },
+      {
+        "id": "aut_f7e1268b1afe4af5a24d942a5e993166",
+        "name": "pipeline-native-broker-1474663859-v5",
+        "status": "paused"
+      },
+      {
+        "id": "aut_c6f07e880ec84a5b89be65fcfdf2ecf0",
+        "name": "pipeline-native-broker-1474663859-v6",
+        "status": "paused"
+      },
+      {
+        "id": "aut_f9fdd52da91645df87973a0030ddec26",
+        "name": "pipeline-native-broker-1474663859-v7",
+        "status": "paused"
+      },
+      {
+        "id": "aut_25092aee432946ceade2ea4c6bc2a2d7",
+        "name": "pipeline-native-broker-1474663859-v8",
+        "status": "paused"
+      },
+      {
+        "id": "aut_be7d79c9081f4cbcaabdc088e601b151",
+        "name": "pipeline-native-broker-1474663859-v9",
+        "status": "paused"
+      },
+      {
+        "id": "aut_0631ecd7ec2b4ae9a166f9f9b2b9ed77",
+        "name": "pipeline-native-broker-1474663859-v10-staged",
+        "status": "paused"
+      },
+      {
+        "id": "aut_56e599d0747448479acb75f385baf23e",
+        "name": "pipeline-epic-service-recovery-v1-staged",
+        "status": "paused"
+      },
+      {
+        "id": "aut_7fd83fe573ae469e9cc85078a08d9b22",
+        "name": "pipeline-native-broker-1474663859-v11",
+        "status": "paused"
+      },
+      {
+        "id": "aut_36f681afc0314a1da669c65c0f7e2232",
+        "name": "pipeline-plan-read-diagnostic-v1",
+        "status": "paused"
+      },
+      {
+        "id": "aut_1ee6cbd4ae774aa78ee66f8cc8c99277",
+        "name": "pipeline-native-broker-1474663859-v12",
+        "status": "paused"
+      },
+      {
+        "id": "aut_36b47cb10c754e6bae7dc15d670e0fee",
+        "name": "pipeline-native-broker-1474663859-v13",
+        "status": "paused"
+      },
+      {
+        "id": "aut_87f62b4cfdb54045ac7449685191853e",
+        "name": "pipeline-native-broker-1474663859-v14",
+        "status": "paused"
+      },
+      {
+        "id": "aut_33e6c3a8267041e4ba26326d2dcf93bb",
+        "name": "pipeline-native-broker-1474663859-v15",
+        "status": "paused"
+      },
+      {
+        "id": "aut_3725cac20b4a46e398a005b0199da7bf",
+        "name": "pipeline-investigate-staged",
+        "status": "paused"
+      },
+      {
+        "id": "aut_be700e7e2ba241e99dc611f6025db54d",
+        "name": "pipeline-investigation-recovery-v1-staged",
+        "status": "paused"
+      },
+      {
+        "id": "aut_d1ddffaa83ba4d999566b0b761b5ba75",
+        "name": "pipeline-native-broker-1474663859-v16",
+        "status": "paused"
+      }
+    ]
+  },
+  "ci": {
+    "head": "a85e025938a775d1a293ab59ef7503a9ea6e2313",
+    "run_id": 46171500734,
+    "url": "https://github.com/serhii-nochevnyi/collegium-pipeline/actions/runs/46171500734",
+    "conclusion": "success",
+    "tests": 315
+  },
+  "tests": {
+    "investigation": 26,
+    "delivery_regression": 56,
+    "recovery_regression": 23,
+    "epic_regression": 93,
+    "bundle": 29,
+    "config": 8,
+    "private_claude_platform": 10
+  },
+  "native_preflight": {
+    "repository_id": 1474663859,
+    "repository": "serhii-nochevnyi/collegium-pipeline",
+    "worker_bindings_verified": 10,
+    "agent_started": false,
+    "runtime_effort_verified": false,
+    "automation_resumed": false,
+    "publication_allowed": false
+  },
+  "duplicate_admission": {
+    "same_run_id": true,
+    "same_catalog": true,
+    "agent_launches": 0
+  },
+  "negative_validation_command_gate": {
+    "run_id": "11f671e8-ee63-4be2-aa18-0113884a800b",
+    "assessment": "c8862bd72b728d669a337e63285933eeda137b68b551497cea25075849612ad9",
+    "attempts": {},
+    "decision_approved": false,
+    "delivered": false,
+    "head": "e9ae4b520d78dc38a40e2910e11a4557e3215cfd",
+    "intake": {
+      "constraints": [
+        "Read-only synthetic service diagnostic; no product pilot, Jira, PR or GitHub mutation.",
+        "Any proposed follow-up is documentation only under docs/; no runtime, persistence, security, API, concurrency or deployment changes.",
+        "Use only registered excerpts as facts. Do not assume access to external MCP observations. Leave genuine unknowns explicit; do not invent questions."
+      ],
+      "head": "e9ae4b520d78dc38a40e2910e11a4557e3215cfd",
+      "risk_flags": [],
+      "sources": [
+        {
+          "end": 96,
+          "path": "docs/INVESTIGATE.md",
+          "start": 60
+        }
+      ],
+      "task": {
+        "repository": "serhii-nochevnyi/collegium-pipeline",
+        "requirements": "Synthetic bundle acceptance diagnostic, not a product pilot. Using only the registered documentation excerpts, compare two ways of presenting ready_for_decision and needs_input to an operator: a brief terminal-state table or a paragraph. Recommend a documentation-only presentation. Produce an inert proposed ADR and one or two documentation-check tickets, without implementation, export or approval. Cover facts, alternative tradeoffs, risks, assumptions and questions. This is a narrow editorial question; assess each complexity dimension for that exact scope rather than the entire pipeline.",
+        "source": "text",
+        "source_id": "investigation-service-documentation-v1",
+        "title": "Read-only service diagnostic: document investigation terminal states"
+      }
+    },
+    "paused": false,
+    "reason": "Proposed validation must retain configured commands",
+    "rejections": [],
+    "research": {
+      "alternatives": "48c94ce43e95d936cf2fbf4c6b64c1e3bc4ad8765367a8db9c6abceea6ebc94b",
+      "constraints": "a04b4fd9e40491ad88d953ee8428f3e5b54dcc8cad72b3039a403dd200f621d4",
+      "current_system": "ef14771cedbd34c4c01089269e2b9d01950606e0e00a315187877c11a3c89b17",
+      "risks": "6bd981853b746c5c17c2501b2e93b927a6d250ba525de85eb876af4cd8d401ad"
+    },
+    "results": {
+      "assessing": "3095b45fccdf3e7d4a0d1ffb6f8047cc87fb6eb05f3c51662707eeb04f013c02",
+      "researching:alternatives": "48c94ce43e95d936cf2fbf4c6b64c1e3bc4ad8765367a8db9c6abceea6ebc94b",
+      "researching:constraints": "a04b4fd9e40491ad88d953ee8428f3e5b54dcc8cad72b3039a403dd200f621d4",
+      "researching:current_system": "ef14771cedbd34c4c01089269e2b9d01950606e0e00a315187877c11a3c89b17",
+      "researching:risks": "6bd981853b746c5c17c2501b2e93b927a6d250ba525de85eb876af4cd8d401ad",
+      "synthesizing": "8faeec7f8adcaa986656a7c74e3dec05e3d1143e4b72e5d54c0f66fe9db6d275"
+    },
+    "review": null,
+    "revision": 1,
+    "settlement": {
+      "pending": [],
+      "settled": [],
+      "tokens": 0
+    },
+    "sources": "6e2c66c09f651799b175d95dcd81d26349698e0217897baf8547fcdc9117a438",
+    "state": "blocked",
+    "synthesis": null,
+    "tokens": 623748,
+    "unaccepted_tokens": 0,
+    "workers": [
+      {
+        "job": "ff332507-c454-4276-a202-0e0ec7f4b19a",
+        "key": "11f671e8-ee63-4be2-aa18-0113884a800b:investigation:assessing:1:0",
+        "state": "worker_completed",
+        "at": 1795886551.335753,
+        "intent": "f33c28df-fbc3-4acd-b35d-eda9d0bfc1c6",
+        "session_id": "ses_fa8fd0e3f175452aa8b4bd933f3dc58e",
+        "turn_id": "run_366e644994c0427cb2a7497faeac2453"
+      },
+      {
+        "job": "ea3e86b3-629a-4e00-bcf0-14b7886bcb1f",
+        "key": "11f671e8-ee63-4be2-aa18-0113884a800b:investigation:researching:current_system:1:0",
+        "state": "worker_completed",
+        "at": 1795886624.4488075,
+        "intent": "dd33f221-5249-4ea0-983c-ffadb915186d",
+        "session_id": "ses_da4974618a8940fd8137cdbce9deb655",
+        "turn_id": "run_f47a0783e3d54476acf3c1a998a6404e"
+      },
+      {
+        "job": "f8240701-cd91-4f9a-9871-7c11bc232d93",
+        "key": "11f671e8-ee63-4be2-aa18-0113884a800b:investigation:researching:alternatives:1:0",
+        "state": "worker_completed",
+        "at": 1795886633.3076992,
+        "intent": "a63820ce-30af-4bfe-ac14-5402d7071afc",
+        "session_id": "ses_480c4dfcee344d3da32f70d3a0103b38",
+        "turn_id": "run_f4439461b6a94001a8bdca96cf38750b"
+      },
+      {
+        "job": "28e514ee-78c8-4fc3-9746-079408b9e5a3",
+        "key": "11f671e8-ee63-4be2-aa18-0113884a800b:investigation:researching:constraints:1:0",
+        "state": "worker_completed",
+        "at": 1795886665.3345208,
+        "intent": "1641cc95-4571-4de6-b081-73b1727f8877",
+        "session_id": "ses_c462bc450e7749b48f3055d8a7cafcd2",
+        "turn_id": "run_c5a4e19474ed45d5b68c70eb73d479c2"
+      },
+      {
+        "job": "3bd87044-9a35-4bc8-a996-6bd513ea166a",
+        "key": "11f671e8-ee63-4be2-aa18-0113884a800b:investigation:researching:risks:1:0",
+        "state": "worker_completed",
+        "at": 1795886697.2163553,
+        "intent": "03b0376a-2b23-46b8-bdc4-2a6777658c7e",
+        "session_id": "ses_c206a79f8f374200943c99e03b78d9f9",
+        "turn_id": "run_65527e90e57e4bc29c4016329004b4ab"
+      },
+      {
+        "job": "f0525d2e-dbca-4651-8542-8da29a777b78",
+        "key": "11f671e8-ee63-4be2-aa18-0113884a800b:investigation:synthesizing:1:0",
+        "state": "worker_completed",
+        "at": 1795886776.7935133,
+        "intent": "e26fd83e-0a46-426f-80a2-c6734b8bce17",
+        "session_id": "ses_73e5861a619b42fcbd9aa0c0cea5d4f5",
+        "turn_id": "run_daa11002fb5d4306ac9e874ecf618ca0"
+      }
+    ],
+    "complexity_assessment": {
+      "complexity": "simple",
+      "confidence": 0.85,
+      "dimensions": {
+        "concurrency": {
+          "evidence": {
+            "citations": [
+              {
+                "end": 61,
+                "quote": "`status`, `pause` and `resume` accept exactly `action`, `operation`, `run_id`.\n`tick` additionally requires `live:true`. Each tick observes existing turns and may",
+                "source_id": "017d615abd7db3c11dace405b1de37f36ea180243498f7250d41de0e60e2db8d",
+                "start": 60
+              }
+            ],
+            "text": "Presenting two terminal states in a table or a paragraph involves no concurrent behavior. Run-level pause and tick semantics are not touched."
+          },
+          "score": 0
+        },
+        "contracts": {
+          "evidence": {
+            "citations": [
+              {
+                "end": 93,
+                "quote": "remains. Both return `decision_approved:false` and `delivered:false`. Human acceptance,\nJira export and delivery admission are separate future actions. Defaults allow 16 jobs,",
+                "source_id": "017d615abd7db3c11dace405b1de37f36ea180243498f7250d41de0e60e2db8d",
+                "start": 92
+              }
+            ],
+            "text": "The documentation must keep the contract that both terminal states return decision_approved:false and delivered:false. The follow-up changes only docs wording and does not change any API."
+          },
+          "score": 1
+        },
+        "persistence": {
+          "evidence": {
+            "citations": [
+              {
+                "end": 92,
+                "quote": "Success ends at `ready_for_decision`, or `needs_input` when any blocking question\nremains. Both return `decision_approved:false` and `delivered:false`. Human acceptance,",
+                "source_id": "017d615abd7db3c11dace405b1de37f36ea180243498f7250d41de0e60e2db8d",
+                "start": 91
+              }
+            ],
+            "text": "The follow-up is documentation text only and changes no checkpoints or run state. The existing documented state handling is out of scope."
+          },
+          "score": 0
+        },
+        "scope": {
+          "evidence": {
+            "citations": [
+              {
+                "end": 92,
+                "quote": "Success ends at `ready_for_decision`, or `needs_input` when any blocking question\nremains. Both return `decision_approved:false` and `delivered:false`. Human acceptance,",
+                "source_id": "017d615abd7db3c11dace405b1de37f36ea180243498f7250d41de0e60e2db8d",
+                "start": 91
+              }
+            ],
+            "text": "The question is narrow and editorial. It covers only how the two terminal states, ready_for_decision and needs_input, are presented, and one registered excerpt defines them."
+          },
+          "score": 1
+        },
+        "security": {
+          "evidence": {
+            "citations": [
+              {
+                "end": 61,
+                "quote": "`status`, `pause` and `resume` accept exactly `action`, `operation`, `run_id`.\n`tick` additionally requires `live:true`. Each tick observes existing turns and may",
+                "source_id": "017d615abd7db3c11dace405b1de37f36ea180243498f7250d41de0e60e2db8d",
+                "start": 60
+              }
+            ],
+            "text": "A documentation-only wording change under docs/ touches no credentials or access. The run-level controls it describes are unchanged by it."
+          },
+          "score": 0
+        },
+        "uncertainty": {
+          "evidence": {
+            "citations": [
+              {
+                "end": 81,
+                "quote": "This first slice registers Git evidence only. External documentation, Jira, MCP and\nDEV/PROD observations are not independently ingested into its evidence catalog yet;\nunverified external claims must remain assumptions or open questions. Existing bundle",
+                "source_id": "017d615abd7db3c11dace405b1de37f36ea180243498f7250d41de0e60e2db8d",
+                "start": 79
+              }
+            ],
+            "text": "The terminal-state semantics are documented. Claims about external documentation and MCP observations are not ingested, so they stay assumptions. This task does not depend on them."
+          },
+          "score": 1
+        }
+      },
+      "evidence_digest": "5fbd44ab19384b007238bcbb9a2a0798b864ae0893991be2ff8b20cb775557f2",
+      "rationale": "This is a narrow, documentation-only editorial choice between a brief table and a paragraph. Scope, uncertainty and contracts each score 1 because the wording must stay faithful to the two terminal states and their false approval and delivery flags. Security, persistence and concurrency score 0 because no runtime, storage or access change is proposed. The coordinator imposes risk floors.",
+      "routing_reason": {
+        "dimension_floors": {},
+        "minimum": "simple",
+        "policy": "investigation-policy/v1",
+        "risk_floors": []
+      },
+      "score": 3
+    },
+    "stage_evidence": {
+      "assessing": {
+        "verdict": "pass",
+        "revision": {
+          "acceptance_digest": "ee506f6c35bdf55bd1a238a95d3194175e790212f522a5117ef18f442b320d60",
+          "base": "e9ae4b520d78dc38a40e2910e11a4557e3215cfd",
+          "config_digest": "b7140e2fdc96d405898bfed6f7874f4180b1f07c842931435f61e09446510dcf",
+          "head": "e9ae4b520d78dc38a40e2910e11a4557e3215cfd"
+        },
+        "session_id": "ses_fa8fd0e3f175452aa8b4bd933f3dc58e",
+        "runtime_evidence": {
+          "agent_id": "agent_e6c4312d769542c7991a1e929cb747e2",
+          "command_digest": "419021bec18b972b5b5e9ec44658eeb4996f504eeab3cda4c8f051a4bbd9f6b4",
+          "command_normalization": "same_python_ast_and_pinned_shell_frame",
+          "effort": "low",
+          "effort_verification": "explicit_launch_argument_and_supported_served_model",
+          "harness": "claude-code",
+          "harness_release": "claude-code-2.1.289-9162edd4",
+          "model": "sonnet",
+          "model_connection_id": "mcn_699c8e51528e4438a359acfd4dced40f",
+          "process_id": 8,
+          "proof_kind": "first_tool_claude_code_process_arguments",
+          "provider_internal_reasoning_verified": false,
+          "runtime": "aranarium-aws",
+          "served_model": "claude-sonnet-5-5",
+          "session_id": "ses_fa8fd0e3f175452aa8b4bd933f3dc58e",
+          "tool_result_event_id": "evt_01M8HJW8ABYA6VQ4YJ7P1RC9C1",
+          "tool_use_id": "toolu_01F8Um1UDWnDT32sRHoAHdpn",
+          "turn_id": "run_366e644994c0427cb2a7497faeac2453",
+          "verified_by_platform": true
+        },
+        "observed_tokens": 112192
+      },
+      "researching:alternatives": {
+        "verdict": "pass",
+        "revision": {
+          "acceptance_digest": "ee506f6c35bdf55bd1a238a95d3194175e790212f522a5117ef18f442b320d60",
+          "base": "e9ae4b520d78dc38a40e2910e11a4557e3215cfd",
+          "config_digest": "b7140e2fdc96d405898bfed6f7874f4180b1f07c842931435f61e09446510dcf",
+          "head": "e9ae4b520d78dc38a40e2910e11a4557e3215cfd"
+        },
+        "session_id": "ses_480c4dfcee344d3da32f70d3a0103b38",
+        "runtime_evidence": {
+          "agent_id": "agent_b52cb7974bfc43ca870eb62dbc3bd6cf",
+          "command_digest": "419021bec18b972b5b5e9ec44658eeb4996f504eeab3cda4c8f051a4bbd9f6b4",
+          "command_normalization": "same_python_ast_and_pinned_shell_frame",
+          "effort": "low",
+          "effort_verification": "explicit_launch_argument_and_supported_served_model",
+          "harness": "claude-code",
+          "harness_release": "claude-code-2.1.289-9162edd4",
+          "model": "sonnet",
+          "model_connection_id": "mcn_699c8e51528e4438a359acfd4dced40f",
+          "process_id": 7,
+          "proof_kind": "first_tool_claude_code_process_arguments",
+          "provider_internal_reasoning_verified": false,
+          "runtime": "aranarium-aws",
+          "served_model": "claude-sonnet-5-5",
+          "session_id": "ses_480c4dfcee344d3da32f70d3a0103b38",
+          "tool_result_event_id": "evt_01M8HJYRESXVCPRJ9T61J4XHKE",
+          "tool_use_id": "toolu_01Rdg8JtGQK2CXkEQyYC4Ynm",
+          "turn_id": "run_f4439461b6a94001a8bdca96cf38750b",
+          "verified_by_platform": true
+        },
+        "observed_tokens": 68336
+      },
+      "researching:constraints": {
+        "verdict": "pass",
+        "revision": {
+          "acceptance_digest": "ee506f6c35bdf55bd1a238a95d3194175e790212f522a5117ef18f442b320d60",
+          "base": "e9ae4b520d78dc38a40e2910e11a4557e3215cfd",
+          "config_digest": "b7140e2fdc96d405898bfed6f7874f4180b1f07c842931435f61e09446510dcf",
+          "head": "e9ae4b520d78dc38a40e2910e11a4557e3215cfd"
+        },
+        "session_id": "ses_c462bc450e7749b48f3055d8a7cafcd2",
+        "runtime_evidence": {
+          "agent_id": "agent_b52cb7974bfc43ca870eb62dbc3bd6cf",
+          "command_digest": "419021bec18b972b5b5e9ec44658eeb4996f504eeab3cda4c8f051a4bbd9f6b4",
+          "command_normalization": "same_python_ast_and_pinned_shell_frame",
+          "effort": "low",
+          "effort_verification": "explicit_launch_argument_and_supported_served_model",
+          "harness": "claude-code",
+          "harness_release": "claude-code-2.1.289-9162edd4",
+          "model": "sonnet",
+          "model_connection_id": "mcn_699c8e51528e4438a359acfd4dced40f",
+          "process_id": 7,
+          "proof_kind": "first_tool_claude_code_process_arguments",
+          "provider_internal_reasoning_verified": false,
+          "runtime": "aranarium-aws",
+          "served_model": "claude-sonnet-5-5",
+          "session_id": "ses_c462bc450e7749b48f3055d8a7cafcd2",
+          "tool_result_event_id": "evt_01M8HJZQ5F7KPV5PGEK4AXX0RV",
+          "tool_use_id": "toolu_01YFUKzFAdd71UUGRBTKKrWU",
+          "turn_id": "run_c5a4e19474ed45d5b68c70eb73d479c2",
+          "verified_by_platform": true
+        },
+        "observed_tokens": 114710
+      },
+      "researching:current_system": {
+        "verdict": "pass",
+        "revision": {
+          "acceptance_digest": "ee506f6c35bdf55bd1a238a95d3194175e790212f522a5117ef18f442b320d60",
+          "base": "e9ae4b520d78dc38a40e2910e11a4557e3215cfd",
+          "config_digest": "b7140e2fdc96d405898bfed6f7874f4180b1f07c842931435f61e09446510dcf",
+          "head": "e9ae4b520d78dc38a40e2910e11a4557e3215cfd"
+        },
+        "session_id": "ses_da4974618a8940fd8137cdbce9deb655",
+        "runtime_evidence": {
+          "agent_id": "agent_b52cb7974bfc43ca870eb62dbc3bd6cf",
+          "command_digest": "419021bec18b972b5b5e9ec44658eeb4996f504eeab3cda4c8f051a4bbd9f6b4",
+          "command_normalization": "same_python_ast_and_pinned_shell_frame",
+          "effort": "low",
+          "effort_verification": "explicit_launch_argument_and_supported_served_model",
+          "harness": "claude-code",
+          "harness_release": "claude-code-2.1.289-9162edd4",
+          "model": "sonnet",
+          "model_connection_id": "mcn_699c8e51528e4438a359acfd4dced40f",
+          "process_id": 7,
+          "proof_kind": "first_tool_claude_code_process_arguments",
+          "provider_internal_reasoning_verified": false,
+          "runtime": "aranarium-aws",
+          "served_model": "claude-sonnet-5-5",
+          "session_id": "ses_da4974618a8940fd8137cdbce9deb655",
+          "tool_result_event_id": "evt_01M8HJYFC8T3WX7SAJDRA7FX0J",
+          "tool_use_id": "toolu_0142LNGn5MpujmVh9mbDgJMj",
+          "turn_id": "run_f47a0783e3d54476acf3c1a998a6404e",
+          "verified_by_platform": true
+        },
+        "observed_tokens": 113863
+      },
+      "researching:risks": {
+        "verdict": "pass",
+        "revision": {
+          "acceptance_digest": "ee506f6c35bdf55bd1a238a95d3194175e790212f522a5117ef18f442b320d60",
+          "base": "e9ae4b520d78dc38a40e2910e11a4557e3215cfd",
+          "config_digest": "b7140e2fdc96d405898bfed6f7874f4180b1f07c842931435f61e09446510dcf",
+          "head": "e9ae4b520d78dc38a40e2910e11a4557e3215cfd"
+        },
+        "session_id": "ses_c206a79f8f374200943c99e03b78d9f9",
+        "runtime_evidence": {
+          "agent_id": "agent_b52cb7974bfc43ca870eb62dbc3bd6cf",
+          "command_digest": "419021bec18b972b5b5e9ec44658eeb4996f504eeab3cda4c8f051a4bbd9f6b4",
+          "command_normalization": "same_python_ast_and_pinned_shell_frame",
+          "effort": "low",
+          "effort_verification": "explicit_launch_argument_and_supported_served_model",
+          "harness": "claude-code",
+          "harness_release": "claude-code-2.1.289-9162edd4",
+          "model": "sonnet",
+          "model_connection_id": "mcn_699c8e51528e4438a359acfd4dced40f",
+          "process_id": 8,
+          "proof_kind": "first_tool_claude_code_process_arguments",
+          "provider_internal_reasoning_verified": false,
+          "runtime": "aranarium-aws",
+          "served_model": "claude-sonnet-5-5",
+          "session_id": "ses_c206a79f8f374200943c99e03b78d9f9",
+          "tool_result_event_id": "evt_01M8HK0QCFX6R8JTS6KCPMT8GQ",
+          "tool_use_id": "toolu_01XAJ2pXYnZqi8HrESpqLL3D",
+          "turn_id": "run_65527e90e57e4bc29c4016329004b4ab",
+          "verified_by_platform": true
+        },
+        "observed_tokens": 68308
+      },
+      "synthesizing": {
+        "verdict": "pass",
+        "revision": {
+          "acceptance_digest": "ee506f6c35bdf55bd1a238a95d3194175e790212f522a5117ef18f442b320d60",
+          "base": "e9ae4b520d78dc38a40e2910e11a4557e3215cfd",
+          "config_digest": "b7140e2fdc96d405898bfed6f7874f4180b1f07c842931435f61e09446510dcf",
+          "head": "e9ae4b520d78dc38a40e2910e11a4557e3215cfd"
+        },
+        "session_id": "ses_73e5861a619b42fcbd9aa0c0cea5d4f5",
+        "runtime_evidence": {
+          "agent_id": "agent_696712237d5e4d31b1f156fc6d9147da",
+          "command_digest": "419021bec18b972b5b5e9ec44658eeb4996f504eeab3cda4c8f051a4bbd9f6b4",
+          "command_normalization": "same_python_ast_and_pinned_shell_frame",
+          "effort": "high",
+          "effort_verification": "explicit_launch_argument_and_supported_served_model",
+          "harness": "claude-code",
+          "harness_release": "claude-code-2.1.289-9162edd4",
+          "model": "sonnet",
+          "model_connection_id": "mcn_699c8e51528e4438a359acfd4dced40f",
+          "process_id": 8,
+          "proof_kind": "first_tool_claude_code_process_arguments",
+          "provider_internal_reasoning_verified": false,
+          "runtime": "aranarium-aws",
+          "served_model": "claude-sonnet-5-5",
+          "session_id": "ses_73e5861a619b42fcbd9aa0c0cea5d4f5",
+          "tool_result_event_id": "evt_01M8HK34K0FE823DG684JAVKD2",
+          "tool_use_id": "toolu_01QksnbRcTRsLvdPh86j389U",
+          "turn_id": "run_daa11002fb5d4306ac9e874ecf618ca0",
+          "verified_by_platform": true
+        },
+        "observed_tokens": 146339
+      }
+    },
+    "proposal": null,
+    "controller_host": "Collegium installed bundle",
+    "config_digest": "b7140e2fdc96d405898bfed6f7874f4180b1f07c842931435f61e09446510dcf",
+    "jira_writes": 0,
+    "github_mutations": 0,
+    "pilot_selected": false
+  },
+  "negative_quote_gate": {
+    "run_id": "2bb9f221-e980-4746-b683-611d3ad9cebf",
+    "assessment": null,
+    "attempts": {},
+    "decision_approved": false,
+    "delivered": false,
+    "head": "414b8bbf860f4cb9d8faeca67a761c6a60f1914e",
+    "intake": {
+      "constraints": [
+        "Read-only synthetic service diagnostic; no product pilot, Jira, PR or GitHub mutation.",
+        "Any proposed follow-up is documentation only under docs/; no runtime, persistence, security, API, concurrency or deployment changes.",
+        "Use only registered excerpts as facts. Do not assume access to external MCP observations. Leave genuine unknowns explicit; do not invent questions.",
+        "This is an explicit service replan after v1 validation-command rejection; retain exact configured validation argv even for proposed documentation checks. Do not run or export them."
+      ],
+      "head": "414b8bbf860f4cb9d8faeca67a761c6a60f1914e",
+      "risk_flags": [],
+      "sources": [
+        {
+          "end": 99,
+          "path": "docs/INVESTIGATE.md",
+          "start": 60
+        }
+      ],
+      "task": {
+        "repository": "serhii-nochevnyi/collegium-pipeline",
+        "requirements": "Synthetic bundle acceptance diagnostic, not a product pilot. Using only the registered documentation excerpts, compare two ways of presenting ready_for_decision and needs_input to an operator: a brief terminal-state table or a paragraph. Recommend a documentation-only presentation. Produce an inert proposed ADR and one or two documentation-check tickets, without implementation, export or approval. Cover facts, alternative tradeoffs, risks, assumptions and questions. This is a narrow editorial question; assess each complexity dimension for that exact scope rather than the entire pipeline.",
+        "source": "text",
+        "source_id": "investigation-service-documentation-v2",
+        "title": "Read-only service diagnostic: document investigation terminal states"
+      }
+    },
+    "paused": false,
+    "reason": "Citation quote differs from the pinned source",
+    "rejections": [],
+    "research": {},
+    "results": {
+      "assessing": "09379f3f782e7b2d7574fa41b400c6a06b725e9337597a8ce3abb5d865aef43e"
+    },
+    "review": null,
+    "revision": 1,
+    "settlement": {
+      "pending": [],
+      "settled": [],
+      "tokens": 0
+    },
+    "sources": "df7e2203b5ec6b6bfceb94aa238b94aa5d129c55d550b21e17ff52dca78ac208",
+    "state": "blocked",
+    "synthesis": null,
+    "tokens": 113995,
+    "unaccepted_tokens": 0,
+    "workers": [
+      {
+        "job": "9f7d5fe4-20fd-44c0-89e9-28c9537f6c30",
+        "key": "2bb9f221-e980-4746-b683-611d3ad9cebf:investigation:assessing:1:0",
+        "state": "worker_completed",
+        "at": 1795887149.11419,
+        "intent": "ea052d3e-6d06-467a-b6b9-d98316baa9c6",
+        "session_id": "ses_114e5927ba7f4e079c0bf7e200a1b665",
+        "turn_id": "run_6005a9b307434fb598535722e7aa1b9a"
+      }
+    ],
+    "complexity_assessment": null,
+    "stage_evidence": {
+      "assessing": {
+        "verdict": "pass",
+        "revision": {
+          "acceptance_digest": "65b49f8e87a948c61983cc89cb435f7c79fdf5b5e4fec04dcbcdedd08e903621",
+          "base": "414b8bbf860f4cb9d8faeca67a761c6a60f1914e",
+          "config_digest": "b7140e2fdc96d405898bfed6f7874f4180b1f07c842931435f61e09446510dcf",
+          "head": "414b8bbf860f4cb9d8faeca67a761c6a60f1914e"
+        },
+        "session_id": "ses_114e5927ba7f4e079c0bf7e200a1b665",
+        "runtime_evidence": {
+          "agent_id": "agent_e6c4312d769542c7991a1e929cb747e2",
+          "command_digest": "419021bec18b972b5b5e9ec44658eeb4996f504eeab3cda4c8f051a4bbd9f6b4",
+          "command_normalization": "same_python_ast_and_pinned_shell_frame",
+          "effort": "low",
+          "effort_verification": "explicit_launch_argument_and_supported_served_model",
+          "harness": "claude-code",
+          "harness_release": "claude-code-2.1.289-9162edd4",
+          "model": "sonnet",
+          "model_connection_id": "mcn_699c8e51528e4438a359acfd4dced40f",
+          "process_id": 7,
+          "proof_kind": "first_tool_claude_code_process_arguments",
+          "provider_internal_reasoning_verified": false,
+          "runtime": "aranarium-aws",
+          "served_model": "claude-sonnet-5-5",
+          "session_id": "ses_114e5927ba7f4e079c0bf7e200a1b665",
+          "tool_result_event_id": "evt_01M8HKEFNYMVTHXCHHRDGW361S",
+          "tool_use_id": "toolu_01R4QEc97heyX98JCjb6bEHv",
+          "turn_id": "run_6005a9b307434fb598535722e7aa1b9a",
+          "verified_by_platform": true
+        },
+        "observed_tokens": 113995
+      }
+    },
+    "proposal": null,
+    "controller_host": "Collegium installed bundle",
+    "config_digest": "b7140e2fdc96d405898bfed6f7874f4180b1f07c842931435f61e09446510dcf",
+    "jira_writes": 0,
+    "github_mutations": 0,
+    "pilot_selected": false
+  },
+  "manual_repair": {
+    "same_run_id": true,
+    "same_assessment": true,
+    "same_research": true,
+    "same_first_six_sessions": true,
+    "launched_by_repair_itself": 0
+  },
+  "native_verification": {
+    "terminal_turn_usage": [
+      {
+        "session_id": "ses_fa8fd0e3f175452aa8b4bd933f3dc58e",
+        "turn_id": "run_366e644994c0427cb2a7497faeac2453",
+        "observed_tokens": 112192,
+        "accepted": true
+      },
+      {
+        "session_id": "ses_da4974618a8940fd8137cdbce9deb655",
+        "turn_id": "run_f47a0783e3d54476acf3c1a998a6404e",
+        "observed_tokens": 113863,
+        "accepted": true
+      },
+      {
+        "session_id": "ses_480c4dfcee344d3da32f70d3a0103b38",
+        "turn_id": "run_f4439461b6a94001a8bdca96cf38750b",
+        "observed_tokens": 68336,
+        "accepted": true
+      },
+      {
+        "session_id": "ses_c462bc450e7749b48f3055d8a7cafcd2",
+        "turn_id": "run_c5a4e19474ed45d5b68c70eb73d479c2",
+        "observed_tokens": 114710,
+        "accepted": true
+      },
+      {
+        "session_id": "ses_c206a79f8f374200943c99e03b78d9f9",
+        "turn_id": "run_65527e90e57e4bc29c4016329004b4ab",
+        "observed_tokens": 68308,
+        "accepted": true
+      },
+      {
+        "session_id": "ses_73e5861a619b42fcbd9aa0c0cea5d4f5",
+        "turn_id": "run_daa11002fb5d4306ac9e874ecf618ca0",
+        "observed_tokens": 146339,
+        "accepted": false
+      },
+      {
+        "session_id": "ses_13e78a17d062412f869d46e7b50a97af",
+        "turn_id": "run_7fa913afb87f4edeac527a22ec8f8f7d",
+        "observed_tokens": 133259,
+        "accepted": true
+      },
+      {
+        "session_id": "ses_fa117ecbd91843258a820bfcfa73f4e0",
+        "turn_id": "run_1813c1c2f92b4adbb37feb9403d0bdfb",
+        "observed_tokens": 179921,
+        "accepted": true
+      }
+    ],
+    "all_paid_usage_accounted_once": true,
+    "independent_native_observations": 7,
+    "accepted_stages": [
+      {
+        "stage": "assessing",
+        "session_id": "ses_fa8fd0e3f175452aa8b4bd933f3dc58e",
+        "turn_id": "run_366e644994c0427cb2a7497faeac2453",
+        "started_at": "2026-11-28T17:22:30.936Z",
+        "finished_at": "2026-11-28T17:22:58.643Z",
+        "proof": {
+          "verified_by_platform": true,
+          "harness": "claude-code",
+          "model": "sonnet",
+          "effort": "low",
+          "session_id": "ses_fa8fd0e3f175452aa8b4bd933f3dc58e",
+          "turn_id": "run_366e644994c0427cb2a7497faeac2453",
+          "agent_id": "agent_e6c4312d769542c7991a1e929cb747e2",
+          "harness_release": "claude-code-2.1.289-9162edd4",
+          "runtime": "aranarium-aws",
+          "proof_kind": "first_tool_claude_code_process_arguments",
+          "process_id": 8,
+          "tool_use_id": "toolu_01F8Um1UDWnDT32sRHoAHdpn",
+          "tool_result_event_id": "evt_01M8HJW8ABYA6VQ4YJ7P1RC9C1",
+          "command_digest": "419021bec18b972b5b5e9ec44658eeb4996f504eeab3cda4c8f051a4bbd9f6b4",
+          "command_normalization": "same_python_ast_and_pinned_shell_frame",
+          "model_connection_id": "mcn_699c8e51528e4438a359acfd4dced40f",
+          "served_model": "claude-sonnet-5-5",
+          "effort_verification": "explicit_launch_argument_and_supported_served_model",
+          "provider_internal_reasoning_verified": false
+        },
+        "payload": {
+          "dimensions": {
+            "scope": {
+              "score": 1,
+              "evidence": {
+                "text": "The question is narrow and editorial. It covers only how the two terminal states, ready_for_decision and needs_input, are presented, and one registered excerpt defines them.",
+                "citations": [
+                  {
+                    "source_id": "017d615abd7db3c11dace405b1de37f36ea180243498f7250d41de0e60e2db8d",
+                    "start": 91,
+                    "end": 92,
+                    "quote": "Success ends at `ready_for_decision`, or `needs_input` when any blocking question\nremains. Both return `decision_approved:false` and `delivered:false`. Human acceptance,"
+                  }
+                ]
+              }
+            },
+            "uncertainty": {
+              "score": 1,
+              "evidence": {
+                "text": "The terminal-state semantics are documented. Claims about external documentation and MCP observations are not ingested, so they stay assumptions. This task does not depend on them.",
+                "citations": [
+                  {
+                    "source_id": "017d615abd7db3c11dace405b1de37f36ea180243498f7250d41de0e60e2db8d",
+                    "start": 79,
+                    "end": 81,
+                    "quote": "This first slice registers Git evidence only. External documentation, Jira, MCP and\nDEV/PROD observations are not independently ingested into its evidence catalog yet;\nunverified external claims must remain assumptions or open questions. Existing bundle"
+                  }
+                ]
+              }
+            },
+            "contracts": {
+              "score": 1,
+              "evidence": {
+                "text": "The documentation must keep the contract that both terminal states return decision_approved:false and delivered:false. The follow-up changes only docs wording and does not change any API.",
+                "citations": [
+                  {
+                    "source_id": "017d615abd7db3c11dace405b1de37f36ea180243498f7250d41de0e60e2db8d",
+                    "start": 92,
+                    "end": 93,
+                    "quote": "remains. Both return `decision_approved:false` and `delivered:false`. Human acceptance,\nJira export and delivery admission are separate future actions. Defaults allow 16 jobs,"
+                  }
+                ]
+              }
+            },
+            "security": {
+              "score": 0,
+              "evidence": {
+                "text": "A documentation-only wording change under docs/ touches no credentials or access. The run-level controls it describes are unchanged by it.",
+                "citations": [
+                  {
+                    "source_id": "017d615abd7db3c11dace405b1de37f36ea180243498f7250d41de0e60e2db8d",
+                    "start": 60,
+                    "end": 61,
+                    "quote": "`status`, `pause` and `resume` accept exactly `action`, `operation`, `run_id`.\n`tick` additionally requires `live:true`. Each tick observes existing turns and may"
+                  }
+                ]
+              }
+            },
+            "persistence": {
+              "score": 0,
+              "evidence": {
+                "text": "The follow-up is documentation text only and changes no checkpoints or run state. The existing documented state handling is out of scope.",
+                "citations": [
+                  {
+                    "source_id": "017d615abd7db3c11dace405b1de37f36ea180243498f7250d41de0e60e2db8d",
+                    "start": 91,
+                    "end": 92,
+                    "quote": "Success ends at `ready_for_decision`, or `needs_input` when any blocking question\nremains. Both return `decision_approved:false` and `delivered:false`. Human acceptance,"
+                  }
+                ]
+              }
+            },
+            "concurrency": {
+              "score": 0,
+              "evidence": {
+                "text": "Presenting two terminal states in a table or a paragraph involves no concurrent behavior. Run-level pause and tick semantics are not touched.",
+                "citations": [
+                  {
+                    "source_id": "017d615abd7db3c11dace405b1de37f36ea180243498f7250d41de0e60e2db8d",
+                    "start": 60,
+                    "end": 61,
+                    "quote": "`status`, `pause` and `resume` accept exactly `action`, `operation`, `run_id`.\n`tick` additionally requires `live:true`. Each tick observes existing turns and may"
+                  }
+                ]
+              }
+            }
+          },
+          "confidence": 0.85,
+          "rationale": "This is a narrow, documentation-only editorial choice between a brief table and a paragraph. Scope, uncertainty and contracts each score 1 because the wording must stay faithful to the two terminal states and their false approval and delivery flags. Security, persistence and concurrency score 0 because no runtime, storage or access change is proposed. The coordinator imposes risk floors."
+        }
+      },
+      {
+        "stage": "investigation_review",
+        "session_id": "ses_fa117ecbd91843258a820bfcfa73f4e0",
+        "turn_id": "run_1813c1c2f92b4adbb37feb9403d0bdfb",
+        "started_at": "2026-11-28T17:41:58.936Z",
+        "finished_at": "2026-11-28T17:42:24.656Z",
+        "proof": {
+          "verified_by_platform": true,
+          "harness": "claude-code",
+          "model": "opus",
+          "effort": "high",
+          "session_id": "ses_fa117ecbd91843258a820bfcfa73f4e0",
+          "turn_id": "run_1813c1c2f92b4adbb37feb9403d0bdfb",
+          "agent_id": "agent_837fd64a4a404e4cb7083dcd96b8d1be",
+          "harness_release": "claude-code-2.1.289-9162edd4",
+          "runtime": "aranarium-aws",
+          "proof_kind": "first_tool_claude_code_process_arguments",
+          "process_id": 8,
+          "tool_use_id": "toolu_017LQRoA5fhjXvGuaqcQi8ye",
+          "tool_result_event_id": "evt_01M8HKZXFT020JABE57S040PEW",
+          "command_digest": "419021bec18b972b5b5e9ec44658eeb4996f504eeab3cda4c8f051a4bbd9f6b4",
+          "command_normalization": "same_python_ast_and_pinned_shell_frame",
+          "model_connection_id": "mcn_699c8e51528e4438a359acfd4dced40f",
+          "served_model": "claude-opus-5-5",
+          "effort_verification": "explicit_launch_argument_and_supported_served_model",
+          "provider_internal_reasoning_verified": false
+        },
+        "payload": {
+          "subject_digest": "b443e7a62ecfb2e26c78771423b174141acf1d33e04799bfa34e458c7b4456ec",
+          "research_digests": {
+            "alternatives": "48c94ce43e95d936cf2fbf4c6b64c1e3bc4ad8765367a8db9c6abceea6ebc94b",
+            "constraints": "a04b4fd9e40491ad88d953ee8428f3e5b54dcc8cad72b3039a403dd200f621d4",
+            "current_system": "ef14771cedbd34c4c01089269e2b9d01950606e0e00a315187877c11a3c89b17",
+            "risks": "6bd981853b746c5c17c2501b2e93b927a6d250ba525de85eb876af4cd8d401ad"
+          },
+          "checks": {
+            "coverage": true,
+            "sources": true,
+            "uncertainty": true,
+            "alternatives": true,
+            "risks": true,
+            "decomposition": true
+          },
+          "open_questions": []
+        }
+      },
+      {
+        "stage": "researching:alternatives",
+        "session_id": "ses_480c4dfcee344d3da32f70d3a0103b38",
+        "turn_id": "run_f4439461b6a94001a8bdca96cf38750b",
+        "started_at": "2026-11-28T17:23:53.021Z",
+        "finished_at": "2026-11-28T17:24:16.558Z",
+        "proof": {
+          "verified_by_platform": true,
+          "harness": "claude-code",
+          "model": "sonnet",
+          "effort": "low",
+          "session_id": "ses_480c4dfcee344d3da32f70d3a0103b38",
+          "turn_id": "run_f4439461b6a94001a8bdca96cf38750b",
+          "agent_id": "agent_b52cb7974bfc43ca870eb62dbc3bd6cf",
+          "harness_release": "claude-code-2.1.289-9162edd4",
+          "runtime": "aranarium-aws",
+          "proof_kind": "first_tool_claude_code_process_arguments",
+          "process_id": 7,
+          "tool_use_id": "toolu_01Rdg8JtGQK2CXkEQyYC4Ynm",
+          "tool_result_event_id": "evt_01M8HJYRESXVCPRJ9T61J4XHKE",
+          "command_digest": "419021bec18b972b5b5e9ec44658eeb4996f504eeab3cda4c8f051a4bbd9f6b4",
+          "command_normalization": "same_python_ast_and_pinned_shell_frame",
+          "model_connection_id": "mcn_699c8e51528e4438a359acfd4dced40f",
+          "served_model": "claude-sonnet-5-5",
+          "effort_verification": "explicit_launch_argument_and_supported_served_model",
+          "provider_internal_reasoning_verified": false
+        },
+        "payload": {
+          "perspective": "alternatives",
+          "findings": [
+            {
+              "text": "The documentation defines exactly two success terminal states. ready_for_decision is the default. needs_input applies when any blocking question remains. Both share the same flags, decision_approved:false and delivered:false. This fits a compact two-row table with a state, condition and flags column.",
+              "citations": [
+                {
+                  "source_id": "017d615abd7db3c11dace405b1de37f36ea180243498f7250d41de0e60e2db8d",
+                  "start": 91,
+                  "end": 92,
+                  "quote": "Success ends at `ready_for_decision`, or `needs_input` when any blocking question\nremains. Both return `decision_approved:false` and `delivered:false`. Human acceptance,"
+                }
+              ]
+            },
+            {
+              "text": "The current text presents the states as prose. The condition that separates them (a remaining blocking question) and the shared false flags sit in one sentence together with the list of separate future actions. An operator has to parse that sentence to compare the states. A table would make the difference scannable. A paragraph keeps the existing narrative flow and the link to the later human acceptance, Jira export and delivery admission steps.",
+              "citations": [
+                {
+                  "source_id": "017d615abd7db3c11dace405b1de37f36ea180243498f7250d41de0e60e2db8d",
+                  "start": 91,
+                  "end": 92,
+                  "quote": "Success ends at `ready_for_decision`, or `needs_input` when any blocking question\nremains. Both return `decision_approved:false` and `delivered:false`. Human acceptance,"
+                }
+              ]
+            },
+            {
+              "text": "Recommendation: use a brief two-row table for the states, followed by one sentence saying that human acceptance, Jira export and delivery admission are separate future actions. The table carries the comparison, and the sentence keeps the non-approval message from being lost.",
+              "citations": [
+                {
+                  "source_id": "017d615abd7db3c11dace405b1de37f36ea180243498f7250d41de0e60e2db8d",
+                  "start": 91,
+                  "end": 92,
+                  "quote": "Success ends at `ready_for_decision`, or `needs_input` when any blocking question\nremains. Both return `decision_approved:false` and `delivered:false`. Human acceptance,"
+                }
+              ]
+            }
+          ],
+          "risks": [
+            {
+              "text": "Table cells could drop the 'any blocking question' condition or the shared false flags. An operator could then read ready_for_decision as an approval or as delivered. The table must repeat both flags for both states and say the states are not approvals.",
+              "citations": [
+                {
+                  "source_id": "017d615abd7db3c11dace405b1de37f36ea180243498f7250d41de0e60e2db8d",
+                  "start": 91,
+                  "end": 92,
+                  "quote": "Success ends at `ready_for_decision`, or `needs_input` when any blocking question\nremains. Both return `decision_approved:false` and `delivered:false`. Human acceptance,"
+                }
+              ]
+            },
+            {
+              "text": "Wording about unverified external claims could be flattened when the section is shortened. The documentation says such claims must stay assumptions or open questions, and an edit must not remove that.",
+              "citations": [
+                {
+                  "source_id": "017d615abd7db3c11dace405b1de37f36ea180243498f7250d41de0e60e2db8d",
+                  "start": 79,
+                  "end": 81,
+                  "quote": "This first slice registers Git evidence only. External documentation, Jira, MCP and\nDEV/PROD observations are not independently ingested into its evidence catalog yet;\nunverified external claims must remain assumptions or open questions. Existing bundle"
+                }
+              ]
+            }
+          ],
+          "assumptions": [
+            "Operators scan the documentation for state differences more than they read it end to end, so a table helps them. No usability evidence is registered.",
+            "The documentation renders GitHub-flavored Markdown tables, so a table will display correctly.",
+            "The documentation-check tickets would touch only docs/INVESTIGATE.md or a sibling file under docs/."
+          ],
+          "open_questions": []
+        }
+      },
+      {
+        "stage": "researching:constraints",
+        "session_id": "ses_c462bc450e7749b48f3055d8a7cafcd2",
+        "turn_id": "run_c5a4e19474ed45d5b68c70eb73d479c2",
+        "started_at": "2026-11-28T17:24:25.063Z",
+        "finished_at": "2026-11-28T17:24:49.264Z",
+        "proof": {
+          "verified_by_platform": true,
+          "harness": "claude-code",
+          "model": "sonnet",
+          "effort": "low",
+          "session_id": "ses_c462bc450e7749b48f3055d8a7cafcd2",
+          "turn_id": "run_c5a4e19474ed45d5b68c70eb73d479c2",
+          "agent_id": "agent_b52cb7974bfc43ca870eb62dbc3bd6cf",
+          "harness_release": "claude-code-2.1.289-9162edd4",
+          "runtime": "aranarium-aws",
+          "proof_kind": "first_tool_claude_code_process_arguments",
+          "process_id": 7,
+          "tool_use_id": "toolu_01YFUKzFAdd71UUGRBTKKrWU",
+          "tool_result_event_id": "evt_01M8HJZQ5F7KPV5PGEK4AXX0RV",
+          "command_digest": "419021bec18b972b5b5e9ec44658eeb4996f504eeab3cda4c8f051a4bbd9f6b4",
+          "command_normalization": "same_python_ast_and_pinned_shell_frame",
+          "model_connection_id": "mcn_699c8e51528e4438a359acfd4dced40f",
+          "served_model": "claude-sonnet-5-5",
+          "effort_verification": "explicit_launch_argument_and_supported_served_model",
+          "provider_internal_reasoning_verified": false
+        },
+        "payload": {
+          "perspective": "constraints",
+          "findings": [
+            {
+              "text": "The two terminal states are defined together: success ends at ready_for_decision, or needs_input when any blocking question remains. The distinguishing condition is the presence of a blocking question. Any presentation must preserve that condition.",
+              "citations": [
+                {
+                  "source_id": "017d615abd7db3c11dace405b1de37f36ea180243498f7250d41de0e60e2db8d",
+                  "start": 91,
+                  "end": 92,
+                  "quote": "Success ends at `ready_for_decision`, or `needs_input` when any blocking question\nremains. Both return `decision_approved:false` and `delivered:false`. Human acceptance,"
+                }
+              ]
+            },
+            {
+              "text": "Both terminal states return decision_approved:false and delivered:false. A shared invariant like this fits a table column or a single sentence. Neither presentation may imply approval or delivery.",
+              "citations": [
+                {
+                  "source_id": "017d615abd7db3c11dace405b1de37f36ea180243498f7250d41de0e60e2db8d",
+                  "start": 92,
+                  "end": 92,
+                  "quote": "remains. Both return `decision_approved:false` and `delivered:false`. Human acceptance,"
+                }
+              ]
+            },
+            {
+              "text": "Human acceptance, Jira export and delivery admission are documented as separate future actions. Operator-facing text must not present them as part of either terminal state.",
+              "citations": [
+                {
+                  "source_id": "017d615abd7db3c11dace405b1de37f36ea180243498f7250d41de0e60e2db8d",
+                  "start": 92,
+                  "end": 93,
+                  "quote": "remains. Both return `decision_approved:false` and `delivered:false`. Human acceptance,\nJira export and delivery admission are separate future actions. Defaults allow 16 jobs,"
+                }
+              ]
+            },
+            {
+              "text": "The registered documentation says external documentation, Jira, MCP and DEV/PROD observations are not ingested into the evidence catalog. Unverified external claims must stay assumptions or open questions, so the documentation change must rely only on registered Git excerpts.",
+              "citations": [
+                {
+                  "source_id": "017d615abd7db3c11dace405b1de37f36ea180243498f7250d41de0e60e2db8d",
+                  "start": 79,
+                  "end": 81,
+                  "quote": "This first slice registers Git evidence only. External documentation, Jira, MCP and\nDEV/PROD observations are not independently ingested into its evidence catalog yet;\nunverified external claims must remain assumptions or open questions. Existing bundle"
+                }
+              ]
+            }
+          ],
+          "risks": [
+            {
+              "text": "A paragraph could blur the two states, or could read as implying approval or delivery. The excerpt makes decision_approved:false and delivered:false explicit for both, so the wording must state this.",
+              "citations": [
+                {
+                  "source_id": "017d615abd7db3c11dace405b1de37f36ea180243498f7250d41de0e60e2db8d",
+                  "start": 92,
+                  "end": 92,
+                  "quote": "remains. Both return `decision_approved:false` and `delivered:false`. Human acceptance,"
+                }
+              ]
+            },
+            {
+              "text": "A table could drop the condition that distinguishes needs_input, namely any blocking question remaining. Operators might then read ready_for_decision as approval.",
+              "citations": [
+                {
+                  "source_id": "017d615abd7db3c11dace405b1de37f36ea180243498f7250d41de0e60e2db8d",
+                  "start": 91,
+                  "end": 92,
+                  "quote": "Success ends at `ready_for_decision`, or `needs_input` when any blocking question\nremains. Both return `decision_approved:false` and `delivered:false`. Human acceptance,"
+                }
+              ]
+            }
+          ],
+          "assumptions": [
+            "Operators scan terminal states for a quick comparison, so a brief table would aid them. This is an editorial inference and is not in the excerpts.",
+            "The scope of this follow-up is limited to wording under docs/ and changes no runtime behavior, as the task constraints state.",
+            "The excerpt is lines 60-96 only. Other parts of docs/INVESTIGATE.md may already describe these states, and this investigation has not checked them."
+          ],
+          "open_questions": []
+        }
+      },
+      {
+        "stage": "researching:current_system",
+        "session_id": "ses_da4974618a8940fd8137cdbce9deb655",
+        "turn_id": "run_f47a0783e3d54476acf3c1a998a6404e",
+        "started_at": "2026-11-28T17:23:44.059Z",
+        "finished_at": "2026-11-28T17:24:06.939Z",
+        "proof": {
+          "verified_by_platform": true,
+          "harness": "claude-code",
+          "model": "sonnet",
+          "effort": "low",
+          "session_id": "ses_da4974618a8940fd8137cdbce9deb655",
+          "turn_id": "run_f47a0783e3d54476acf3c1a998a6404e",
+          "agent_id": "agent_b52cb7974bfc43ca870eb62dbc3bd6cf",
+          "harness_release": "claude-code-2.1.289-9162edd4",
+          "runtime": "aranarium-aws",
+          "proof_kind": "first_tool_claude_code_process_arguments",
+          "process_id": 7,
+          "tool_use_id": "toolu_0142LNGn5MpujmVh9mbDgJMj",
+          "tool_result_event_id": "evt_01M8HJYFC8T3WX7SAJDRA7FX0J",
+          "command_digest": "419021bec18b972b5b5e9ec44658eeb4996f504eeab3cda4c8f051a4bbd9f6b4",
+          "command_normalization": "same_python_ast_and_pinned_shell_frame",
+          "model_connection_id": "mcn_699c8e51528e4438a359acfd4dced40f",
+          "served_model": "claude-sonnet-5-5",
+          "effort_verification": "explicit_launch_argument_and_supported_served_model",
+          "provider_internal_reasoning_verified": false
+        },
+        "payload": {
+          "perspective": "current_system",
+          "findings": [
+            {
+              "text": "The documentation defines the two terminal states together in one sentence pair: success ends at ready_for_decision, or needs_input when any blocking question remains.",
+              "citations": [
+                {
+                  "source_id": "017d615abd7db3c11dace405b1de37f36ea180243498f7250d41de0e60e2db8d",
+                  "start": 91,
+                  "end": 92,
+                  "quote": "Success ends at `ready_for_decision`, or `needs_input` when any blocking question\nremains. Both return `decision_approved:false` and `delivered:false`. Human acceptance,"
+                }
+              ]
+            },
+            {
+              "text": "Both terminal states return decision_approved:false and delivered:false; human acceptance, Jira export and delivery admission are separate future actions. Any presentation must preserve this shared contract.",
+              "citations": [
+                {
+                  "source_id": "017d615abd7db3c11dace405b1de37f36ea180243498f7250d41de0e60e2db8d",
+                  "start": 92,
+                  "end": 93,
+                  "quote": "remains. Both return `decision_approved:false` and `delivered:false`. Human acceptance,\nJira export and delivery admission are separate future actions. Defaults allow 16 jobs,"
+                }
+              ]
+            },
+            {
+              "text": "The two states differ by a single condition (whether any blocking question remains) and share identical flag values, which is the kind of content a compact two-row table can express.",
+              "citations": [
+                {
+                  "source_id": "017d615abd7db3c11dace405b1de37f36ea180243498f7250d41de0e60e2db8d",
+                  "start": 91,
+                  "end": 92,
+                  "quote": "Success ends at `ready_for_decision`, or `needs_input` when any blocking question\nremains. Both return `decision_approved:false` and `delivered:false`. Human acceptance,"
+                }
+              ]
+            }
+          ],
+          "risks": [
+            {
+              "text": "External documentation, Jira, MCP and DEV/PROD observations are not ingested into the evidence catalog, so a presentation that implied them would be unverifiable and must stay as assumptions or open questions.",
+              "citations": [
+                {
+                  "source_id": "017d615abd7db3c11dace405b1de37f36ea180243498f7250d41de0e60e2db8d",
+                  "start": 79,
+                  "end": 81,
+                  "quote": "This first slice registers Git evidence only. External documentation, Jira, MCP and\nDEV/PROD observations are not independently ingested into its evidence catalog yet;\nunverified external claims must remain assumptions or open questions. Existing bundle"
+                }
+              ]
+            },
+            {
+              "text": "A presentation that omits the separate future actions could be read as implying approval or delivery has happened, although both states return decision_approved:false and delivered:false.",
+              "citations": [
+                {
+                  "source_id": "017d615abd7db3c11dace405b1de37f36ea180243498f7250d41de0e60e2db8d",
+                  "start": 92,
+                  "end": 93,
+                  "quote": "remains. Both return `decision_approved:false` and `delivered:false`. Human acceptance,\nJira export and delivery admission are separate future actions. Defaults allow 16 jobs,"
+                }
+              ]
+            }
+          ],
+          "assumptions": [
+            "A brief table is easier for an operator to scan than a paragraph; this is an editorial judgement, not stated in the registered excerpt.",
+            "The excerpt is the only place the terminal states are described; no other docs/ page was reviewed for this diagnostic."
+          ],
+          "open_questions": []
+        }
+      },
+      {
+        "stage": "researching:risks",
+        "session_id": "ses_c206a79f8f374200943c99e03b78d9f9",
+        "turn_id": "run_65527e90e57e4bc29c4016329004b4ab",
+        "started_at": "2026-11-28T17:24:56.832Z",
+        "finished_at": "2026-11-28T17:25:20.661Z",
+        "proof": {
+          "verified_by_platform": true,
+          "harness": "claude-code",
+          "model": "sonnet",
+          "effort": "low",
+          "session_id": "ses_c206a79f8f374200943c99e03b78d9f9",
+          "turn_id": "run_65527e90e57e4bc29c4016329004b4ab",
+          "agent_id": "agent_b52cb7974bfc43ca870eb62dbc3bd6cf",
+          "harness_release": "claude-code-2.1.289-9162edd4",
+          "runtime": "aranarium-aws",
+          "proof_kind": "first_tool_claude_code_process_arguments",
+          "process_id": 8,
+          "tool_use_id": "toolu_01XAJ2pXYnZqi8HrESpqLL3D",
+          "tool_result_event_id": "evt_01M8HK0QCFX6R8JTS6KCPMT8GQ",
+          "command_digest": "419021bec18b972b5b5e9ec44658eeb4996f504eeab3cda4c8f051a4bbd9f6b4",
+          "command_normalization": "same_python_ast_and_pinned_shell_frame",
+          "model_connection_id": "mcn_699c8e51528e4438a359acfd4dced40f",
+          "served_model": "claude-sonnet-5-5",
+          "effort_verification": "explicit_launch_argument_and_supported_served_model",
+          "provider_internal_reasoning_verified": false
+        },
+        "payload": {
+          "perspective": "risks",
+          "findings": [
+            {
+              "text": "The registered excerpt defines both terminal states together. Success ends at ready_for_decision, or at needs_input when any blocking question remains. Both states return decision_approved:false and delivered:false.",
+              "citations": [
+                {
+                  "source_id": "017d615abd7db3c11dace405b1de37f36ea180243498f7250d41de0e60e2db8d",
+                  "start": 91,
+                  "end": 92,
+                  "quote": "Success ends at `ready_for_decision`, or `needs_input` when any blocking question\nremains. Both return `decision_approved:false` and `delivered:false`. Human acceptance,"
+                }
+              ]
+            },
+            {
+              "text": "The excerpt says human acceptance, Jira export and delivery admission are separate future actions. A presentation must not imply that either state is an approval.",
+              "citations": [
+                {
+                  "source_id": "017d615abd7db3c11dace405b1de37f36ea180243498f7250d41de0e60e2db8d",
+                  "start": 92,
+                  "end": 93,
+                  "quote": "remains. Both return `decision_approved:false` and `delivered:false`. Human acceptance,\nJira export and delivery admission are separate future actions. Defaults allow 16 jobs,"
+                }
+              ]
+            },
+            {
+              "text": "External documentation, Jira, MCP and DEV/PROD observations are not ingested into the evidence catalog. Claims that depend on them must stay assumptions or open questions.",
+              "citations": [
+                {
+                  "source_id": "017d615abd7db3c11dace405b1de37f36ea180243498f7250d41de0e60e2db8d",
+                  "start": 79,
+                  "end": 81,
+                  "quote": "This first slice registers Git evidence only. External documentation, Jira, MCP and\nDEV/PROD observations are not independently ingested into its evidence catalog yet;\nunverified external claims must remain assumptions or open questions. Existing bundle"
+                }
+              ]
+            }
+          ],
+          "risks": [
+            {
+              "text": "A paragraph could bury the conditional that needs_input applies only when a blocking question remains. An operator could then read needs_input as a failure, or ready_for_decision as an approval. A table makes the trigger condition and the false flags easier to scan.",
+              "citations": [
+                {
+                  "source_id": "017d615abd7db3c11dace405b1de37f36ea180243498f7250d41de0e60e2db8d",
+                  "start": 91,
+                  "end": 92,
+                  "quote": "Success ends at `ready_for_decision`, or `needs_input` when any blocking question\nremains. Both return `decision_approved:false` and `delivered:false`. Human acceptance,"
+                }
+              ]
+            },
+            {
+              "text": "A terse table could drop the point that acceptance, export and delivery are separate future actions. Operators could then take ready_for_decision as permission to export or deliver. The table needs a note or column that keeps this distinction.",
+              "citations": [
+                {
+                  "source_id": "017d615abd7db3c11dace405b1de37f36ea180243498f7250d41de0e60e2db8d",
+                  "start": 92,
+                  "end": 93,
+                  "quote": "remains. Both return `decision_approved:false` and `delivered:false`. Human acceptance,\nJira export and delivery admission are separate future actions. Defaults allow 16 jobs,"
+                }
+              ]
+            },
+            {
+              "text": "Wording that extends beyond the registered Git evidence, such as external or MCP-derived claims about state behavior, would present unverified claims as facts.",
+              "citations": [
+                {
+                  "source_id": "017d615abd7db3c11dace405b1de37f36ea180243498f7250d41de0e60e2db8d",
+                  "start": 79,
+                  "end": 81,
+                  "quote": "This first slice registers Git evidence only. External documentation, Jira, MCP and\nDEV/PROD observations are not independently ingested into its evidence catalog yet;\nunverified external claims must remain assumptions or open questions. Existing bundle"
+                }
+              ]
+            }
+          ],
+          "assumptions": [
+            "The lower-risk presentation is a brief table of the two states, with trigger and false flags columns plus a one-line note on the separate future actions. This is an editorial judgment, not a sourced fact.",
+            "Operators scan terminal states faster in a table than in prose. This is unverified.",
+            "A docs-only follow-up under docs/ has no runtime, persistence, security, API or concurrency impact, as the task constraints state."
+          ],
+          "open_questions": []
+        }
+      },
+      {
+        "stage": "synthesizing",
+        "session_id": "ses_13e78a17d062412f869d46e7b50a97af",
+        "turn_id": "run_7fa913afb87f4edeac527a22ec8f8f7d",
+        "started_at": "2026-11-28T17:40:16.162Z",
+        "finished_at": "2026-11-28T17:40:47.655Z",
+        "proof": {
+          "verified_by_platform": true,
+          "harness": "claude-code",
+          "model": "sonnet",
+          "effort": "high",
+          "session_id": "ses_13e78a17d062412f869d46e7b50a97af",
+          "turn_id": "run_7fa913afb87f4edeac527a22ec8f8f7d",
+          "agent_id": "agent_696712237d5e4d31b1f156fc6d9147da",
+          "harness_release": "claude-code-2.1.289-9162edd4",
+          "runtime": "aranarium-aws",
+          "proof_kind": "first_tool_claude_code_process_arguments",
+          "process_id": 7,
+          "tool_use_id": "toolu_01ACJ7pnrNSXwDduriQnAjkB",
+          "tool_result_event_id": "evt_01M8HKWR8BT4RZVF07MZBS2F6Y",
+          "command_digest": "419021bec18b972b5b5e9ec44658eeb4996f504eeab3cda4c8f051a4bbd9f6b4",
+          "command_normalization": "same_python_ast_and_pinned_shell_frame",
+          "model_connection_id": "mcn_699c8e51528e4438a359acfd4dced40f",
+          "served_model": "claude-sonnet-5-5",
+          "effort_verification": "explicit_launch_argument_and_supported_served_model",
+          "provider_internal_reasoning_verified": false
+        },
+        "payload": {
+          "summary": {
+            "text": "The registered excerpt defines two success terminal states together. The run ends at ready_for_decision, or at needs_input when any blocking question remains. Both states return decision_approved:false and delivered:false. Human acceptance, Jira export and delivery admission are separate future actions. The only differentiator is whether a blocking question remains, and the flags are shared. That content suits a compact two-row table. The choice between table and paragraph is an editorial judgement, and the excerpt contains no usability evidence either way.",
+            "citations": [
+              {
+                "source_id": "017d615abd7db3c11dace405b1de37f36ea180243498f7250d41de0e60e2db8d",
+                "start": 91,
+                "end": 92,
+                "quote": "Success ends at `ready_for_decision`, or `needs_input` when any blocking question\nremains. Both return `decision_approved:false` and `delivered:false`. Human acceptance,"
+              }
+            ]
+          },
+          "options": [
+            {
+              "name": "Brief terminal-state table",
+              "analysis": {
+                "text": "Present the two states as a two-row table with state, condition and flags columns. Add one sentence saying that human acceptance, Jira export and delivery admission are separate future actions. The two states differ by one condition (whether a blocking question remains) and share identical flag values, so a table can show both at a glance. Each row repeats decision_approved:false and delivered:false so neither state reads as approval or delivery.",
+                "citations": [
+                  {
+                    "source_id": "017d615abd7db3c11dace405b1de37f36ea180243498f7250d41de0e60e2db8d",
+                    "start": 91,
+                    "end": 92,
+                    "quote": "Success ends at `ready_for_decision`, or `needs_input` when any blocking question\nremains. Both return `decision_approved:false` and `delivered:false`. Human acceptance,"
+                  }
+                ]
+              },
+              "tradeoffs": [
+                "Pro: the distinguishing condition and the shared false flags are scannable side by side.",
+                "Pro: repeating the flags in both rows keeps the non-approval message explicit.",
+                "Con: terse cells could drop the 'any blocking question' condition or the separate-future-actions note, so the table needs a condition column and a trailing sentence.",
+                "Con: it assumes the docs render GitHub-flavored Markdown tables, which is unverified.",
+                "Con: it changes the existing prose flow, which links the states to the later acceptance, export and delivery steps."
+              ]
+            },
+            {
+              "name": "Single explanatory paragraph",
+              "analysis": {
+                "text": "Keep or lightly polish the current prose. One sentence pair names both states, the blocking-question condition, the shared false flags and the separate future actions. This preserves the narrative link to human acceptance, Jira export and delivery admission and needs no rendering assumption. The condition, the flags and the future-actions list all sit in one run of text, so an operator has to parse it to compare the two states.",
+                "citations": [
+                  {
+                    "source_id": "017d615abd7db3c11dace405b1de37f36ea180243498f7250d41de0e60e2db8d",
+                    "start": 92,
+                    "end": 93,
+                    "quote": "remains. Both return `decision_approved:false` and `delivered:false`. Human acceptance,\nJira export and delivery admission are separate future actions. Defaults allow 16 jobs,"
+                  }
+                ]
+              },
+              "tradeoffs": [
+                "Pro: no rendering assumption and no restructuring of the section.",
+                "Pro: it keeps the narrative link to the separate future actions.",
+                "Con: the needs_input trigger can be buried, so an operator could read needs_input as a failure or ready_for_decision as an approval.",
+                "Con: comparing the two states means parsing a dense sentence."
+              ]
+            }
+          ],
+          "recommendation": "Brief terminal-state table",
+          "risks": [
+            {
+              "text": "A terse table could drop the 'any blocking question' condition that distinguishes needs_input, or the shared false flags. An operator could then read ready_for_decision as approval or delivery. Both flags must be repeated for both states, and the condition must be stated.",
+              "citations": [
+                {
+                  "source_id": "017d615abd7db3c11dace405b1de37f36ea180243498f7250d41de0e60e2db8d",
+                  "start": 91,
+                  "end": 92,
+                  "quote": "Success ends at `ready_for_decision`, or `needs_input` when any blocking question\nremains. Both return `decision_approved:false` and `delivered:false`. Human acceptance,"
+                }
+              ]
+            },
+            {
+              "text": "Omitting the statement that human acceptance, Jira export and delivery admission are separate future actions could lead operators to treat ready_for_decision as permission to export or deliver.",
+              "citations": [
+                {
+                  "source_id": "017d615abd7db3c11dace405b1de37f36ea180243498f7250d41de0e60e2db8d",
+                  "start": 92,
+                  "end": 93,
+                  "quote": "remains. Both return `decision_approved:false` and `delivered:false`. Human acceptance,\nJira export and delivery admission are separate future actions. Defaults allow 16 jobs,"
+                }
+              ]
+            },
+            {
+              "text": "Shortening the section could flatten the rule that external documentation, Jira, MCP and DEV/PROD observations are not ingested, so claims about them must stay assumptions or open questions. Wording that goes beyond registered Git evidence would present unverified claims as facts.",
+              "citations": [
+                {
+                  "source_id": "017d615abd7db3c11dace405b1de37f36ea180243498f7250d41de0e60e2db8d",
+                  "start": 79,
+                  "end": 81,
+                  "quote": "This first slice registers Git evidence only. External documentation, Jira, MCP and\nDEV/PROD observations are not independently ingested into its evidence catalog yet;\nunverified external claims must remain assumptions or open questions. Existing bundle"
+                }
+              ]
+            }
+          ],
+          "open_questions": [],
+          "proposed_adr": {
+            "title": "Proposed: Present investigation terminal states as a brief table in docs/INVESTIGATE.md",
+            "context": "The investigation documentation defines two success terminal states, ready_for_decision and needs_input. They differ by whether any blocking question remains and both return decision_approved:false and delivered:false. Human acceptance, Jira export and delivery admission are separate future actions. Today the states are described in prose. Assumptions, none of them in the registered excerpt: operators scan the section more than they read it end to end, GitHub-flavored Markdown tables render correctly, and lines 60-96 are the only place the states are described. This proposal changes documentation only, under docs/, and changes no runtime, persistence, security, API, concurrency or deployment behavior. It is a proposal only and is not an approval.",
+            "decision": "Proposed: replace the prose for the two terminal states with a two-row table with state, condition and flags columns. The ready_for_decision row says no blocking question remains. The needs_input row says a blocking question remains. Both rows state decision_approved:false and delivered:false. Add one sentence after the table saying that human acceptance, Jira export and delivery admission are separate future actions and that neither state is an approval. Keep the statement that unverified external claims remain assumptions or open questions.",
+            "consequences": "Operators can compare the two states at a glance. The risk of reading a state as approval or delivery is reduced as long as the table keeps the condition, both flags and the separate-future-actions sentence. The docs now depend on Markdown table rendering. The wording can drift from the controller behavior and needs a manual consistency check against the excerpt. No runtime change results. Human review is still required before any adoption, and this ADR has not been approved, exported or delivered."
+          },
+          "tickets": [
+            {
+              "key": "A",
+              "title": "Draft terminal-state table in docs/INVESTIGATE.md",
+              "requirements": "Documentation only. Replace the prose describing ready_for_decision and needs_input in docs/INVESTIGATE.md with a brief two-row table plus one sentence on the separate future actions. Preserve the blocking-question condition, the decision_approved:false and delivered:false flags on both rows, and the rule that unverified external claims stay assumptions or open questions. Make no change outside docs/.",
+              "acceptance": [
+                "The table has exactly two state rows, ready_for_decision and needs_input, with a condition column.",
+                "Both rows state decision_approved:false and delivered:false.",
+                "The needs_input row names the remaining blocking question as its condition.",
+                "A sentence states that human acceptance, Jira export and delivery admission are separate future actions and that neither state is an approval.",
+                "No file outside docs/ is modified."
+              ],
+              "depends_on": [],
+              "paths": [
+                "docs/INVESTIGATE.md"
+              ],
+              "validation_commands": [
+                [
+                  "env",
+                  "PYTHONPATH=src",
+                  "python3",
+                  "-m",
+                  "unittest",
+                  "discover",
+                  "-s",
+                  "tests",
+                  "-v"
+                ]
+              ]
+            },
+            {
+              "key": "B",
+              "title": "Check wording consistency of the terminal-state table",
+              "requirements": "Documentation check only. After ticket A, compare the new table and sentence with the registered excerpt of docs/INVESTIGATE.md, lines 91-93 of the pinned revision. Confirm that no claim goes beyond registered Git evidence and that the external-claims rule is retained. Record any discrepancy in the review notes. Do not change anything outside docs/.",
+              "acceptance": [
+                "The condition and flag values in the table match the registered excerpt.",
+                "The statement about unverified external claims is still present in the document.",
+                "No wording implies that either state is an approval, an export or a delivery.",
+                "Any assumption, such as table rendering or operator scanning behavior, is stated as an assumption and not as a fact."
+              ],
+              "depends_on": [
+                "A"
+              ],
+              "paths": [
+                "docs/INVESTIGATE.md"
+              ],
+              "validation_commands": [
+                [
+                  "env",
+                  "PYTHONPATH=src",
+                  "python3",
+                  "-m",
+                  "unittest",
+                  "discover",
+                  "-s",
+                  "tests",
+                  "-v"
+                ]
+              ]
+            }
+          ]
+        }
+      }
+    ],
+    "parallel_overlap": [
+      {
+        "stages": [
+          "researching:alternatives",
+          "researching:current_system"
+        ],
+        "overlap_seconds": 13.918
+      }
+    ],
+    "unique_sessions": 7,
+    "review_independent": true,
+    "review_binds_exact_artifacts": true,
+    "provider_internal_reasoning_verified": false
+  },
+  "replays": {
+    "stable": true,
+    "operations": [
+      "identical_prepare",
+      "completed_tick"
+    ],
+    "same_run_id": "11f671e8-ee63-4be2-aa18-0113884a800b",
+    "same_native_session_turn_ids": [
+      [
+        "ses_fa8fd0e3f175452aa8b4bd933f3dc58e",
+        "run_366e644994c0427cb2a7497faeac2453"
+      ],
+      [
+        "ses_da4974618a8940fd8137cdbce9deb655",
+        "run_f47a0783e3d54476acf3c1a998a6404e"
+      ],
+      [
+        "ses_480c4dfcee344d3da32f70d3a0103b38",
+        "run_f4439461b6a94001a8bdca96cf38750b"
+      ],
+      [
+        "ses_c462bc450e7749b48f3055d8a7cafcd2",
+        "run_c5a4e19474ed45d5b68c70eb73d479c2"
+      ],
+      [
+        "ses_c206a79f8f374200943c99e03b78d9f9",
+        "run_65527e90e57e4bc29c4016329004b4ab"
+      ],
+      [
+        "ses_73e5861a619b42fcbd9aa0c0cea5d4f5",
+        "run_daa11002fb5d4306ac9e874ecf618ca0"
+      ],
+      [
+        "ses_13e78a17d062412f869d46e7b50a97af",
+        "run_7fa913afb87f4edeac527a22ec8f8f7d"
+      ],
+      [
+        "ses_fa117ecbd91843258a820bfcfa73f4e0",
+        "run_1813c1c2f92b4adbb37feb9403d0bdfb"
+      ]
+    ],
+    "same_artifact_results": {
+      "assessing": "3095b45fccdf3e7d4a0d1ffb6f8047cc87fb6eb05f3c51662707eeb04f013c02",
+      "investigation_review": "807bc483d4246f86e965bb1b927a167ec54d452b5dc7e6e72ebe8465a9981864",
+      "researching:alternatives": "48c94ce43e95d936cf2fbf4c6b64c1e3bc4ad8765367a8db9c6abceea6ebc94b",
+      "researching:constraints": "a04b4fd9e40491ad88d953ee8428f3e5b54dcc8cad72b3039a403dd200f621d4",
+      "researching:current_system": "ef14771cedbd34c4c01089269e2b9d01950606e0e00a315187877c11a3c89b17",
+      "researching:risks": "6bd981853b746c5c17c2501b2e93b927a6d250ba525de85eb876af4cd8d401ad",
+      "synthesizing": "b443e7a62ecfb2e26c78771423b174141acf1d33e04799bfa34e458c7b4456ec"
+    },
+    "same_review_digest": "807bc483d4246f86e965bb1b927a167ec54d452b5dc7e6e72ebe8465a9981864",
+    "same_tokens": 936928,
+    "new_agents": 0,
+    "new_sessions": 0,
+    "paid_turns": 0
+  },
+  "live_result": {
+    "run_id": "11f671e8-ee63-4be2-aa18-0113884a800b",
+    "assessment": "c8862bd72b728d669a337e63285933eeda137b68b551497cea25075849612ad9",
+    "attempts": {},
+    "decision_approved": false,
+    "delivered": false,
+    "feedback": {
+      "reason": "Proposed validation must retain configured commands",
+      "rejected_digest": "8faeec7f8adcaa986656a7c74e3dec05e3d1143e4b72e5d54c0f66fe9db6d275",
+      "rejected_result": {
+        "blocking_findings": [],
+        "job_key": "investigation:synthesizing:1:0",
+        "observation_digest": "c81adc94c835ba42cf0f5352065e95557014b60c44c973c3acf4cb71dfcc2394",
+        "observed_tokens": 146339,
+        "payload": {
+          "open_questions": [],
+          "options": [
+            {
+              "analysis": {
+                "citations": [
+                  {
+                    "end": 92,
+                    "quote": "Success ends at `ready_for_decision`, or `needs_input` when any blocking question\nremains. Both return `decision_approved:false` and `delivered:false`. Human acceptance,",
+                    "source_id": "017d615abd7db3c11dace405b1de37f36ea180243498f7250d41de0e60e2db8d",
+                    "start": 91
+                  }
+                ],
+                "text": "Present the two states as a two-row table with state, condition and flags columns. Add one sentence saying that human acceptance, Jira export and delivery admission are separate future actions. The two states differ by one condition (whether a blocking question remains) and share identical flag values, so a table can show both at a glance. Each row repeats decision_approved:false and delivered:false so neither state reads as approval or delivery."
+              },
+              "name": "Brief terminal-state table",
+              "tradeoffs": [
+                "Pro: the distinguishing condition and the shared false flags are scannable side by side.",
+                "Pro: repeating the flags in both rows keeps the non-approval message explicit.",
+                "Con: terse cells could drop the 'any blocking question' condition or the separate-future-actions note, so the table needs a condition column and a trailing sentence.",
+                "Con: it assumes the docs render GitHub-flavored Markdown tables, which is unverified.",
+                "Con: it changes the existing prose flow, which links the states to the later acceptance, export and delivery steps."
+              ]
+            },
+            {
+              "analysis": {
+                "citations": [
+                  {
+                    "end": 93,
+                    "quote": "remains. Both return `decision_approved:false` and `delivered:false`. Human acceptance,\nJira export and delivery admission are separate future actions. Defaults allow 16 jobs,",
+                    "source_id": "017d615abd7db3c11dace405b1de37f36ea180243498f7250d41de0e60e2db8d",
+                    "start": 92
+                  }
+                ],
+                "text": "Keep or lightly polish the current prose. One sentence pair names both states, the blocking-question condition, the shared false flags and the separate future actions. This preserves the narrative link to human acceptance, Jira export and delivery admission and needs no rendering assumption. The condition, the flags and the future-actions list all sit in one run of text, so an operator has to parse it to compare the two states."
+              },
+              "name": "Single explanatory paragraph",
+              "tradeoffs": [
+                "Pro: no rendering assumption and no restructuring of the section.",
+                "Pro: it keeps the narrative link to the separate future actions.",
+                "Con: the needs_input trigger can be buried, so an operator could read needs_input as a failure or ready_for_decision as an approval.",
+                "Con: comparing the two states means parsing a dense sentence."
+              ]
+            }
+          ],
+          "proposed_adr": {
+            "consequences": "Operators can compare the two states at a glance. The risk of reading a state as approval or delivery is reduced as long as the table keeps the condition, both flags and the separate-future-actions sentence. The docs now depend on Markdown table rendering. The wording can drift from the controller behavior and needs a manual consistency check against the excerpt. No runtime change results. Human review is still required before any adoption, and this ADR has not been approved, exported or delivered.",
+            "context": "The investigation documentation defines two success terminal states, ready_for_decision and needs_input. They differ by whether any blocking question remains and both return decision_approved:false and delivered:false. Human acceptance, Jira export and delivery admission are separate future actions. Today the states are described in prose. Assumptions, none of them in the registered excerpt: operators scan the section more than they read it end to end, GitHub-flavored Markdown tables render correctly, and lines 60-96 are the only place the states are described. This proposal changes documentation only, under docs/, and changes no runtime, persistence, security, API, concurrency or deployment behavior. It is a proposal only and is not an approval.",
+            "decision": "Proposed: replace the prose for the two terminal states with a two-row table with state, condition and flags columns. The ready_for_decision row says no blocking question remains. The needs_input row says a blocking question remains. Both rows state decision_approved:false and delivered:false. Add one sentence after the table saying that human acceptance, Jira export and delivery admission are separate future actions and that neither state is an approval. Keep the statement that unverified external claims remain assumptions or open questions.",
+            "title": "Proposed: Present investigation terminal states as a brief table in docs/INVESTIGATE.md"
+          },
+          "recommendation": "Brief terminal-state table",
+          "risks": [
+            {
+              "citations": [
+                {
+                  "end": 92,
+                  "quote": "Success ends at `ready_for_decision`, or `needs_input` when any blocking question\nremains. Both return `decision_approved:false` and `delivered:false`. Human acceptance,",
+                  "source_id": "017d615abd7db3c11dace405b1de37f36ea180243498f7250d41de0e60e2db8d",
+                  "start": 91
+                }
+              ],
+              "text": "A terse table could drop the 'any blocking question' condition that distinguishes needs_input, or the shared false flags. An operator could then read ready_for_decision as approval or delivery. Both flags must be repeated for both states, and the condition must be stated."
+            },
+            {
+              "citations": [
+                {
+                  "end": 93,
+                  "quote": "remains. Both return `decision_approved:false` and `delivered:false`. Human acceptance,\nJira export and delivery admission are separate future actions. Defaults allow 16 jobs,",
+                  "source_id": "017d615abd7db3c11dace405b1de37f36ea180243498f7250d41de0e60e2db8d",
+                  "start": 92
+                }
+              ],
+              "text": "Omitting the statement that human acceptance, Jira export and delivery admission are separate future actions could lead operators to treat ready_for_decision as permission to export or deliver."
+            },
+            {
+              "citations": [
+                {
+                  "end": 81,
+                  "quote": "This first slice registers Git evidence only. External documentation, Jira, MCP and\nDEV/PROD observations are not independently ingested into its evidence catalog yet;\nunverified external claims must remain assumptions or open questions. Existing bundle",
+                  "source_id": "017d615abd7db3c11dace405b1de37f36ea180243498f7250d41de0e60e2db8d",
+                  "start": 79
+                }
+              ],
+              "text": "Shortening the section could flatten the rule that external documentation, Jira, MCP and DEV/PROD observations are not ingested, so claims about them must stay assumptions or open questions. Wording that goes beyond registered Git evidence would present unverified claims as facts."
+            }
+          ],
+          "summary": {
+            "citations": [
+              {
+                "end": 92,
+                "quote": "Success ends at `ready_for_decision`, or `needs_input` when any blocking question\nremains. Both return `decision_approved:false` and `delivered:false`. Human acceptance,",
+                "source_id": "017d615abd7db3c11dace405b1de37f36ea180243498f7250d41de0e60e2db8d",
+                "start": 91
+              }
+            ],
+            "text": "The registered excerpt defines two success terminal states together. The run ends at ready_for_decision, or at needs_input when any blocking question remains. Both states return decision_approved:false and delivered:false. Human acceptance, Jira export and delivery admission are separate future actions. The only differentiator is whether a blocking question remains, and the flags are shared. That content suits a compact two-row table. The choice between table and paragraph is an editorial judgement, and the excerpt contains no usability evidence either way."
+          },
+          "tickets": [
+            {
+              "acceptance": [
+                "The table has exactly two state rows, ready_for_decision and needs_input, with a condition column.",
+                "Both rows state decision_approved:false and delivered:false.",
+                "The needs_input row names the remaining blocking question as its condition.",
+                "A sentence states that human acceptance, Jira export and delivery admission are separate future actions and that neither state is an approval.",
+                "No file outside docs/ is modified."
+              ],
+              "depends_on": [],
+              "key": "A",
+              "paths": [
+                "docs/INVESTIGATE.md"
+              ],
+              "requirements": "Documentation only. Replace the prose describing ready_for_decision and needs_input in docs/INVESTIGATE.md with a brief two-row table plus one sentence on the separate future actions. Preserve the blocking-question condition, the decision_approved:false and delivered:false flags on both rows, and the rule that unverified external claims stay assumptions or open questions. Make no change outside docs/.",
+              "title": "Draft terminal-state table in docs/INVESTIGATE.md",
+              "validation_commands": [
+                [
+                  "grep",
+                  "-n",
+                  "decision_approved:false",
+                  "docs/INVESTIGATE.md"
+                ],
+                [
+                  "grep",
+                  "-n",
+                  "needs_input",
+                  "docs/INVESTIGATE.md"
+                ]
+              ]
+            },
+            {
+              "acceptance": [
+                "The condition and flag values in the table match the registered excerpt.",
+                "The statement about unverified external claims is still present in the document.",
+                "No wording implies that either state is an approval, an export or a delivery.",
+                "Any assumption, such as table rendering or operator scanning behavior, is stated as an assumption and not as a fact."
+              ],
+              "depends_on": [
+                "A"
+              ],
+              "key": "B",
+              "paths": [
+                "docs/INVESTIGATE.md"
+              ],
+              "requirements": "Documentation check only. After ticket A, compare the new table and sentence with the registered excerpt of docs/INVESTIGATE.md, lines 91-93 of the pinned revision. Confirm that no claim goes beyond registered Git evidence and that the external-claims rule is retained. Record any discrepancy in the review notes. Do not change anything outside docs/.",
+              "title": "Check wording consistency of the terminal-state table",
+              "validation_commands": [
+                [
+                  "grep",
+                  "-n",
+                  "delivered:false",
+                  "docs/INVESTIGATE.md"
+                ],
+                [
+                  "grep",
+                  "-n",
+                  "assumptions or open questions",
+                  "docs/INVESTIGATE.md"
+                ]
+              ]
+            }
+          ]
+        },
+        "revision": {
+          "acceptance_digest": "ee506f6c35bdf55bd1a238a95d3194175e790212f522a5117ef18f442b320d60",
+          "base": "e9ae4b520d78dc38a40e2910e11a4557e3215cfd",
+          "config_digest": "b7140e2fdc96d405898bfed6f7874f4180b1f07c842931435f61e09446510dcf",
+          "head": "e9ae4b520d78dc38a40e2910e11a4557e3215cfd"
+        },
+        "run_id": "11f671e8-ee63-4be2-aa18-0113884a800b",
+        "runtime_evidence": {
+          "agent_id": "agent_696712237d5e4d31b1f156fc6d9147da",
+          "command_digest": "419021bec18b972b5b5e9ec44658eeb4996f504eeab3cda4c8f051a4bbd9f6b4",
+          "command_normalization": "same_python_ast_and_pinned_shell_frame",
+          "effort": "high",
+          "effort_verification": "explicit_launch_argument_and_supported_served_model",
+          "harness": "claude-code",
+          "harness_release": "claude-code-2.1.289-9162edd4",
+          "model": "sonnet",
+          "model_connection_id": "mcn_699c8e51528e4438a359acfd4dced40f",
+          "process_id": 8,
+          "proof_kind": "first_tool_claude_code_process_arguments",
+          "provider_internal_reasoning_verified": false,
+          "runtime": "aranarium-aws",
+          "served_model": "claude-sonnet-5-5",
+          "session_id": "ses_73e5861a619b42fcbd9aa0c0cea5d4f5",
+          "tool_result_event_id": "evt_01M8HK34K0FE823DG684JAVKD2",
+          "tool_use_id": "toolu_01QksnbRcTRsLvdPh86j389U",
+          "turn_id": "run_daa11002fb5d4306ac9e874ecf618ca0",
+          "verified_by_platform": true
+        },
+        "schema_version": "investigation-result/v1",
+        "session_id": "ses_73e5861a619b42fcbd9aa0c0cea5d4f5",
+        "stage": "synthesizing",
+        "usage_verified": true,
+        "verdict": "pass"
+      },
+      "required_validation_commands": [
+        [
+          "env",
+          "PYTHONPATH=src",
+          "python3",
+          "-m",
+          "unittest",
+          "discover",
+          "-s",
+          "tests",
+          "-v"
+        ]
+      ]
+    },
+    "head": "e9ae4b520d78dc38a40e2910e11a4557e3215cfd",
+    "intake": {
+      "constraints": [
+        "Read-only synthetic service diagnostic; no product pilot, Jira, PR or GitHub mutation.",
+        "Any proposed follow-up is documentation only under docs/; no runtime, persistence, security, API, concurrency or deployment changes.",
+        "Use only registered excerpts as facts. Do not assume access to external MCP observations. Leave genuine unknowns explicit; do not invent questions."
+      ],
+      "head": "e9ae4b520d78dc38a40e2910e11a4557e3215cfd",
+      "risk_flags": [],
+      "sources": [
+        {
+          "end": 96,
+          "path": "docs/INVESTIGATE.md",
+          "start": 60
+        }
+      ],
+      "task": {
+        "repository": "serhii-nochevnyi/collegium-pipeline",
+        "requirements": "Synthetic bundle acceptance diagnostic, not a product pilot. Using only the registered documentation excerpts, compare two ways of presenting ready_for_decision and needs_input to an operator: a brief terminal-state table or a paragraph. Recommend a documentation-only presentation. Produce an inert proposed ADR and one or two documentation-check tickets, without implementation, export or approval. Cover facts, alternative tradeoffs, risks, assumptions and questions. This is a narrow editorial question; assess each complexity dimension for that exact scope rather than the entire pipeline.",
+        "source": "text",
+        "source_id": "investigation-service-documentation-v1",
+        "title": "Read-only service diagnostic: document investigation terminal states"
+      }
+    },
+    "paused": false,
+    "rejections": [
+      {
+        "artifact_digest": "8faeec7f8adcaa986656a7c74e3dec05e3d1143e4b72e5d54c0f66fe9db6d275",
+        "reason": "Proposed validation must retain configured commands",
+        "revision": 1,
+        "stage": "synthesizing"
+      }
+    ],
+    "research": {
+      "alternatives": "48c94ce43e95d936cf2fbf4c6b64c1e3bc4ad8765367a8db9c6abceea6ebc94b",
+      "constraints": "a04b4fd9e40491ad88d953ee8428f3e5b54dcc8cad72b3039a403dd200f621d4",
+      "current_system": "ef14771cedbd34c4c01089269e2b9d01950606e0e00a315187877c11a3c89b17",
+      "risks": "6bd981853b746c5c17c2501b2e93b927a6d250ba525de85eb876af4cd8d401ad"
+    },
+    "results": {
+      "assessing": "3095b45fccdf3e7d4a0d1ffb6f8047cc87fb6eb05f3c51662707eeb04f013c02",
+      "investigation_review": "807bc483d4246f86e965bb1b927a167ec54d452b5dc7e6e72ebe8465a9981864",
+      "researching:alternatives": "48c94ce43e95d936cf2fbf4c6b64c1e3bc4ad8765367a8db9c6abceea6ebc94b",
+      "researching:constraints": "a04b4fd9e40491ad88d953ee8428f3e5b54dcc8cad72b3039a403dd200f621d4",
+      "researching:current_system": "ef14771cedbd34c4c01089269e2b9d01950606e0e00a315187877c11a3c89b17",
+      "researching:risks": "6bd981853b746c5c17c2501b2e93b927a6d250ba525de85eb876af4cd8d401ad",
+      "synthesizing": "b443e7a62ecfb2e26c78771423b174141acf1d33e04799bfa34e458c7b4456ec"
+    },
+    "review": "807bc483d4246f86e965bb1b927a167ec54d452b5dc7e6e72ebe8465a9981864",
+    "revision": 2,
+    "settlement": {
+      "pending": [],
+      "settled": [],
+      "tokens": 0
+    },
+    "sources": "6e2c66c09f651799b175d95dcd81d26349698e0217897baf8547fcdc9117a438",
+    "state": "ready_for_decision",
+    "synthesis": "b443e7a62ecfb2e26c78771423b174141acf1d33e04799bfa34e458c7b4456ec",
+    "tokens": 936928,
+    "unaccepted_tokens": 0,
+    "workers": [
+      {
+        "job": "ff332507-c454-4276-a202-0e0ec7f4b19a",
+        "key": "11f671e8-ee63-4be2-aa18-0113884a800b:investigation:assessing:1:0",
+        "state": "worker_completed",
+        "at": 1795886551.335753,
+        "intent": "f33c28df-fbc3-4acd-b35d-eda9d0bfc1c6",
+        "session_id": "ses_fa8fd0e3f175452aa8b4bd933f3dc58e",
+        "turn_id": "run_366e644994c0427cb2a7497faeac2453"
+      },
+      {
+        "job": "ea3e86b3-629a-4e00-bcf0-14b7886bcb1f",
+        "key": "11f671e8-ee63-4be2-aa18-0113884a800b:investigation:researching:current_system:1:0",
+        "state": "worker_completed",
+        "at": 1795886624.4488075,
+        "intent": "dd33f221-5249-4ea0-983c-ffadb915186d",
+        "session_id": "ses_da4974618a8940fd8137cdbce9deb655",
+        "turn_id": "run_f47a0783e3d54476acf3c1a998a6404e"
+      },
+      {
+        "job": "f8240701-cd91-4f9a-9871-7c11bc232d93",
+        "key": "11f671e8-ee63-4be2-aa18-0113884a800b:investigation:researching:alternatives:1:0",
+        "state": "worker_completed",
+        "at": 1795886633.3076992,
+        "intent": "a63820ce-30af-4bfe-ac14-5402d7071afc",
+        "session_id": "ses_480c4dfcee344d3da32f70d3a0103b38",
+        "turn_id": "run_f4439461b6a94001a8bdca96cf38750b"
+      },
+      {
+        "job": "28e514ee-78c8-4fc3-9746-079408b9e5a3",
+        "key": "11f671e8-ee63-4be2-aa18-0113884a800b:investigation:researching:constraints:1:0",
+        "state": "worker_completed",
+        "at": 1795886665.3345208,
+        "intent": "1641cc95-4571-4de6-b081-73b1727f8877",
+        "session_id": "ses_c462bc450e7749b48f3055d8a7cafcd2",
+        "turn_id": "run_c5a4e19474ed45d5b68c70eb73d479c2"
+      },
+      {
+        "job": "3bd87044-9a35-4bc8-a996-6bd513ea166a",
+        "key": "11f671e8-ee63-4be2-aa18-0113884a800b:investigation:researching:risks:1:0",
+        "state": "worker_completed",
+        "at": 1795886697.2163553,
+        "intent": "03b0376a-2b23-46b8-bdc4-2a6777658c7e",
+        "session_id": "ses_c206a79f8f374200943c99e03b78d9f9",
+        "turn_id": "run_65527e90e57e4bc29c4016329004b4ab"
+      },
+      {
+        "job": "f0525d2e-dbca-4651-8542-8da29a777b78",
+        "key": "11f671e8-ee63-4be2-aa18-0113884a800b:investigation:synthesizing:1:0",
+        "state": "worker_completed",
+        "at": 1795886776.7935133,
+        "intent": "e26fd83e-0a46-426f-80a2-c6734b8bce17",
+        "session_id": "ses_73e5861a619b42fcbd9aa0c0cea5d4f5",
+        "turn_id": "run_daa11002fb5d4306ac9e874ecf618ca0"
+      },
+      {
+        "job": "9cce9830-13cf-4069-b924-38ee440495cc",
+        "key": "11f671e8-ee63-4be2-aa18-0113884a800b:investigation:synthesizing:2:0",
+        "state": "worker_completed",
+        "at": 1795887616.590942,
+        "intent": "fb7d159d-9645-423f-a5c9-2253ff62d380",
+        "session_id": "ses_13e78a17d062412f869d46e7b50a97af",
+        "turn_id": "run_7fa913afb87f4edeac527a22ec8f8f7d"
+      },
+      {
+        "job": "26d0c484-7d66-493c-b710-cf1c48d0b5bd",
+        "key": "11f671e8-ee63-4be2-aa18-0113884a800b:investigation:investigation_review:2:0",
+        "state": "worker_completed",
+        "at": 1795887719.3423722,
+        "intent": "4015e9fc-6802-4b38-99cd-30bdbb6a0a92",
+        "session_id": "ses_fa117ecbd91843258a820bfcfa73f4e0",
+        "turn_id": "run_1813c1c2f92b4adbb37feb9403d0bdfb"
+      }
+    ],
+    "complexity_assessment": {
+      "complexity": "simple",
+      "confidence": 0.85,
+      "dimensions": {
+        "concurrency": {
+          "evidence": {
+            "citations": [
+              {
+                "end": 61,
+                "quote": "`status`, `pause` and `resume` accept exactly `action`, `operation`, `run_id`.\n`tick` additionally requires `live:true`. Each tick observes existing turns and may",
+                "source_id": "017d615abd7db3c11dace405b1de37f36ea180243498f7250d41de0e60e2db8d",
+                "start": 60
+              }
+            ],
+            "text": "Presenting two terminal states in a table or a paragraph involves no concurrent behavior. Run-level pause and tick semantics are not touched."
+          },
+          "score": 0
+        },
+        "contracts": {
+          "evidence": {
+            "citations": [
+              {
+                "end": 93,
+                "quote": "remains. Both return `decision_approved:false` and `delivered:false`. Human acceptance,\nJira export and delivery admission are separate future actions. Defaults allow 16 jobs,",
+                "source_id": "017d615abd7db3c11dace405b1de37f36ea180243498f7250d41de0e60e2db8d",
+                "start": 92
+              }
+            ],
+            "text": "The documentation must keep the contract that both terminal states return decision_approved:false and delivered:false. The follow-up changes only docs wording and does not change any API."
+          },
+          "score": 1
+        },
+        "persistence": {
+          "evidence": {
+            "citations": [
+              {
+                "end": 92,
+                "quote": "Success ends at `ready_for_decision`, or `needs_input` when any blocking question\nremains. Both return `decision_approved:false` and `delivered:false`. Human acceptance,",
+                "source_id": "017d615abd7db3c11dace405b1de37f36ea180243498f7250d41de0e60e2db8d",
+                "start": 91
+              }
+            ],
+            "text": "The follow-up is documentation text only and changes no checkpoints or run state. The existing documented state handling is out of scope."
+          },
+          "score": 0
+        },
+        "scope": {
+          "evidence": {
+            "citations": [
+              {
+                "end": 92,
+                "quote": "Success ends at `ready_for_decision`, or `needs_input` when any blocking question\nremains. Both return `decision_approved:false` and `delivered:false`. Human acceptance,",
+                "source_id": "017d615abd7db3c11dace405b1de37f36ea180243498f7250d41de0e60e2db8d",
+                "start": 91
+              }
+            ],
+            "text": "The question is narrow and editorial. It covers only how the two terminal states, ready_for_decision and needs_input, are presented, and one registered excerpt defines them."
+          },
+          "score": 1
+        },
+        "security": {
+          "evidence": {
+            "citations": [
+              {
+                "end": 61,
+                "quote": "`status`, `pause` and `resume` accept exactly `action`, `operation`, `run_id`.\n`tick` additionally requires `live:true`. Each tick observes existing turns and may",
+                "source_id": "017d615abd7db3c11dace405b1de37f36ea180243498f7250d41de0e60e2db8d",
+                "start": 60
+              }
+            ],
+            "text": "A documentation-only wording change under docs/ touches no credentials or access. The run-level controls it describes are unchanged by it."
+          },
+          "score": 0
+        },
+        "uncertainty": {
+          "evidence": {
+            "citations": [
+              {
+                "end": 81,
+                "quote": "This first slice registers Git evidence only. External documentation, Jira, MCP and\nDEV/PROD observations are not independently ingested into its evidence catalog yet;\nunverified external claims must remain assumptions or open questions. Existing bundle",
+                "source_id": "017d615abd7db3c11dace405b1de37f36ea180243498f7250d41de0e60e2db8d",
+                "start": 79
+              }
+            ],
+            "text": "The terminal-state semantics are documented. Claims about external documentation and MCP observations are not ingested, so they stay assumptions. This task does not depend on them."
+          },
+          "score": 1
+        }
+      },
+      "evidence_digest": "5fbd44ab19384b007238bcbb9a2a0798b864ae0893991be2ff8b20cb775557f2",
+      "rationale": "This is a narrow, documentation-only editorial choice between a brief table and a paragraph. Scope, uncertainty and contracts each score 1 because the wording must stay faithful to the two terminal states and their false approval and delivery flags. Security, persistence and concurrency score 0 because no runtime, storage or access change is proposed. The coordinator imposes risk floors.",
+      "routing_reason": {
+        "dimension_floors": {},
+        "minimum": "simple",
+        "policy": "investigation-policy/v1",
+        "risk_floors": []
+      },
+      "score": 3
+    },
+    "stage_evidence": {
+      "assessing": {
+        "verdict": "pass",
+        "revision": {
+          "acceptance_digest": "ee506f6c35bdf55bd1a238a95d3194175e790212f522a5117ef18f442b320d60",
+          "base": "e9ae4b520d78dc38a40e2910e11a4557e3215cfd",
+          "config_digest": "b7140e2fdc96d405898bfed6f7874f4180b1f07c842931435f61e09446510dcf",
+          "head": "e9ae4b520d78dc38a40e2910e11a4557e3215cfd"
+        },
+        "session_id": "ses_fa8fd0e3f175452aa8b4bd933f3dc58e",
+        "runtime_evidence": {
+          "agent_id": "agent_e6c4312d769542c7991a1e929cb747e2",
+          "command_digest": "419021bec18b972b5b5e9ec44658eeb4996f504eeab3cda4c8f051a4bbd9f6b4",
+          "command_normalization": "same_python_ast_and_pinned_shell_frame",
+          "effort": "low",
+          "effort_verification": "explicit_launch_argument_and_supported_served_model",
+          "harness": "claude-code",
+          "harness_release": "claude-code-2.1.289-9162edd4",
+          "model": "sonnet",
+          "model_connection_id": "mcn_699c8e51528e4438a359acfd4dced40f",
+          "process_id": 8,
+          "proof_kind": "first_tool_claude_code_process_arguments",
+          "provider_internal_reasoning_verified": false,
+          "runtime": "aranarium-aws",
+          "served_model": "claude-sonnet-5-5",
+          "session_id": "ses_fa8fd0e3f175452aa8b4bd933f3dc58e",
+          "tool_result_event_id": "evt_01M8HJW8ABYA6VQ4YJ7P1RC9C1",
+          "tool_use_id": "toolu_01F8Um1UDWnDT32sRHoAHdpn",
+          "turn_id": "run_366e644994c0427cb2a7497faeac2453",
+          "verified_by_platform": true
+        },
+        "observed_tokens": 112192
+      },
+      "investigation_review": {
+        "verdict": "pass",
+        "revision": {
+          "acceptance_digest": "ee506f6c35bdf55bd1a238a95d3194175e790212f522a5117ef18f442b320d60",
+          "base": "e9ae4b520d78dc38a40e2910e11a4557e3215cfd",
+          "config_digest": "b7140e2fdc96d405898bfed6f7874f4180b1f07c842931435f61e09446510dcf",
+          "head": "e9ae4b520d78dc38a40e2910e11a4557e3215cfd"
+        },
+        "session_id": "ses_fa117ecbd91843258a820bfcfa73f4e0",
+        "runtime_evidence": {
+          "agent_id": "agent_837fd64a4a404e4cb7083dcd96b8d1be",
+          "command_digest": "419021bec18b972b5b5e9ec44658eeb4996f504eeab3cda4c8f051a4bbd9f6b4",
+          "command_normalization": "same_python_ast_and_pinned_shell_frame",
+          "effort": "high",
+          "effort_verification": "explicit_launch_argument_and_supported_served_model",
+          "harness": "claude-code",
+          "harness_release": "claude-code-2.1.289-9162edd4",
+          "model": "opus",
+          "model_connection_id": "mcn_699c8e51528e4438a359acfd4dced40f",
+          "process_id": 8,
+          "proof_kind": "first_tool_claude_code_process_arguments",
+          "provider_internal_reasoning_verified": false,
+          "runtime": "aranarium-aws",
+          "served_model": "claude-opus-5-5",
+          "session_id": "ses_fa117ecbd91843258a820bfcfa73f4e0",
+          "tool_result_event_id": "evt_01M8HKZXFT020JABE57S040PEW",
+          "tool_use_id": "toolu_017LQRoA5fhjXvGuaqcQi8ye",
+          "turn_id": "run_1813c1c2f92b4adbb37feb9403d0bdfb",
+          "verified_by_platform": true
+        },
+        "observed_tokens": 179921
+      },
+      "researching:alternatives": {
+        "verdict": "pass",
+        "revision": {
+          "acceptance_digest": "ee506f6c35bdf55bd1a238a95d3194175e790212f522a5117ef18f442b320d60",
+          "base": "e9ae4b520d78dc38a40e2910e11a4557e3215cfd",
+          "config_digest": "b7140e2fdc96d405898bfed6f7874f4180b1f07c842931435f61e09446510dcf",
+          "head": "e9ae4b520d78dc38a40e2910e11a4557e3215cfd"
+        },
+        "session_id": "ses_480c4dfcee344d3da32f70d3a0103b38",
+        "runtime_evidence": {
+          "agent_id": "agent_b52cb7974bfc43ca870eb62dbc3bd6cf",
+          "command_digest": "419021bec18b972b5b5e9ec44658eeb4996f504eeab3cda4c8f051a4bbd9f6b4",
+          "command_normalization": "same_python_ast_and_pinned_shell_frame",
+          "effort": "low",
+          "effort_verification": "explicit_launch_argument_and_supported_served_model",
+          "harness": "claude-code",
+          "harness_release": "claude-code-2.1.289-9162edd4",
+          "model": "sonnet",
+          "model_connection_id": "mcn_699c8e51528e4438a359acfd4dced40f",
+          "process_id": 7,
+          "proof_kind": "first_tool_claude_code_process_arguments",
+          "provider_internal_reasoning_verified": false,
+          "runtime": "aranarium-aws",
+          "served_model": "claude-sonnet-5-5",
+          "session_id": "ses_480c4dfcee344d3da32f70d3a0103b38",
+          "tool_result_event_id": "evt_01M8HJYRESXVCPRJ9T61J4XHKE",
+          "tool_use_id": "toolu_01Rdg8JtGQK2CXkEQyYC4Ynm",
+          "turn_id": "run_f4439461b6a94001a8bdca96cf38750b",
+          "verified_by_platform": true
+        },
+        "observed_tokens": 68336
+      },
+      "researching:constraints": {
+        "verdict": "pass",
+        "revision": {
+          "acceptance_digest": "ee506f6c35bdf55bd1a238a95d3194175e790212f522a5117ef18f442b320d60",
+          "base": "e9ae4b520d78dc38a40e2910e11a4557e3215cfd",
+          "config_digest": "b7140e2fdc96d405898bfed6f7874f4180b1f07c842931435f61e09446510dcf",
+          "head": "e9ae4b520d78dc38a40e2910e11a4557e3215cfd"
+        },
+        "session_id": "ses_c462bc450e7749b48f3055d8a7cafcd2",
+        "runtime_evidence": {
+          "agent_id": "agent_b52cb7974bfc43ca870eb62dbc3bd6cf",
+          "command_digest": "419021bec18b972b5b5e9ec44658eeb4996f504eeab3cda4c8f051a4bbd9f6b4",
+          "command_normalization": "same_python_ast_and_pinned_shell_frame",
+          "effort": "low",
+          "effort_verification": "explicit_launch_argument_and_supported_served_model",
+          "harness": "claude-code",
+          "harness_release": "claude-code-2.1.289-9162edd4",
+          "model": "sonnet",
+          "model_connection_id": "mcn_699c8e51528e4438a359acfd4dced40f",
+          "process_id": 7,
+          "proof_kind": "first_tool_claude_code_process_arguments",
+          "provider_internal_reasoning_verified": false,
+          "runtime": "aranarium-aws",
+          "served_model": "claude-sonnet-5-5",
+          "session_id": "ses_c462bc450e7749b48f3055d8a7cafcd2",
+          "tool_result_event_id": "evt_01M8HJZQ5F7KPV5PGEK4AXX0RV",
+          "tool_use_id": "toolu_01YFUKzFAdd71UUGRBTKKrWU",
+          "turn_id": "run_c5a4e19474ed45d5b68c70eb73d479c2",
+          "verified_by_platform": true
+        },
+        "observed_tokens": 114710
+      },
+      "researching:current_system": {
+        "verdict": "pass",
+        "revision": {
+          "acceptance_digest": "ee506f6c35bdf55bd1a238a95d3194175e790212f522a5117ef18f442b320d60",
+          "base": "e9ae4b520d78dc38a40e2910e11a4557e3215cfd",
+          "config_digest": "b7140e2fdc96d405898bfed6f7874f4180b1f07c842931435f61e09446510dcf",
+          "head": "e9ae4b520d78dc38a40e2910e11a4557e3215cfd"
+        },
+        "session_id": "ses_da4974618a8940fd8137cdbce9deb655",
+        "runtime_evidence": {
+          "agent_id": "agent_b52cb7974bfc43ca870eb62dbc3bd6cf",
+          "command_digest": "419021bec18b972b5b5e9ec44658eeb4996f504eeab3cda4c8f051a4bbd9f6b4",
+          "command_normalization": "same_python_ast_and_pinned_shell_frame",
+          "effort": "low",
+          "effort_verification": "explicit_launch_argument_and_supported_served_model",
+          "harness": "claude-code",
+          "harness_release": "claude-code-2.1.289-9162edd4",
+          "model": "sonnet",
+          "model_connection_id": "mcn_699c8e51528e4438a359acfd4dced40f",
+          "process_id": 7,
+          "proof_kind": "first_tool_claude_code_process_arguments",
+          "provider_internal_reasoning_verified": false,
+          "runtime": "aranarium-aws",
+          "served_model": "claude-sonnet-5-5",
+          "session_id": "ses_da4974618a8940fd8137cdbce9deb655",
+          "tool_result_event_id": "evt_01M8HJYFC8T3WX7SAJDRA7FX0J",
+          "tool_use_id": "toolu_0142LNGn5MpujmVh9mbDgJMj",
+          "turn_id": "run_f47a0783e3d54476acf3c1a998a6404e",
+          "verified_by_platform": true
+        },
+        "observed_tokens": 113863
+      },
+      "researching:risks": {
+        "verdict": "pass",
+        "revision": {
+          "acceptance_digest": "ee506f6c35bdf55bd1a238a95d3194175e790212f522a5117ef18f442b320d60",
+          "base": "e9ae4b520d78dc38a40e2910e11a4557e3215cfd",
+          "config_digest": "b7140e2fdc96d405898bfed6f7874f4180b1f07c842931435f61e09446510dcf",
+          "head": "e9ae4b520d78dc38a40e2910e11a4557e3215cfd"
+        },
+        "session_id": "ses_c206a79f8f374200943c99e03b78d9f9",
+        "runtime_evidence": {
+          "agent_id": "agent_b52cb7974bfc43ca870eb62dbc3bd6cf",
+          "command_digest": "419021bec18b972b5b5e9ec44658eeb4996f504eeab3cda4c8f051a4bbd9f6b4",
+          "command_normalization": "same_python_ast_and_pinned_shell_frame",
+          "effort": "low",
+          "effort_verification": "explicit_launch_argument_and_supported_served_model",
+          "harness": "claude-code",
+          "harness_release": "claude-code-2.1.289-9162edd4",
+          "model": "sonnet",
+          "model_connection_id": "mcn_699c8e51528e4438a359acfd4dced40f",
+          "process_id": 8,
+          "proof_kind": "first_tool_claude_code_process_arguments",
+          "provider_internal_reasoning_verified": false,
+          "runtime": "aranarium-aws",
+          "served_model": "claude-sonnet-5-5",
+          "session_id": "ses_c206a79f8f374200943c99e03b78d9f9",
+          "tool_result_event_id": "evt_01M8HK0QCFX6R8JTS6KCPMT8GQ",
+          "tool_use_id": "toolu_01XAJ2pXYnZqi8HrESpqLL3D",
+          "turn_id": "run_65527e90e57e4bc29c4016329004b4ab",
+          "verified_by_platform": true
+        },
+        "observed_tokens": 68308
+      },
+      "synthesizing": {
+        "verdict": "pass",
+        "revision": {
+          "acceptance_digest": "ee506f6c35bdf55bd1a238a95d3194175e790212f522a5117ef18f442b320d60",
+          "base": "e9ae4b520d78dc38a40e2910e11a4557e3215cfd",
+          "config_digest": "b7140e2fdc96d405898bfed6f7874f4180b1f07c842931435f61e09446510dcf",
+          "head": "e9ae4b520d78dc38a40e2910e11a4557e3215cfd"
+        },
+        "session_id": "ses_13e78a17d062412f869d46e7b50a97af",
+        "runtime_evidence": {
+          "agent_id": "agent_696712237d5e4d31b1f156fc6d9147da",
+          "command_digest": "419021bec18b972b5b5e9ec44658eeb4996f504eeab3cda4c8f051a4bbd9f6b4",
+          "command_normalization": "same_python_ast_and_pinned_shell_frame",
+          "effort": "high",
+          "effort_verification": "explicit_launch_argument_and_supported_served_model",
+          "harness": "claude-code",
+          "harness_release": "claude-code-2.1.289-9162edd4",
+          "model": "sonnet",
+          "model_connection_id": "mcn_699c8e51528e4438a359acfd4dced40f",
+          "process_id": 7,
+          "proof_kind": "first_tool_claude_code_process_arguments",
+          "provider_internal_reasoning_verified": false,
+          "runtime": "aranarium-aws",
+          "served_model": "claude-sonnet-5-5",
+          "session_id": "ses_13e78a17d062412f869d46e7b50a97af",
+          "tool_result_event_id": "evt_01M8HKWR8BT4RZVF07MZBS2F6Y",
+          "tool_use_id": "toolu_01ACJ7pnrNSXwDduriQnAjkB",
+          "turn_id": "run_7fa913afb87f4edeac527a22ec8f8f7d",
+          "verified_by_platform": true
+        },
+        "observed_tokens": 133259
+      }
+    },
+    "proposal": {
+      "open_questions": [],
+      "options": [
+        {
+          "analysis": {
+            "citations": [
+              {
+                "end": 92,
+                "quote": "Success ends at `ready_for_decision`, or `needs_input` when any blocking question\nremains. Both return `decision_approved:false` and `delivered:false`. Human acceptance,",
+                "source_id": "017d615abd7db3c11dace405b1de37f36ea180243498f7250d41de0e60e2db8d",
+                "start": 91
+              }
+            ],
+            "text": "Present the two states as a two-row table with state, condition and flags columns. Add one sentence saying that human acceptance, Jira export and delivery admission are separate future actions. The two states differ by one condition (whether a blocking question remains) and share identical flag values, so a table can show both at a glance. Each row repeats decision_approved:false and delivered:false so neither state reads as approval or delivery."
+          },
+          "name": "Brief terminal-state table",
+          "tradeoffs": [
+            "Pro: the distinguishing condition and the shared false flags are scannable side by side.",
+            "Pro: repeating the flags in both rows keeps the non-approval message explicit.",
+            "Con: terse cells could drop the 'any blocking question' condition or the separate-future-actions note, so the table needs a condition column and a trailing sentence.",
+            "Con: it assumes the docs render GitHub-flavored Markdown tables, which is unverified.",
+            "Con: it changes the existing prose flow, which links the states to the later acceptance, export and delivery steps."
+          ]
+        },
+        {
+          "analysis": {
+            "citations": [
+              {
+                "end": 93,
+                "quote": "remains. Both return `decision_approved:false` and `delivered:false`. Human acceptance,\nJira export and delivery admission are separate future actions. Defaults allow 16 jobs,",
+                "source_id": "017d615abd7db3c11dace405b1de37f36ea180243498f7250d41de0e60e2db8d",
+                "start": 92
+              }
+            ],
+            "text": "Keep or lightly polish the current prose. One sentence pair names both states, the blocking-question condition, the shared false flags and the separate future actions. This preserves the narrative link to human acceptance, Jira export and delivery admission and needs no rendering assumption. The condition, the flags and the future-actions list all sit in one run of text, so an operator has to parse it to compare the two states."
+          },
+          "name": "Single explanatory paragraph",
+          "tradeoffs": [
+            "Pro: no rendering assumption and no restructuring of the section.",
+            "Pro: it keeps the narrative link to the separate future actions.",
+            "Con: the needs_input trigger can be buried, so an operator could read needs_input as a failure or ready_for_decision as an approval.",
+            "Con: comparing the two states means parsing a dense sentence."
+          ]
+        }
+      ],
+      "proposed_adr": {
+        "consequences": "Operators can compare the two states at a glance. The risk of reading a state as approval or delivery is reduced as long as the table keeps the condition, both flags and the separate-future-actions sentence. The docs now depend on Markdown table rendering. The wording can drift from the controller behavior and needs a manual consistency check against the excerpt. No runtime change results. Human review is still required before any adoption, and this ADR has not been approved, exported or delivered.",
+        "context": "The investigation documentation defines two success terminal states, ready_for_decision and needs_input. They differ by whether any blocking question remains and both return decision_approved:false and delivered:false. Human acceptance, Jira export and delivery admission are separate future actions. Today the states are described in prose. Assumptions, none of them in the registered excerpt: operators scan the section more than they read it end to end, GitHub-flavored Markdown tables render correctly, and lines 60-96 are the only place the states are described. This proposal changes documentation only, under docs/, and changes no runtime, persistence, security, API, concurrency or deployment behavior. It is a proposal only and is not an approval.",
+        "decision": "Proposed: replace the prose for the two terminal states with a two-row table with state, condition and flags columns. The ready_for_decision row says no blocking question remains. The needs_input row says a blocking question remains. Both rows state decision_approved:false and delivered:false. Add one sentence after the table saying that human acceptance, Jira export and delivery admission are separate future actions and that neither state is an approval. Keep the statement that unverified external claims remain assumptions or open questions.",
+        "title": "Proposed: Present investigation terminal states as a brief table in docs/INVESTIGATE.md"
+      },
+      "recommendation": "Brief terminal-state table",
+      "risks": [
+        {
+          "citations": [
+            {
+              "end": 92,
+              "quote": "Success ends at `ready_for_decision`, or `needs_input` when any blocking question\nremains. Both return `decision_approved:false` and `delivered:false`. Human acceptance,",
+              "source_id": "017d615abd7db3c11dace405b1de37f36ea180243498f7250d41de0e60e2db8d",
+              "start": 91
+            }
+          ],
+          "text": "A terse table could drop the 'any blocking question' condition that distinguishes needs_input, or the shared false flags. An operator could then read ready_for_decision as approval or delivery. Both flags must be repeated for both states, and the condition must be stated."
+        },
+        {
+          "citations": [
+            {
+              "end": 93,
+              "quote": "remains. Both return `decision_approved:false` and `delivered:false`. Human acceptance,\nJira export and delivery admission are separate future actions. Defaults allow 16 jobs,",
+              "source_id": "017d615abd7db3c11dace405b1de37f36ea180243498f7250d41de0e60e2db8d",
+              "start": 92
+            }
+          ],
+          "text": "Omitting the statement that human acceptance, Jira export and delivery admission are separate future actions could lead operators to treat ready_for_decision as permission to export or deliver."
+        },
+        {
+          "citations": [
+            {
+              "end": 81,
+              "quote": "This first slice registers Git evidence only. External documentation, Jira, MCP and\nDEV/PROD observations are not independently ingested into its evidence catalog yet;\nunverified external claims must remain assumptions or open questions. Existing bundle",
+              "source_id": "017d615abd7db3c11dace405b1de37f36ea180243498f7250d41de0e60e2db8d",
+              "start": 79
+            }
+          ],
+          "text": "Shortening the section could flatten the rule that external documentation, Jira, MCP and DEV/PROD observations are not ingested, so claims about them must stay assumptions or open questions. Wording that goes beyond registered Git evidence would present unverified claims as facts."
+        }
+      ],
+      "summary": {
+        "citations": [
+          {
+            "end": 92,
+            "quote": "Success ends at `ready_for_decision`, or `needs_input` when any blocking question\nremains. Both return `decision_approved:false` and `delivered:false`. Human acceptance,",
+            "source_id": "017d615abd7db3c11dace405b1de37f36ea180243498f7250d41de0e60e2db8d",
+            "start": 91
+          }
+        ],
+        "text": "The registered excerpt defines two success terminal states together. The run ends at ready_for_decision, or at needs_input when any blocking question remains. Both states return decision_approved:false and delivered:false. Human acceptance, Jira export and delivery admission are separate future actions. The only differentiator is whether a blocking question remains, and the flags are shared. That content suits a compact two-row table. The choice between table and paragraph is an editorial judgement, and the excerpt contains no usability evidence either way."
+      },
+      "tickets": [
+        {
+          "acceptance": [
+            "The table has exactly two state rows, ready_for_decision and needs_input, with a condition column.",
+            "Both rows state decision_approved:false and delivered:false.",
+            "The needs_input row names the remaining blocking question as its condition.",
+            "A sentence states that human acceptance, Jira export and delivery admission are separate future actions and that neither state is an approval.",
+            "No file outside docs/ is modified."
+          ],
+          "depends_on": [],
+          "key": "A",
+          "paths": [
+            "docs/INVESTIGATE.md"
+          ],
+          "requirements": "Documentation only. Replace the prose describing ready_for_decision and needs_input in docs/INVESTIGATE.md with a brief two-row table plus one sentence on the separate future actions. Preserve the blocking-question condition, the decision_approved:false and delivered:false flags on both rows, and the rule that unverified external claims stay assumptions or open questions. Make no change outside docs/.",
+          "title": "Draft terminal-state table in docs/INVESTIGATE.md",
+          "validation_commands": [
+            [
+              "env",
+              "PYTHONPATH=src",
+              "python3",
+              "-m",
+              "unittest",
+              "discover",
+              "-s",
+              "tests",
+              "-v"
+            ]
+          ]
+        },
+        {
+          "acceptance": [
+            "The condition and flag values in the table match the registered excerpt.",
+            "The statement about unverified external claims is still present in the document.",
+            "No wording implies that either state is an approval, an export or a delivery.",
+            "Any assumption, such as table rendering or operator scanning behavior, is stated as an assumption and not as a fact."
+          ],
+          "depends_on": [
+            "A"
+          ],
+          "key": "B",
+          "paths": [
+            "docs/INVESTIGATE.md"
+          ],
+          "requirements": "Documentation check only. After ticket A, compare the new table and sentence with the registered excerpt of docs/INVESTIGATE.md, lines 91-93 of the pinned revision. Confirm that no claim goes beyond registered Git evidence and that the external-claims rule is retained. Record any discrepancy in the review notes. Do not change anything outside docs/.",
+          "title": "Check wording consistency of the terminal-state table",
+          "validation_commands": [
+            [
+              "env",
+              "PYTHONPATH=src",
+              "python3",
+              "-m",
+              "unittest",
+              "discover",
+              "-s",
+              "tests",
+              "-v"
+            ]
+          ]
+        }
+      ]
+    },
+    "controller_host": "Collegium installed bundle",
+    "config_digest": "b7140e2fdc96d405898bfed6f7874f4180b1f07c842931435f61e09446510dcf",
+    "jira_writes": 0,
+    "github_mutations": 0,
+    "pilot_selected": false
+  },
+  "manual_controller_runs": [
+    {
+      "id": "run_85a33653da9d4755b8bd892f91ac704f",
+      "status": "succeeded",
+      "operation": "preflight",
+      "root": null
+    },
+    {
+      "id": "run_d75e6f53cc4c496bb0261c5df156b696",
+      "status": "succeeded",
+      "operation": "prepare",
+      "root": "11f671e8-ee63-4be2-aa18-0113884a800b"
+    },
+    {
+      "id": "run_f29fc3e4748545a3bc002824926e2ee8",
+      "status": "succeeded",
+      "operation": "prepare",
+      "root": "11f671e8-ee63-4be2-aa18-0113884a800b"
+    },
+    {
+      "id": "run_d71a4a1c5c974dc99dcb55d3813a5a8a",
+      "status": "succeeded",
+      "operation": "tick",
+      "root": "11f671e8-ee63-4be2-aa18-0113884a800b"
+    },
+    {
+      "id": "run_876af6d7b8a3422d9f7101327b938af7",
+      "status": "succeeded",
+      "operation": "tick",
+      "root": "11f671e8-ee63-4be2-aa18-0113884a800b"
+    },
+    {
+      "id": "run_9b2008e6c85a4604bbee6c15b6e0197d",
+      "status": "succeeded",
+      "operation": "tick",
+      "root": "11f671e8-ee63-4be2-aa18-0113884a800b"
+    },
+    {
+      "id": "run_ad92d35f44234c9c88ce6b5bcbd520a7",
+      "status": "succeeded",
+      "operation": "tick",
+      "root": "11f671e8-ee63-4be2-aa18-0113884a800b"
+    },
+    {
+      "id": "run_ca9dcd70abca4ec8970db908a382f891",
+      "status": "succeeded",
+      "operation": "tick",
+      "root": "11f671e8-ee63-4be2-aa18-0113884a800b"
+    },
+    {
+      "id": "run_da67ff794b0843cba1528a7585260a9b",
+      "status": "succeeded",
+      "operation": "tick",
+      "root": "11f671e8-ee63-4be2-aa18-0113884a800b"
+    },
+    {
+      "id": "run_2f86bfb47aa8435388c0dfd5db7d06c8",
+      "status": "succeeded",
+      "operation": "tick",
+      "root": "11f671e8-ee63-4be2-aa18-0113884a800b"
+    },
+    {
+      "id": "run_951510fca23147a48d31bb1410a5eb1d",
+      "status": "succeeded",
+      "operation": "tick",
+      "root": "11f671e8-ee63-4be2-aa18-0113884a800b"
+    },
+    {
+      "id": "run_f4c3d7ef92b74ede9552f4d2d44754ad",
+      "status": "succeeded",
+      "operation": "tick",
+      "root": "11f671e8-ee63-4be2-aa18-0113884a800b"
+    },
+    {
+      "id": "run_4ac50318a0854bc699ff3d31bb0acf70",
+      "status": "succeeded",
+      "operation": "tick",
+      "root": "11f671e8-ee63-4be2-aa18-0113884a800b"
+    },
+    {
+      "id": "run_09e80277545b4d52950a867a602fc782",
+      "status": "succeeded",
+      "operation": "tick",
+      "root": "11f671e8-ee63-4be2-aa18-0113884a800b"
+    },
+    {
+      "id": "run_29f16da00c7f43378bae812c51a874d5",
+      "status": "succeeded",
+      "operation": "prepare",
+      "root": "2bb9f221-e980-4746-b683-611d3ad9cebf"
+    },
+    {
+      "id": "run_2a240a6c5f6a4d90a23f5d161c5e1572",
+      "status": "succeeded",
+      "operation": "tick",
+      "root": "2bb9f221-e980-4746-b683-611d3ad9cebf"
+    },
+    {
+      "id": "run_9229fd87fc7141c7a4e6aea04caabc4d",
+      "status": "succeeded",
+      "operation": "tick",
+      "root": "2bb9f221-e980-4746-b683-611d3ad9cebf"
+    },
+    {
+      "id": "run_6fd2157867af4427ad730e66aec32c71",
+      "status": "succeeded",
+      "operation": "tick",
+      "root": "2bb9f221-e980-4746-b683-611d3ad9cebf"
+    },
+    {
+      "id": "run_f933449becbc4a67bca9d26ecd66bb2e",
+      "status": "succeeded",
+      "operation": "repair",
+      "root": "11f671e8-ee63-4be2-aa18-0113884a800b"
+    },
+    {
+      "id": "run_c5aad3968036430d89d9d59f59384b22",
+      "status": "succeeded",
+      "operation": "tick",
+      "root": "11f671e8-ee63-4be2-aa18-0113884a800b"
+    },
+    {
+      "id": "run_df67c563acb84f1f80e959d9fc6ba687",
+      "status": "succeeded",
+      "operation": "tick",
+      "root": "11f671e8-ee63-4be2-aa18-0113884a800b"
+    },
+    {
+      "id": "run_4daf696959c64999b997c03371a12b53",
+      "status": "succeeded",
+      "operation": "tick",
+      "root": "11f671e8-ee63-4be2-aa18-0113884a800b"
+    },
+    {
+      "id": "run_1a0bbefe161a439fb4ecbac58824eb1a",
+      "status": "succeeded",
+      "operation": "tick",
+      "root": "11f671e8-ee63-4be2-aa18-0113884a800b"
+    },
+    {
+      "id": "run_dc502b257dc44e4d81cd6f33f07b7a6b",
+      "status": "succeeded",
+      "operation": "tick",
+      "root": "11f671e8-ee63-4be2-aa18-0113884a800b"
+    },
+    {
+      "id": "run_7e207308f2024b36be6001a0727836b9",
+      "status": "succeeded",
+      "operation": "prepare",
+      "root": "11f671e8-ee63-4be2-aa18-0113884a800b"
+    },
+    {
+      "id": "run_fcd3c0d3c3e4488c8bbddac4cedaf876",
+      "status": "succeeded",
+      "operation": "tick",
+      "root": "11f671e8-ee63-4be2-aa18-0113884a800b"
+    }
+  ],
+  "automations": [
+    {
+      "id": "aut_a4c51e456cf34206b0f6424f7f000359",
+      "name": "pipeline-github-app-read-probe-v1",
+      "status": "paused"
+    },
+    {
+      "id": "aut_5b17ddca92424243b1feb5aa8732a7a0",
+      "name": "pipeline-native-broker-1474663859-v1",
+      "status": "paused"
+    },
+    {
+      "id": "aut_c7077fff758947d2b9413f5eb9ddbd8d",
+      "name": "pipeline-native-broker-1474663859-v2",
+      "status": "paused"
+    },
+    {
+      "id": "aut_144094f5a49446a1b4de7f8f531d55d9",
+      "name": "pipeline-native-broker-1474663859-v3",
+      "status": "paused"
+    },
+    {
+      "id": "aut_2ea6d08b772f41d5a9fa236cb19f93d8",
+      "name": "pipeline-controller",
+      "status": "paused"
+    },
+    {
+      "id": "aut_e98e1ccb28594a938ec7d9815bda7cd5",
+      "name": "pipeline-native-broker-1474663859-v4",
+      "status": "paused"
+    },
+    {
+      "id": "aut_3a938ace3b15451585f1ed87f166625f",
+      "name": "pipeline-recovery-store-v1",
+      "status": "paused"
+    },
+    {
+      "id": "aut_f7e1268b1afe4af5a24d942a5e993166",
+      "name": "pipeline-native-broker-1474663859-v5",
+      "status": "paused"
+    },
+    {
+      "id": "aut_c6f07e880ec84a5b89be65fcfdf2ecf0",
+      "name": "pipeline-native-broker-1474663859-v6",
+      "status": "paused"
+    },
+    {
+      "id": "aut_f9fdd52da91645df87973a0030ddec26",
+      "name": "pipeline-native-broker-1474663859-v7",
+      "status": "paused"
+    },
+    {
+      "id": "aut_25092aee432946ceade2ea4c6bc2a2d7",
+      "name": "pipeline-native-broker-1474663859-v8",
+      "status": "paused"
+    },
+    {
+      "id": "aut_be7d79c9081f4cbcaabdc088e601b151",
+      "name": "pipeline-native-broker-1474663859-v9",
+      "status": "paused"
+    },
+    {
+      "id": "aut_0631ecd7ec2b4ae9a166f9f9b2b9ed77",
+      "name": "pipeline-native-broker-1474663859-v10-staged",
+      "status": "paused"
+    },
+    {
+      "id": "aut_56e599d0747448479acb75f385baf23e",
+      "name": "pipeline-epic-service-recovery-v1-staged",
+      "status": "paused"
+    },
+    {
+      "id": "aut_7fd83fe573ae469e9cc85078a08d9b22",
+      "name": "pipeline-native-broker-1474663859-v11",
+      "status": "paused"
+    },
+    {
+      "id": "aut_36f681afc0314a1da669c65c0f7e2232",
+      "name": "pipeline-plan-read-diagnostic-v1",
+      "status": "paused"
+    },
+    {
+      "id": "aut_1ee6cbd4ae774aa78ee66f8cc8c99277",
+      "name": "pipeline-native-broker-1474663859-v12",
+      "status": "paused"
+    },
+    {
+      "id": "aut_36b47cb10c754e6bae7dc15d670e0fee",
+      "name": "pipeline-native-broker-1474663859-v13",
+      "status": "paused"
+    },
+    {
+      "id": "aut_87f62b4cfdb54045ac7449685191853e",
+      "name": "pipeline-native-broker-1474663859-v14",
+      "status": "paused"
+    },
+    {
+      "id": "aut_33e6c3a8267041e4ba26326d2dcf93bb",
+      "name": "pipeline-native-broker-1474663859-v15",
+      "status": "paused"
+    },
+    {
+      "id": "aut_3725cac20b4a46e398a005b0199da7bf",
+      "name": "pipeline-investigate-staged",
+      "status": "paused"
+    },
+    {
+      "id": "aut_be700e7e2ba241e99dc611f6025db54d",
+      "name": "pipeline-investigation-recovery-v1-staged",
+      "status": "paused"
+    },
+    {
+      "id": "aut_d1ddffaa83ba4d999566b0b761b5ba75",
+      "name": "pipeline-native-broker-1474663859-v16",
+      "status": "paused"
+    }
+  ],
+  "pilot_selected": false,
+  "jira_writes": 0,
+  "github_mutations_from_investigation": 0,
+  "main_head": "dbe5e20955dee07fab2a7bc9ab93aa0bcd1b0451",
+  "limits": [
+    "Git-only independently captured evidence; external MCP/Jira ingestion is not implemented in this investigation lane.",
+    "Per-lane parallelism; not a shared cross-lane limit.",
+    "ADR/tickets remain proposals; human acceptance, export and delivery are separate.",
+    "Token thresholds are admission guards, not a hard provider/USD cap.",
+    "This native service verified Sonnet low/high and Opus high; critical/max routing has configuration and fixture coverage, not a new paid critical service run.",
+    "Signed investigation crash restoration has fixture coverage; no fresh live cancellation was performed in this slice."
+  ]
+}

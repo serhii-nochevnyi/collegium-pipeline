@@ -513,6 +513,25 @@ def build(config_path, integrations_path, output=DEFAULT_OUTPUT):
             )
     if investigation:
         recovery = investigation["recovery_store"]
+        from collegium_pipeline.investigation_mcp import validate_catalog
+
+        mcp_catalog = json.loads((ROOT / "config/investigation-mcp.json").read_text())
+        validate_catalog(mcp_catalog)
+        for name, pinned in mcp_catalog["sources"].items():
+            connection = next((c for c in connections if c["name"] == name), None)
+            if (
+                not connection
+                or connection["url"] != pinned["url"]
+                or set(connection["tools"]) != set(pinned["tools"])
+                or integrations["bindings"][name]["connection_id"] != pinned["connection_id"]
+            ):
+                raise PolicyError(
+                    "Investigation MCP catalog exceeds authenticated integration ceiling"
+                )
+        write(
+            "controller/investigation-mcp.json",
+            json.dumps(mcp_catalog, sort_keys=True, separators=(",", ":")),
+        )
         claims["automation/pipeline-investigate"] = recovery["owner"]
         claims["automation/pipeline-investigation-recovery-v1"] = recovery["automation_id"]
         prefix = "investigation-recovery/"
@@ -529,6 +548,7 @@ def build(config_path, integrations_path, output=DEFAULT_OUTPUT):
             "controller/runtime.b64",
             "controller/settings.json",
             "controller/investigation-settings.json",
+            "controller/investigation-mcp.json",
         ]
         if sum(len((output / name).read_bytes()) for name in inv_files) > 256000:
             raise PolicyError("Investigation controller exceeds platform code.files budget")
@@ -538,6 +558,7 @@ def build(config_path, integrations_path, output=DEFAULT_OUTPUT):
                 {
                     "files": inv_files,
                     "command": "python3 controller/investigation_entry.py",
+                    "mcp_servers": list(mcp_catalog["sources"]),
                     "repositories": [
                         {
                             "url": "https://github.com/" + config["repository"],

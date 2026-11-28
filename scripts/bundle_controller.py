@@ -402,6 +402,8 @@ def cloud_fence(
             unsafe = data.get("action") == "investigate" and data.get("operation") not in {
                 "preflight",
                 "status",
+                "mcp-preflight",
+                "evidence",
             }
         if unsafe and not (
             not diagnostic
@@ -1171,7 +1173,11 @@ def main(event=None, *, root=None, environ=None, http=None):
         http = http or (
             JsonHttp(investigation_config["server"], {"X-Api-Key": key}) if key else None
         )
-        return dispatch(event, state, investigation_config, environ, http, globals())
+        catalog_path = root / "investigation-mcp.json"
+        catalog = json.loads(catalog_path.read_text()) if catalog_path.exists() else None
+        return dispatch(
+            event, state, investigation_config, environ, http, globals(), mcp_catalog=catalog
+        )
     if action in {"epic", "deliver", "reconcile"}:
         from collegium_pipeline.recovery import recovery_profiles
 
