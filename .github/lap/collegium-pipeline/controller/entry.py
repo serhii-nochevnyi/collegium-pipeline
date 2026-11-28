@@ -5,7 +5,7 @@ import os
 import sys
 from pathlib import Path
 
-_BUNDLE_RUNTIME_SHA256 = "816e4945a9eb7ec364ca54dda217e88732938c5dc14c78c43a5b9d0c11d8886f"
+_BUNDLE_RUNTIME_SHA256 = "676d3f5db80f9f5b909ad3207468c908b00e22a5dc130634c9c7c2e24b3b9f31"
 _BUNDLE_RUNTIME = None
 
 

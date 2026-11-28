@@ -8,5 +8,6 @@
   "agent/pipeline-claude-fixer-high-broker-v1": "agent_22d9cdd3069a43048729138f8fc28077",
   "agent/pipeline-claude-fixer-max-broker-v1": "agent_1251aa2533df492e9029bd922a59718b",
   "automation/pipeline-native-broker-1474663859-v1": "aut_5b17ddca92424243b1feb5aa8732a7a0",
+  "automation/pipeline-native-broker-1474663859-v8": "aut_25092aee432946ceade2ea4c6bc2a2d7",
   "automation/pipeline-recovery-store-v1": "aut_3a938ace3b15451585f1ed87f166625f"
 }

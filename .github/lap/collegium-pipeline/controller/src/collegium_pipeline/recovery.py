@@ -53,9 +53,7 @@ def resolve_recovery_profile(config, admitted_digest, profiles=None):
         "repository",
         "repository_id",
         "base_branch",
-        "allowed_paths",
         "github_connection_id",
-        "native_broker",
         "broker_transport",
         "broker_reads",
         "broker_allow_paused_triggers",
@@ -63,6 +61,8 @@ def resolve_recovery_profile(config, admitted_digest, profiles=None):
     )
     if any(profile.get(key) != config.get(key) for key in scope):
         raise PolicyError("Frozen recovery profile has a different controller or broker scope")
+    # Only exact installed profiles in the trusted registry may differ in path/broker
+    # authority. Recovery uses the originating profile and remains observation-only.
     return profile
 
 

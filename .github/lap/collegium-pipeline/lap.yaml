@@ -414,6 +414,30 @@
       }
     },
     {
+      "name": "pipeline-native-broker-1474663859-v8",
+      "start": "paused",
+      "schedule": "0 0 1 1 *",
+      "notify": "none",
+      "script": {
+        "files": [
+          "epic-broker/native_github_broker.py",
+          "epic-broker/broker_scope.json"
+        ],
+        "command": "cd epic-broker && python3 native_github_broker.py",
+        "executor": "aranarium",
+        "environment_ref": "custom",
+        "environment": "base",
+        "size": "small",
+        "repositories": [
+          {
+            "url": "https://github.com/serhii-nochevnyi/collegium-pipeline",
+            "connection": "ghc_7de07519a1e3437a95f98edc4545022d",
+            "access": "contributor"
+          }
+        ]
+      }
+    },
+    {
       "name": "pipeline-recovery-store-v1",
       "start": "paused",
       "schedule": "0 0 1 1 *",

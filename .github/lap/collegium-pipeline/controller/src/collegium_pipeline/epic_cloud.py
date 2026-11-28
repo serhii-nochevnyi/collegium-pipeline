@@ -118,7 +118,17 @@ def _dispatch(event, state, config, environ, http, hooks, guard, profiles):
     if operation == "preflight":
         from lap_mcp import connection
 
-        connection("atlassian-rovo").call("getAccessibleAtlassianResources")
+        resources = connection("atlassian-rovo").call("getAccessibleAtlassianResources")
+        jira = config["epic"]["jira"]
+        if jira is not None:
+            from .jira_epics import resource_ids
+            from .native_broker import ScriptTransport
+
+            if jira["cloud_id"] not in resource_ids(resources):
+                raise PolicyError("Configured Jira cloud is not accessible through the pinned MCP")
+            if http is None:
+                raise PolicyError("Working broker preflight requires the controller Vault key")
+            ScriptTransport(config, http, None, None).scope()
         print(
             "COLLEGIUM_EPIC_PREFLIGHT="
             + json.dumps(
@@ -126,6 +136,9 @@ def _dispatch(event, state, config, environ, http, hooks, guard, profiles):
                     "epic_scheduler_packaged": True,
                     "jira_connection_read_verified": True,
                     "jira_site_configured": config["epic"]["jira"] is not None,
+                    "jira_mapping": jira,
+                    "working_broker_scope_verified": jira is not None,
+                    "allowed_paths": config["allowed_paths"],
                     "strategy": "direct_to_base",
                     "scheduling": config["scheduling"],
                     "execution_enabled": config["execution_enabled"],
