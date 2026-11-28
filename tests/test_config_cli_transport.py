@@ -80,6 +80,31 @@ class ConfigCliTests(unittest.TestCase):
 
 
 class TransportTests(unittest.TestCase):
+    def test_large_json_body_uses_private_file_instead_of_a_long_curl_config_line(self):
+        payload = {"data": "x" * 200000, "multiline": "first\nsecond", "unicode": "Україна"}
+        files = []
+
+        def curl(arguments, **kwargs):
+            lines = kwargs["input"].splitlines()
+            self.assertLess(max(map(len, lines)), 1000)
+            value = next(
+                line.split(" = ", 1)[1] for line in lines if line.startswith("data-binary")
+            )
+            name = json.loads(value)
+            self.assertTrue(name.startswith("@"))
+            body = Path(name[1:])
+            files.append(body)
+            self.assertEqual(body.stat().st_mode & 0o777, 0o600)
+            self.assertEqual(json.loads(body.read_text()), payload)
+            header = Path(arguments[arguments.index("--dump-header") + 1])
+            header.write_text("HTTP/2 200\nContent-Type: application/json\n")
+            return subprocess.CompletedProcess(arguments, 0, '{"ok":true}\n200', "")
+
+        with patch("subprocess.run", side_effect=curl):
+            value, _ = JsonHttp("https://approved.example").request("POST", "/large", payload)
+        self.assertTrue(value["ok"])
+        self.assertTrue(files and all(not path.exists() for path in files))
+
     def test_credentials_stay_on_stdin_and_sse_crlf_is_parsed(self):
         secret = "synthetic-test-key"
         http = JsonHttp("https://approved.example", {"X-Api-Key": secret})
