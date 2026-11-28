@@ -661,6 +661,69 @@ class EpicTests(unittest.TestCase):
         self.assertEqual(self.engine.capacity.get(self.root)["state"], "released")
         self.assertEqual(self.http.created, before)
 
+    def test_integration_invalid_json_retries_same_head_and_accounts_rejected_usage(self):
+        self.merged_all()
+
+        def malformed(packet, observed):
+            self.scoped(packet, observed)
+            if (
+                packet["job_key"].startswith("epic:")
+                and packet["stage"] == "validating"
+                and packet["job_key"].endswith(":validating")
+            ):
+                observed["turn"]["answer"] += "\nCorrection: use exit code0."
+
+        self.http.mutate = malformed
+        expected = self.shared.refs["main"]
+        result = self.until(lambda r: r["state"] == "ready_for_acceptance")
+        self.assertEqual(result["integration_attempt"], 1)
+        self.assertEqual(result["integration_head"], expected)
+        self.assertEqual(len(result["integration_json_retries"]), 1)
+        self.assertEqual(result["drained_tokens"], 20)
+        self.assertEqual(result["tokens"], 60)
+        self.assertNotEqual(result["validation"]["session_id"], result["review"]["session_id"])
+
+    def test_integration_invalid_json_retries_are_bounded(self):
+        self.merged_all()
+
+        def malformed(packet, observed):
+            self.scoped(packet, observed)
+            if packet["job_key"].startswith("epic:"):
+                observed["turn"]["answer"] += "\nCorrection"
+
+        self.http.mutate = malformed
+        result = self.until(lambda r: r["state"] == "blocked")
+        self.assertEqual(result["reason"], "Integration JSON retry limit exhausted")
+        self.assertEqual(result["integration_attempt"], self.config["max_repair_attempts"])
+        self.assertEqual(result["drained_tokens"], 20 * (self.config["max_repair_attempts"] + 1))
+
+    def test_integration_json_retry_resumes_after_settlement_before_doc_save(self):
+        from unittest.mock import patch
+
+        self.merged_all()
+
+        def malformed(packet, observed):
+            self.scoped(packet, observed)
+            if packet["job_key"].endswith(":validating"):
+                observed["turn"]["answer"] += "\nCorrection"
+
+        self.http.mutate = malformed
+        self.engine.step(self.root)
+        save = self.engine.save
+
+        def interrupted(root, doc):
+            if doc["state"].startswith("retrying_integration_"):
+                raise RuntimeError("after terminal drain")
+            return save(root, doc)
+
+        with patch.object(self.engine, "save", side_effect=interrupted):
+            with self.assertRaisesRegex(RuntimeError, "after terminal drain"):
+                self.engine.step(self.root)
+        result = self.until(lambda r: r["state"] == "ready_for_acceptance")
+        self.assertEqual(result["integration_attempt"], 1)
+        self.assertEqual(result["tokens"], 60)
+        self.assertEqual(len(result["integration_json_retries"]), 1)
+
     def test_known_child_usage_overrun_refuses_new_integrator_dispatch(self):
         self.merged_all()
         child = self.engine.load(self.root)["nodes"]["C"]["run_id"]
