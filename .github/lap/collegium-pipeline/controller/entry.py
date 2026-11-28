@@ -5,7 +5,7 @@ import os
 import sys
 from pathlib import Path
 
-_BUNDLE_RUNTIME_SHA256 = "88600b2c43a65f3c01b039648994e11da8e31a1c2dfd2d4f2493089681232f4e"
+_BUNDLE_RUNTIME_SHA256 = "4472fe20574306e50c47da9aaba6723cb43fd5cc63edcc0bac311d0c04c8ba4e"
 _BUNDLE_RUNTIME = None
 
 
@@ -402,6 +402,8 @@ def cloud_fence(
             unsafe = data.get("action") == "investigate" and data.get("operation") not in {
                 "preflight",
                 "status",
+                "mcp-preflight",
+                "evidence",
             }
         if unsafe and not (
             not diagnostic
@@ -1171,7 +1173,11 @@ def main(event=None, *, root=None, environ=None, http=None):
         http = http or (
             JsonHttp(investigation_config["server"], {"X-Api-Key": key}) if key else None
         )
-        return dispatch(event, state, investigation_config, environ, http, globals())
+        catalog_path = root / "investigation-mcp.json"
+        catalog = json.loads(catalog_path.read_text()) if catalog_path.exists() else None
+        return dispatch(
+            event, state, investigation_config, environ, http, globals(), mcp_catalog=catalog
+        )
     if action in {"epic", "deliver", "reconcile"}:
         from collegium_pipeline.recovery import recovery_profiles
 

@@ -80,10 +80,12 @@ The controller independently captures regular UTF-8 Git blobs at the admitted SH
 checking repository ID, path ceiling, mode, size and line bounds. Facts cite registered
 source IDs, exact line ranges and matching quotes. Citation existence is mechanical;
 whether a quote supports the interpretation is checked by the independent reviewer.
-This first slice registers Git evidence only. External documentation, Jira, MCP and
-DEV/PROD observations are not independently ingested into its evidence catalog yet;
-unverified external claims must remain assumptions or open questions. Existing bundle
-MCP connections remain installed, but these new workers receive no MCP grants.
+The controller also registers native MCP snapshots from the six reviewed connections:
+Atlassian (Jira/Confluence), Agents Knowledge DEV/PROD, Grafana PROD, VictoriaMetrics
+PROD and Backstage PROD. Workers cite the captured catalog and have no direct MCP
+grants. See [MCP evidence protocol](INVESTIGATE-MCP.md) for intake, provenance,
+freshness, DEV/PROD labels, scope checks and unavailable connections. Uncaptured
+external claims remain assumptions or open questions.
 
 Synthesis must compare at least two alternatives, recommend one, identify sourced
 risks, preserve open questions, propose an ADR and propose an acyclic ticket graph.

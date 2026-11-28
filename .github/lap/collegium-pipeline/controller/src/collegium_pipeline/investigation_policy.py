@@ -79,7 +79,10 @@ def validate_policy(policy):
 
 
 def cited(claim, sources):
-    if not isinstance(claim, dict) or set(claim) != {"text", "citations"}:
+    if not isinstance(claim, dict) or set(claim) not in (
+        {"text", "citations"},
+        {"text", "citations", "environments"},
+    ):
         raise PolicyError("Findings need text and independently checked citations")
     if not isinstance(claim["text"], str) or not claim["text"].strip() or len(claim["text"]) > 8000:
         raise PolicyError("Invalid finding text")
@@ -87,12 +90,24 @@ def cited(claim, sources):
     if not isinstance(refs, list) or not refs or len(refs) > 16:
         raise PolicyError("A factual finding needs registered source citations")
     catalog = {s["id"]: s for s in sources}
+    environments = set()
     for ref in refs:
-        if not isinstance(ref, dict) or set(ref) != {"source_id", "start", "end", "quote"}:
+        if not isinstance(ref, dict) or set(ref) not in (
+            {"source_id", "start", "end", "quote"},
+            {"source_id", "start", "end", "quote", "environment"},
+        ):
             raise PolicyError("Invalid citation fields")
         source = catalog.get(ref["source_id"])
         if not source or type(ref["start"]) is not int or type(ref["end"]) is not int:
             raise PolicyError("Citation source or line bounds are absent")
+        if source.get("kind") == "mcp":
+            if ref.get("environment") != source["environment"]:
+                raise PolicyError(
+                    "MCP citation environment differs from pinned DEV/PROD/SHARED source"
+                )
+            environments.add(source["environment"])
+        elif "environment" in ref:
+            raise PolicyError("Git evidence has no asserted service environment")
         if not source["start"] <= ref["start"] <= ref["end"] <= source["end"]:
             raise PolicyError("Citation leaves captured source bounds")
         lines = source["text"].splitlines()
@@ -109,6 +124,10 @@ def cited(claim, sources):
                     }
                 )
             )
+    if environments and claim.get("environments") != sorted(environments):
+        raise PolicyError("MCP facts must explicitly label the exact cited environment set")
+    if not environments and "environments" in claim:
+        raise PolicyError("Cannot assert a service environment from Git-only evidence")
     return claim
 
 

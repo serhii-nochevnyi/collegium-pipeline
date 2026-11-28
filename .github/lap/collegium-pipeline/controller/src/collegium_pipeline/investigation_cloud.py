@@ -70,7 +70,9 @@ def preflight(config, http, sources):
             journal.close()
 
 
-def dispatch(event, state, config, environ, http, hooks, *, sources=None):
+def dispatch(
+    event, state, config, environ, http, hooks, *, sources=None, mcp_catalog=None, mcp_connect=None
+):
     fields = {
         "preflight": {"action", "operation"},
         "prepare": {"action", "operation", "intake"},
@@ -79,6 +81,8 @@ def dispatch(event, state, config, environ, http, hooks, *, sources=None):
         "pause": {"action", "operation", "run_id"},
         "resume": {"action", "operation", "run_id"},
         "repair": {"action", "operation", "run_id"},
+        "mcp-preflight": {"action", "operation"},
+        "evidence": {"action", "operation", "run_id", "source_id"},
     }
     operation = event.get("operation")
     if (
@@ -97,6 +101,38 @@ def dispatch(event, state, config, environ, http, hooks, *, sources=None):
     if not key or http is None:
         raise PolicyError("Investigation requires its project Vault control key")
     sources = sources or GitSources(config)
+    from .artifacts import Artifacts
+    from .investigation_mcp import McpSources, requests_checked
+
+    if operation == "mcp-preflight":
+        import tempfile
+
+        with tempfile.TemporaryDirectory() as directory:
+            reader = McpSources(
+                config,
+                mcp_catalog,
+                http,
+                environ,
+                identity,
+                Artifacts(directory),
+                connect=mcp_connect,
+            )
+            result = reader.scope()
+            for name in mcp_catalog["sources"]:
+                reader.connection(name)
+            print(
+                "COLLEGIUM_INVESTIGATION_PREFLIGHT="
+                + json.dumps(
+                    {
+                        **result,
+                        "tool_schemas_verified": sum(
+                            len(x["tools"]) for x in mcp_catalog["sources"].values()
+                        ),
+                        "backend_tool_results_captured": False,
+                    }
+                )
+            )
+        return 0
     if operation == "preflight":
         print("COLLEGIUM_INVESTIGATION_PREFLIGHT=" + json.dumps(preflight(config, http, sources)))
         return 0
@@ -124,22 +160,28 @@ def dispatch(event, state, config, environ, http, hooks, *, sources=None):
                 engine = Investigations(execution, journal, http, state / "artifacts")
                 if operation == "prepare":
                     intake = event["intake"]
-                    # Shape is checked before network or source capture.
-                    if not isinstance(intake, dict) or set(intake) != {
-                        "task",
-                        "head",
-                        "sources",
-                        "risk_flags",
-                        "constraints",
-                    }:
-                        raise PolicyError("Investigation intake schema differs")
-                    from .domain import Task
-
-                    if Task(**intake["task"]).repository != config["repository"]:
-                        raise PolicyError("Intake repository differs")
-                    result = engine.admit(
-                        intake, sources.capture(intake["head"], intake["sources"])
-                    )
+                    engine.validate_intake(intake)
+                    if "mcp_sources" in intake:
+                        requests_checked(intake["mcp_sources"], mcp_catalog)
+                    result = engine.existing(intake)
+                    if result is None:
+                        captured = (
+                            sources.capture(intake["head"], intake["sources"])
+                            if intake["sources"]
+                            else []
+                        )
+                        if "mcp_sources" in intake:
+                            reader = McpSources(
+                                config,
+                                mcp_catalog,
+                                http,
+                                environ,
+                                identity,
+                                engine.artifacts,
+                                connect=mcp_connect,
+                            )
+                            captured.extend(reader.capture(intake["head"], intake["mcp_sources"]))
+                        result = engine.admit(intake, captured)
                 else:
                     root = event["run_id"]
                     engine.load(root)
@@ -156,6 +198,28 @@ def dispatch(event, state, config, environ, http, hooks, *, sources=None):
                         engine.pause(root, operation == "pause")
                     elif operation == "repair":
                         engine.retry_payload(root)
+                    elif operation == "evidence":
+                        doc = engine.load(root)
+                        catalog = engine.artifacts.get(doc["sources"])["sources"]
+                        found = [s for s in catalog if s["id"] == event["source_id"]]
+                        if len(found) != 1:
+                            raise PolicyError("Evidence does not belong to this admitted run")
+                        if found[0].get("kind") == "mcp":
+                            from .investigation_mcp import verify_snapshot
+
+                            verify_snapshot(found[0], engine.artifacts)
+                        print(
+                            "COLLEGIUM_INVESTIGATION_RESULT="
+                            + json.dumps(
+                                {
+                                    "run_id": root,
+                                    "source": found[0],
+                                    "raw_response_returned": False,
+                                    "agent_started": False,
+                                }
+                            )
+                        )
+                        return 0
                     result = {"run_id": root}
                 if operation != "status":
                     journal.checkpoint({"kind": "tick", "run_id": result["run_id"]})
@@ -178,7 +242,7 @@ def dispatch(event, state, config, environ, http, hooks, *, sources=None):
     finally:
         if entered:
             hooks["save_receipt"](fence, receipt)
-        elif operation not in {"status", "preflight"}:
+        elif operation not in {"status", "preflight", "mcp-preflight", "evidence"}:
             target = (
                 state
                 / "no-dispatch"

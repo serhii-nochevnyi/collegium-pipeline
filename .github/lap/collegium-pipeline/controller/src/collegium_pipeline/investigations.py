@@ -2,6 +2,7 @@
 
 import json
 import re
+import time
 
 from .artifacts import Artifacts
 from .capacity import checked_paths
@@ -171,14 +172,20 @@ class Investigations:
             raise PolicyError("Investigation is missing")
         return json.loads(row[0])
 
-    def admit(self, intake, sources):
-        if not isinstance(intake, dict) or set(intake) != {
-            "task",
-            "head",
-            "sources",
-            "risk_flags",
-            "constraints",
-        }:
+    def validate_intake(self, intake):
+        if (
+            not isinstance(intake, dict)
+            or set(intake)
+            - {
+                "task",
+                "head",
+                "sources",
+                "risk_flags",
+                "constraints",
+                "mcp_sources",
+            }
+            or not {"task", "head", "sources", "risk_flags", "constraints"} <= set(intake)
+        ):
             raise PolicyError("Investigation intake schema differs")
         if len(json.dumps(intake).encode()) > 24000:
             raise PolicyError("Investigation intake exceeds24KB")
@@ -196,6 +203,27 @@ class Investigations:
             or set(flags) - {"security", "data_migration", "public_api", "concurrency", "unknowns"}
         ):
             raise PolicyError("Unknown risk floor")
+        if not isinstance(intake["sources"], list) or (
+            not intake["sources"] and not intake.get("mcp_sources")
+        ):
+            raise PolicyError("Investigation requires explicit Git or MCP sources")
+        return task
+
+    def existing(self, intake):
+        task = self.validate_intake(intake)
+        row = self.journal.connection.execute(
+            "SELECT id FROM runs WHERE repository=? AND source=? AND source_id=?",
+            (task.repository, "text", "investigation:" + task.source + ":" + task.source_id),
+        ).fetchone()
+        if not row:
+            return None
+        doc = self.load(row[0])
+        if doc["intake"] != intake:
+            raise PolicyError("Investigation intake changed; explicit new admission required")
+        return {"run_id": row[0], **doc}
+
+    def admit(self, intake, sources):
+        task = self.validate_intake(intake)
         if (
             not sources
             or len({s["id"] for s in sources}) != len(sources)
@@ -205,6 +233,15 @@ class Investigations:
             )
         ):
             raise PolicyError("Independently captured source identity differs")
+        for source in sources:
+            if source.get("kind") == "mcp":
+                from .investigation_mcp import verify_snapshot
+
+                verify_snapshot(source, self.artifacts)
+                if time.time() >= source["expires_at"]:
+                    raise PolicyError("MCP evidence expired before admission")
+        if sum(len(s["text"].encode()) for s in sources) > 48000:
+            raise PolicyError("Combined evidence catalog exceeds 48KB")
         root_task = Task(
             "text",
             "investigation:" + task.source + ":" + task.source_id,
@@ -245,7 +282,7 @@ class Investigations:
         doc["paused"] = paused
         return self.save(root, doc)
 
-    def contract(self, stage, perspective=None):
+    def contract(self, stage, perspective=None, sources=None):
         claim = {
             "text": "fact",
             "citations": [
@@ -257,6 +294,18 @@ class Investigations:
                 }
             ],
         }
+        example = next((s for s in sources or [] if s.get("kind") == "mcp"), None)
+        if example:
+            claim["environments"] = [example["environment"]]
+            claim["citations"] = [
+                {
+                    "source_id": example["id"],
+                    "start": example["start"],
+                    "end": example["start"],
+                    "quote": example["text"].splitlines()[0],
+                    "environment": example["environment"],
+                }
+            ]
         q = [{"text": "question", "blocking": True}]
         if stage == "assessing":
             return {
@@ -363,7 +412,7 @@ class Investigations:
             "synthesis": self.artifacts.get(doc["synthesis"])["payload"]
             if doc["synthesis"]
             else None,
-            "payload_contract": self.contract(stage, perspective),
+            "payload_contract": self.contract(stage, perspective, sources),
             "required_validation_commands": self.config["validation_commands"],
             "feedback": doc.get("feedback")
             if stage in {"synthesizing", "investigation_review"}
@@ -490,12 +539,22 @@ class Investigations:
         if not self.config["execution_enabled"] or self.config["broker_enabled"]:
             raise PolicyError("Investigation dispatch requires explicit read-only live authority")
         doc = self.load(root)
+        sources = self.artifacts.get(doc["sources"])["sources"]
+        try:
+            from .investigation_mcp import verify_snapshot
+
+            for source in sources:
+                if source.get("kind") == "mcp":
+                    verify_snapshot(source, self.artifacts)
+                    if time.time() >= source["expires_at"]:
+                        raise PolicyError("MCP evidence expired; explicit new intake required")
+        except PolicyError as exc:
+            doc.update(state="blocked", reason=str(exc))
         if doc["state"] in {"ready_for_decision", "needs_input", "blocked"}:
             if doc["state"] == "blocked":
                 self.settle(root, doc)
                 return self.save(root, doc)
             return {"run_id": root, **doc}
-        sources = self.artifacts.get(doc["sources"])["sources"]
         try:
             if not doc["assessment"]:
                 result = self.step_job(root, doc, "assessing")
@@ -603,6 +662,36 @@ class Investigations:
             "run_id": root,
             **doc,
             "workers": workers,
+            "evidence_catalog": [
+                {
+                    k: s.get(k)
+                    for k in (
+                        "id",
+                        "kind",
+                        "path",
+                        "environment",
+                        "connection_id",
+                        "server_id",
+                        "server_url",
+                        "tool",
+                        "request_digest",
+                        "arguments_digest",
+                        "selector",
+                        "captured_at",
+                        "expires_at",
+                        "snapshot_digest",
+                        "response_digest",
+                        "schema_digest",
+                        "catalog_digest",
+                        "coverage",
+                    )
+                }
+                for s in self.artifacts.get(doc["sources"])["sources"]
+            ],
+            "evidence_fresh": all(
+                s.get("expires_at", float("inf")) > time.time()
+                for s in self.artifacts.get(doc["sources"])["sources"]
+            ),
             "complexity_assessment": self.artifacts.get(doc["assessment"])
             if doc["assessment"]
             else None,

@@ -43,3 +43,8 @@ its four accepted research artifacts. Invalid native JSON/identities remain hard
 Added tests for quote correction, previous-version repair without repeated research,
 unresolved-launch refusal and inability to reset exhausted retry budgets. Reviewed shared
 checkpoint admission for the new repair origin; original delivery/epic origins unchanged.
+
+Native verification completed from installed v5: repaired v1 reaches ready_for_decision,
+independent Opus/high review passes all 6 exact-artifact checks, all 8 paid turns' usage
+reconciles and two terminal replays create no native sessions. All 23 automations remain
+paused. Source CI passes 315 tests. See reports/INVESTIGATE.md and machine evidence.

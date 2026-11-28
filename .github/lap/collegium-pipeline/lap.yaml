@@ -730,9 +730,18 @@
           "controller/investigation_entry.py",
           "controller/runtime.b64",
           "controller/settings.json",
-          "controller/investigation-settings.json"
+          "controller/investigation-settings.json",
+          "controller/investigation-mcp.json"
         ],
         "command": "python3 controller/investigation_entry.py",
+        "mcp_servers": [
+          "atlassian-rovo",
+          "ak-dev",
+          "ak-prod",
+          "grafana-prod",
+          "vmcluster-prod",
+          "backstage-prod"
+        ],
         "repositories": [
           {
             "url": "https://github.com/serhii-nochevnyi/collegium-pipeline",
