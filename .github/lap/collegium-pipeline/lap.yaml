@@ -371,6 +371,7 @@
       "script": {
         "files": [
           "controller/epic-service-settings.json",
+          "controller/epic-service-v1-settings.json",
           "controller/runtime.b64",
           "controller/entry.py",
           "controller/settings.json",

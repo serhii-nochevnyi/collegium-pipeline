@@ -5,7 +5,7 @@ import os
 import sys
 from pathlib import Path
 
-_BUNDLE_RUNTIME_SHA256 = "a43e69089e9e3ee89f2d560d1094d7f9a4a6747ba4c7aeac8478ec1c32c3386c"
+_BUNDLE_RUNTIME_SHA256 = "e6829b121fa2efd4d8fe7c268b4b1d2e4f559ff7f48f1d50e23dd7f145510e3c"
 _BUNDLE_RUNTIME = None
 
 
@@ -1170,7 +1170,11 @@ def main(event=None, *, root=None, environ=None, http=None):
             raise PolicyError("Epic service requires disabled production settings")
         key = environ.get("PIPELINE_CONTROL_KEY")
         http = http or (JsonHttp(diagnostic["server"], {"X-Api-Key": key}) if key else None)
-        return run(event, state / "cloud-epic-service", diagnostic, environ, http, globals())
+        archive = root / "epic-service-v1-settings.json"
+        legacy = load_config(archive) if archive.exists() else None
+        return run(
+            event, state / "cloud-epic-service", diagnostic, environ, http, globals(), legacy=legacy
+        )
     if action == "verify-control":
         if event != {"action": "verify-control"}:
             raise PolicyError("Control verification accepts no event parameters")

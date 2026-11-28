@@ -59,7 +59,13 @@ def load_config(path: str | Path) -> dict:
         spec = config["epic_service_test"]
         if (
             not isinstance(spec, dict)
-            or set(spec) != {"suite_id", "hold_seconds", "baseline", "main_sha", "expires_at"}
+            or set(spec)
+            not in (
+                {"suite_id", "hold_seconds", "baseline", "main_sha", "expires_at"},
+                {"suite_id", "hold_seconds", "baseline", "main_sha", "expires_at", "revision"},
+            )
+            or type(spec.get("revision", 1)) is not int
+            or spec.get("revision", 1) not in {1, 2}
             or not isinstance(spec["suite_id"], str)
             or not re.fullmatch(r"[a-f0-9-]{36}", spec["suite_id"])
             or type(spec["hold_seconds"]) is not int
