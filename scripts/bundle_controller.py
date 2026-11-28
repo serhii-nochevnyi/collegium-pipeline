@@ -380,7 +380,7 @@ def _cloud_service(event, state, config, environ, http, guard):
 
     if (
         set(event) != {"action", "mode"}
-        or event["mode"] not in {"preflight", "run", "inspect"}
+        or event["mode"] not in {"preflight", "run", "inspect", "finalize"}
         or config["execution_enabled"]
         or config["broker_enabled"]
         or config["allowed_paths"] != ["tests/test_live_service.py"]
@@ -475,7 +475,7 @@ def _cloud_service(event, state, config, environ, http, guard):
         journal = Journal(state / "journal.sqlite3")
         root = None
         try:
-            if event["mode"] == "inspect":
+            if event["mode"] in {"inspect", "finalize"}:
                 rows = journal.connection.execute(
                     "SELECT id FROM runs WHERE source_id='cloud-ci-repair-v1'"
                 ).fetchall()
@@ -502,7 +502,7 @@ def _cloud_service(event, state, config, environ, http, guard):
                 http,
                 state / "artifacts",
             )
-            if event["mode"] == "run":
+            if event["mode"] in {"run", "finalize"}:
                 journal.before_effect = WriteAhead(
                     scoped,
                     journal,
@@ -514,7 +514,9 @@ def _cloud_service(event, state, config, environ, http, guard):
                 until = time.monotonic() + 480
                 while time.monotonic() < until:
                     journal.before_effect({"kind": "tick", "run_id": root})
-                    result = driver.step(root)
+                    result = (
+                        driver.finalize(root) if event["mode"] == "finalize" else driver.step(root)
+                    )
                     print(
                         json.dumps(
                             {

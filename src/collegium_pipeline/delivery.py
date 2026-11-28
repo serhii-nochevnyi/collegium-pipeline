@@ -32,6 +32,23 @@ def serial_lock(journal_path):
         os.close(fd)
 
 
+class EvidenceOnly:
+    """Permit observations, never dispatch, abort, or repository mutations."""
+
+    def __init__(self, target):
+        self.target = target
+
+    def request(self, method, *args, **kwargs):
+        if method != "GET":
+            raise PolicyError("Finalization permits observations only")
+        return self.target.request(method, *args, **kwargs)
+
+    def __getattr__(self, name):
+        if name not in {"scope", "ref", "read", "pr_evidence"}:
+            raise PolicyError("Finalization prohibits repository mutations")
+        return getattr(self.target, name)
+
+
 class Delivery:
     def __init__(self, config, journal, github, http, artifacts, *, workers=None, clock=time.time):
         self.config, self.journal, self.github, self.clock = config, journal, github, clock
@@ -62,6 +79,52 @@ class Delivery:
             "SELECT document FROM deliveries WHERE run_id=?", (run_id,)
         ).fetchone()
         return json.loads(row[0]) if row else None
+
+    def finalize(self, run_id):
+        """Collect an existing final review and CI after dispatch time expires.
+
+        No new jobs, repository writes, budget changes or retries are authorized.
+        The caller retains the normal lock, fence and write-ahead checkpoints.
+        """
+        doc = self._load(run_id)
+        if (
+            not doc
+            or not doc.get("pr")
+            or self.config.get("repair_pr_mode") != "keep_ready"
+            or doc["state"]
+            not in {"reviewing", "readying_pr", "waiting_ci", "ready_for_acceptance"}
+        ):
+            raise PolicyError("Only an existing final review/CI permits evidence finalization")
+        if doc["state"] == "reviewing":
+            key = f"{doc['cycle']}:reviewing:{doc['plan_attempt']}"
+            jobs = self.journal.connection.execute(
+                "SELECT id FROM runs WHERE source_id=? AND repository=?",
+                (run_id + ":" + key, self.config["repository"]),
+            ).fetchall()
+            if len(jobs) != 1:
+                raise PolicyError("Finalization cannot create a review job")
+            child, events = self.journal.get(jobs[0][0]), self.journal.events(jobs[0][0])
+            if (
+                child["state"] in {"failed", "reconciling"}
+                or len([e for e in events if e["kind"] == "launched"]) != 1
+                or not (
+                    child["pending_intent"] or any(e["kind"] == "worker_completed" for e in events)
+                )
+            ):
+                raise PolicyError("Finalization requires the confirmed original review launch")
+        github, broker_http = self.github, self.broker.github
+        worker_http, platform_http = self.workers.http, self.workers.platform.http
+        self.github = self.broker.github = EvidenceOnly(github)
+        self.workers.http = EvidenceOnly(worker_http)
+        self.workers.platform.http = EvidenceOnly(platform_http)
+        self._evidence_only = True
+        try:
+            self.journal.record(run_id, "evidence_only_finalization", {"head": doc["head"]})
+            return self.step(run_id)
+        finally:
+            self._evidence_only = False
+            self.github, self.broker.github = github, broker_http
+            self.workers.http, self.workers.platform.http = worker_http, platform_http
 
     def reconfigure_validation(self, run_id, previous_config, reason):
         """Explicit operator correction after a definitively completed invalid validation.
@@ -295,7 +358,9 @@ class Delivery:
                 reason="Base changed; explicit replan and fresh validation/review required",
             )
             return self._save(run_id, doc)
-        if self.clock() - doc["started_at"] > config.get("max_delivery_seconds", 3600):
+        if not getattr(self, "_evidence_only", False) and self.clock() - doc[
+            "started_at"
+        ] > config.get("max_delivery_seconds", 3600):
             self.workers.stop_root(run_id)
             # Do not abandon an active native turn and silently launch a replacement.
             doc.update(

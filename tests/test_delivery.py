@@ -348,6 +348,57 @@ class DeliveryTests(unittest.TestCase):
         self.assertNotIn("ci_green", result)
         self.assertEqual([op for op, _ in self.github.writes].count("commit"), 1)
 
+    def final_review(self, *, launch):
+        self.config["repair_pr_mode"] = "keep_ready"
+        self.service_profile()
+        with patch("collegium_pipeline.delivery.failure_evidence", self.service_failure):
+            for _ in range(80):
+                r = self.driver.step(self.run)
+                if r["state"] == "reviewing" and r["cycle"] == 1:
+                    if launch:
+                        self.driver.step(self.run)
+                    return
+        self.fail("No repaired final review")
+
+    def test_expired_run_can_finalize_confirmed_review_without_dispatch_or_writes(self):
+        self.final_review(launch=True)
+        self.now += 10000
+        writes, sessions = copy.deepcopy(self.github.writes), copy.deepcopy(self.http.sessions)
+        before_config = config_digest(self.config)
+        original_http = self.http.request
+
+        def read_only(method, *args, **kwargs):
+            self.assertEqual(method, "GET")
+            return original_http(method, *args, **kwargs)
+
+        with patch.object(self.http, "request", side_effect=read_only):
+            for _ in range(3):
+                result = self.driver.finalize(self.run)
+        self.assertEqual(result["state"], "ready_for_acceptance")
+        self.assertTrue(result["ci_green"])
+        self.assertEqual(self.github.writes, writes)
+        self.assertEqual(self.http.sessions, sessions)
+        self.assertEqual(config_digest(self.config), before_config)
+        self.assertEqual(result["started_at"], 100)
+        self.assertFalse(self.driver._evidence_only)
+
+    def test_finalization_refuses_an_unlaunched_review_and_normal_deadline_stays_enforced(self):
+        self.final_review(launch=False)
+        self.now += 10000
+        sessions = copy.deepcopy(self.http.sessions)
+        with self.assertRaisesRegex(PolicyError, "cannot create a review"):
+            self.driver.finalize(self.run)
+        self.assertEqual(self.http.sessions, sessions)
+        self.assertEqual(self.driver.step(self.run)["state"], "blocked")
+
+    def test_evidence_only_guard_refuses_dispatch_and_repository_writes(self):
+        from collegium_pipeline.delivery import EvidenceOnly
+
+        with self.assertRaises(PolicyError):
+            EvidenceOnly(self.http).request("POST", "/session")
+        with self.assertRaises(PolicyError):
+            EvidenceOnly(self.github).mutate("ready", {})
+
     def test_service_premature_green_candidate_is_rejected_before_any_write(self):
         self.service_profile()
 

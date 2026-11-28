@@ -192,6 +192,7 @@ class BundleTests(unittest.TestCase):
                 broker_enabled=False,
                 allowed_paths=["tests/test_live_service.py"],
                 recovery_store={"owner": "aut_owner"},
+                repair_pr_mode="keep_ready",
             )
             # This diagnostic uses the approved immutable red/green fixture.
             text = (
@@ -336,6 +337,18 @@ class BundleTests(unittest.TestCase):
                 self.assertEqual(
                     (fixture.http.created, len(fixture.github.writes)), (created, writes)
                 )
+                http.history.insert(0, prior("succeeded"))
+                event["mode"] = "finalize"
+                environ.update(LAP_RUN_ID="run_finalize", LAP_ATTEMPT_ID="att_finalize")
+                self.assertEqual(
+                    ENTRY_MODULE["cloud_service"](
+                        event, self.path / "state", config, environ, http
+                    ),
+                    0,
+                )
+                self.assertEqual(
+                    (fixture.http.created, len(fixture.github.writes)), (created, writes)
+                )
             self.assertFalse(config["execution_enabled"])
             self.assertFalse(config["broker_enabled"])
         finally:
@@ -386,7 +399,7 @@ class BundleTests(unittest.TestCase):
 
     def test_dev_prod_are_separate_and_no_mcp_is_falsely_claimed_healthy(self):
         integrations = json.loads((self.path / "controller/integrations.json").read_text())
-        urls = {c["name"]: c["url"] for c in integrations["connections"]}
+        urls = {c["need"]: c["url"] for c in integrations["status"]}
         self.assertNotEqual(urls["grafana-prod"], urls["grafana-dev"])
         self.assertNotEqual(urls["langfuse-prod"], urls["langfuse-dev"])
         self.assertFalse(integrations["environment_substitution_allowed"])

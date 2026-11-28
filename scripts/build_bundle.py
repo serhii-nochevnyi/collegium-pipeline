@@ -130,7 +130,9 @@ def build(config_path, integrations_path, output=DEFAULT_OUTPUT):
     # Generated runtime data stays compact within the executor's code.files ceiling.
     write("controller/settings.json", json.dumps(settings, sort_keys=True, separators=(",", ":")))
     runtime_integrations = {
-        k: v for k, v in integrations.items() if k not in {"bindings", "role_connections"}
+        k: v
+        for k, v in integrations.items()
+        if k not in {"bindings", "role_connections", "connections"}
     }
     write(
         "controller/integrations.json",
