@@ -2,6 +2,7 @@
 
 import argparse
 import base64
+import copy
 import hashlib
 import io
 import json
@@ -192,6 +193,30 @@ def build(config_path, integrations_path, output=DEFAULT_OUTPUT):
         json.dumps(epic_settings, sort_keys=True, separators=(",", ":")),
     )
     load_config(output / "controller/epic-settings.json")
+    service_path = ROOT / "config/epic-service.json"
+    service = json.loads(service_path.read_text()) if service_path.exists() else None
+    if service:
+        from collegium_pipeline.epic_service import paths
+
+        diagnostic = copy.deepcopy(epic_settings)
+        diagnostic.update(
+            base_branch=service["base_branch"],
+            allowed_paths=paths(),
+            native_broker=service["native_broker"],
+            recovery_store=service["recovery_store"],
+            epic_service_test={
+                "hold_seconds": 120,
+                **{k: service[k] for k in ("suite_id", "baseline", "main_sha", "expires_at")},
+            },
+        )
+        diagnostic["epic"]["jira"] = None
+        diagnostic["epic"]["scopes"] = {}
+        write(
+            "controller/epic-service-settings.json",
+            json.dumps(diagnostic, sort_keys=True, separators=(",", ":")),
+        )
+        load_config(output / "controller/epic-service-settings.json")
+        script_files.append("controller/epic-service-settings.json")
     runtime_integrations = {
         k: v
         for k, v in integrations.items()
@@ -345,6 +370,84 @@ def build(config_path, integrations_path, output=DEFAULT_OUTPUT):
                 },
             }
         )
+    if service:
+        from collegium_pipeline.epic_service import fixtures, paths
+
+        prefix = "epic-service-broker/"
+        write(
+            prefix + "native_github_broker.py",
+            (ROOT / "scripts/native_github_broker.py").read_text(),
+        )
+        write(
+            prefix + "epic_service_broker.py", (ROOT / "scripts/epic_service_broker.py").read_text()
+        )
+        write(
+            prefix + "broker_scope.json",
+            json.dumps(
+                {k: diagnostic[k] for k in ("repository", "base_branch", "allowed_paths")},
+                sort_keys=True,
+            ),
+        )
+        merge_policy = {
+            k: service[k]
+            for k in ("suite_id", "base_branch", "baseline", "main_sha", "ci_probe", "expires_at")
+        }
+        merge_policy["fixtures"] = dict(zip(paths(), fixtures().values(), strict=True))
+        from collegium_pipeline.epic_service import graph
+
+        merge_policy["graph_digest"] = digest(graph(diagnostic))
+        write(prefix + "epic_service_scope.json", json.dumps(merge_policy, sort_keys=True))
+        for name, binding, script in (
+            (
+                service["broker_name"],
+                service["native_broker"],
+                {
+                    "files": [
+                        prefix + n
+                        for n in (
+                            "native_github_broker.py",
+                            "broker_scope.json",
+                            "epic_service_broker.py",
+                            "epic_service_scope.json",
+                        )
+                    ],
+                    "command": "cd epic-service-broker && python3 epic_service_broker.py",
+                    "secrets": ["PIPELINE_CONTROL_KEY"],
+                    "repositories": [
+                        {
+                            "url": "https://github.com/" + config["repository"],
+                            "connection": config["github_connection_id"],
+                            "access": "contributor",
+                        }
+                    ],
+                },
+            ),
+            (
+                service["recovery_name"],
+                service["recovery_store"],
+                {
+                    "files": ["recovery_store.py", "recovery_scope.json"],
+                    "command": "python3 recovery_store.py",
+                    "secrets": ["PIPELINE_CONTROL_KEY"],
+                },
+            ),
+        ):
+            claims["automation/" + name] = binding["automation_id"]
+            manifest["automations"].append(
+                {
+                    "name": name,
+                    "start": "paused",
+                    "schedule": "0 0 1 1 *",
+                    "notify": "none",
+                    "script": {
+                        "executor": "aranarium",
+                        "environment_ref": "custom",
+                        "environment": "base",
+                        "size": "small",
+                        **script,
+                    },
+                }
+            )
     # JSON is valid YAML; the standard-library serializer keeps this deterministic.
     data("lap.yaml", manifest)
     data("claims.json", claims)

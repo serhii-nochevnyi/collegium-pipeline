@@ -98,9 +98,9 @@ class BundleTests(unittest.TestCase):
 
     def test_installation_contains_controller_and_existing_agent_claims(self):
         self.assertEqual(len(self.manifest["agents"]), 8)
-        self.assertEqual(len(self.manifest["automations"]), 4)
+        self.assertEqual(len(self.manifest["automations"]), 6)
         claims = json.loads((self.path / "claims.json").read_text())
-        self.assertEqual(len(claims), 11)
+        self.assertEqual(len(claims), 13)
         for automation in self.manifest["automations"]:
             self.assertEqual(automation["start"], "paused")
             self.assertLessEqual(len(automation["script"]["files"]), 64)

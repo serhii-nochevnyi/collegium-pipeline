@@ -1,3 +1,41 @@
+# Active installed-bundle live epic service verification — 2026-11-28
+
+Prepare fixed A/B -> C service, isolated base collegium/c5b7d3d9-9db7-4552-8e0e-fbfe99b27001
+seed ed79efbdd3db3734ad901375ce0a99dc8795f230; CI probe PR5 NEVER merge to main.
+Servicebroker v10 aut_0631ecd7ec2b4ae9a166f9f9b2b9ed77 prepared codev5 pin
+1c7f0ad4dd81c0d6c4f2b199ae5ae99b21dd68d15cfd1081e6ed6cb6879a9946, separate store
+aut_56e599d0747448479acb75f385baf23e owner samecontroller. Both paused/no runs yet.
+Service auth uses signed actual-admission and ready receipts; broker has Vault key grant
+only for exact fixed actions. Main/ordinary production settings/brokers unchanged.
+Independent review3 passes completed, all findings fixed; final2 lifecycle regressions
+verified inline. Service19 tests, bundle29 tests and prior stage/recovery tests PASS.
+Source publication and paused installation next. No paid model sessions started yet.
+Live operator receipts will be .local/epic-live-*. Do not resubmit unknown requests.
+No product pilot/Jira work; do not confuse service branch/CI probe with production delivery.
+
+Earlier chronological notes follow; pending scope supersedes earlier completed stages.
+
+# Epic Jira mapping and working scope installed — 2026-11-28
+
+Latest scope complete. Controller v17, source ed79efbdd3db3734ad901375ce0a99dc8795f230.
+CI257 tests/Ruff/compile PASS; targeted local tests and inline diff review PASS.
+Configured pdffiller.atlassian.net cloud3e1c0d80-f6e4-4767-ad1c-f06c182b0f93,
+company-managed Epic10000, Blockers10000 inward + Depends10400 outward. No Jira token needed:
+existing authenticated readonly MCP. Team-managed custom Epic types require explicit mapping.
+Separate working broker v8 aut_25092aee432946ceade2ea4c6bc2a2d7 claimed into bundle, pin
+66dd3ffb35d5010244ca4a9ab303a86f4ff0d0ab7da4711e792651e04a99e69c preserved after install.
+Allowed src/collegium_pipeline/, tests/, docs/, README.md, pyproject.toml, uv.lock.
+Old service broker/48ff profile/recovery store and8 private Claude worker bindings unchanged.
+All12 automations paused; all execution/broker flagsfalse. No issue/project/pilot selected,
+no model sessions, Jira writes, product PR or merge. Main and worker last-runs unchanged.
+Installed preflight run_e9d19efb432341e3816f7797c96f858c PASS; actual App readonly working
+broker run_d3a3cf795fa4492fbb964efd0800817d PASS. Per-ticket scopes still unset until explicit
+future graph/pilot; unknown overlap serializes. Evidence reports/EPIC-MAPPING.md and
+reports/epic-mapping-verification.json. Exact source setup receipts under .local/epic-mapping-*.
+Source publisher v9 aut_be7d79c9081f4cbcaabdc088e601b151 remains paused/exact30pathscope.
+
+Earlier chronological notes follow; their pending statuses are superseded above.
+
 # Active Jira mapping / working scope update — installation pending
 
 2026-11-28: metadata verified, mapping configured for pdffiller.atlassian.net shared Epic10000;

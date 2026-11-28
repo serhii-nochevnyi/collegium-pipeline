@@ -638,6 +638,11 @@ def restore_checkpoint(
             data.get("action") == "epic"
             and data.get("operation") in {"prepare", "import-jira", "tick", "pause", "resume"}
         )
+        allowed = allowed or (
+            config.get("epic_service_test")
+            and data.get("action") == "epic-service"
+            and data.get("mode") in {"run", "crash"}
+        )
     if getattr(checkpoints, "namespace", "delivery") == "service":
         allowed = data in (
             {"action": "service-test", "mode": "run"},
