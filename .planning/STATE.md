@@ -1,3 +1,76 @@
+# Current final transport fix before continuing SAME cloud service
+
+Actual installed still059d50a/version12. Third manual cloud run
+run_d56473c439b045c8b72015335ef03187 CLOSED/FAILED with precise reason:
+Checkpoint acknowledgement unknown(action=chunk,item=None,run=None). Store head and
+begin succeeded; no chunk job reached server. Compressed snapshot81857bytes creates
+>100KB inline curl config data line; older runtime curl limits such lines. No executor
+session/commit/PR created. Same original root6c6d499d.../intent5398.../config48ff...
+retained with2 accepted workers/tokens363303; no Task/budget/model/scope rebinding.
+
+Fix JsonHttp writes exact JSON body to private0600 temporary file +data-binary @file,
+keeps key headers stdin, removes files on completion. New200KB/unicode/newline regression
+verifies body fidelity/private mode/cleanup and short config lines. All162 tests PASS.
+Original source publisher v5 did not allow src/transport.py or its preexisting test file.
+Created separate PAUSED source publisher v6 aut_c6f07e880ec84a5b89be65fcfdf2ecf0,
+EXACTLY TWO paths only: src/collegium_pipeline/transport.py and
+tests/test_config_cli_transport.py. No existing publisher/service broker scope widened.
+Native private App same repo/contributor/main protections. Now9 automations ALL paused.
+Config.local .local/transport-publish-v6.json; source writer root
+d5d83926-1c85-4b0a-881b-7576259f14e3 in .local/transport-publish.sqlite3, immutablecycle0
+published973748aaa7f9b6c46f3370621bc38ceb7022758e to existing source PR1 branch.
+Next v5cycle14 publishes generated matching transport +source index/docs/state only;
+then native read-only focused transport review and controller-only install plan.
+Keep service frozen config48ff... unchanged! DO NOT install intermediate source before
+generated mirror matches. Root started07:49UTC Nov28,3600sec deadline; continue promptly.
+No active service cloud run now. Observer history records all failed runs; no pilot.
+
+--- Earlier state below ---
+
+# Current checkpoint for continuation
+
+Source latest059d50a9f4d8c1be6ece4204f25b56acfd1c4efc on existing PR1;
+cycles12=e350e8b7 (queued item receipts),13=059d50a (diagnostics outsideSQLite+tests).
+Next publisher cycle14 ONLY new content; frozen maps cloud-service-item-fix-changes
+and cloud-service-diagnostic-fix-changes. Installed still e13279c/version11.
+All161 tests PASS; source CI46124988628 GREEN; real lap validator PASS.
+Plan45feac17108a3b963cb2a9427ca14c8ce250cd778db9c7e7f82489fef2ef2023
+complete/appliable, SHOWN to user, NOT APPLIED yet. ONLY controller code + installation
+bookkeeping. Source config/scopes/model/MCP unchanged. Runtime integrations omit
+build-only role_connections/bindings; source fullconfig, manifest and worker/tool scopes
+retained. Controller within256000byte cap.
+
+Native focused review v4 PENDING: rootd747666d-bac8-47ea-a149-e4409ab19cd7,
+.local/cloud-service-review-v4.sqlite3/-v4-packet.json/-v4-artifacts, observer exec55770.
+Review queued item assignment, durable broker_rpc_queued replay, onePOST, MAC verification,
+nonpoisoning policy diagnostics. After PASS apply SHOWN45fe...plan, verify exact code
+and CFG hash remains48ffb7870672bfbac4a7a16c45d8bf4f570b19a61737334aa9ef57a560a056c3.
+Then .local/invoke-cloud-service.py run (ONLY submits/observes RunNow; NO local engine).
+
+Canonical ACTIVE SERVICE ADMISSION6c6d499d-2fee-41fa-be0c-18660001cca2 is paused at
+implementing after2 accepted workers, tokens363303. No service commit/PR/executor session
+yet; ORIGINAL intent5398da0b-9e1f-4e42-8c58-c96640474d5c is known NOT STARTED from
+effect_not_started marker. Two cloud runs failed on checkpoint acknowledgment, both
+closed/adopted, no replacement allowed. Retain same task/config/packet/intent.
+New queued item API handling should let existing reconcile_existing resume safely.
+Task's3600sec deadline began ~07:49UTC Nov28; continue promptly (no new task to evade it).
+
+Observer history .local/cloud-service-remote-runs.json contains1preflight success,
+2run failure (run49d943...),3inspect success (run5d093...),4run failure (run9efb...).
+No remote run currently active. Latest result partial .local/cloud-service-remote-result.json;
+original2 worker identities saved .local/cloud-service-before-recovery.json.
+Read-only OFFICIAL state tar export diagnostic saved .local/cloud-service-state-diagnostic;
+SQLite read mode=ro only, NEVER used by local Delivery. Headab109...; pendinguploads
+uncommitted can be superseded at same committed parent. Complete session list73 proved
+no executor session for original intent. Source priorbugfix reviewsv2/v3 PASS preserved.
+All8 project automations PAUSED, productionflagsfalse, no pilot/Jira/merge.
+
+After remote ready: repeat inspect AND run to prove same worker/commit/PR identities,
+then .local/verify-cloud-service.py read-only host audit; it retains failed run history.
+Do not reuse/modify earlier local PR3 or recoveryPR2.
+
+--- Earlier state below ---
+
 # Cloud continuation: queued item/run receipt handling fix pending
 
 Second cloud run run_9efbfa966c244d66b434fc8ca73f927a failed BEFORE first resumed tick,

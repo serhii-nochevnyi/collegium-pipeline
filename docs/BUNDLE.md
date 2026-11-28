@@ -220,3 +220,7 @@ responses still require the signed request/owner/namespace identity and a succee
 Policy diagnostics stay outside SQLite so an unacknowledged tick snapshot can still be
 adopted exactly. Runtime integration JSON omits only build-time bindings and role matrices;
 the full source config, manifest, connection catalogue/status and tool ceilings are retained.
+
+Large HTTP JSON bodies are written to a private temporary0600 file and sent with
+curl data-binary; credentials stay on stdin and bodies are never command-line arguments
+or oversized curl config lines. This preserves the existing checkpoint chunk protocol.
