@@ -133,6 +133,95 @@ class Delivery:
             self.github, self.broker.github = github, broker_http
             self.workers.http, self.workers.platform.http = worker_http, platform_http
 
+    def retry_truncated_validation(self, run_id):
+        """Explicitly reject a terminal legacy receipt hidden by Claude's output preview.
+
+        The candidate, admission, configuration and old packet remain immutable. A
+        fresh bounded validation attempt is permitted only after this exact failure.
+        """
+        doc = self._load(run_id)
+        if doc and (doc.get("feedback") or {}).get("kind") == "validation_output_retry":
+            return doc
+        if (
+            not doc
+            or doc["state"] != "validating"
+            or doc.get("protocol_failures", 0) >= self.config["max_repair_attempts"]
+            or self.journal.get(run_id)["config_digest"] != config_digest(self.config)
+        ):
+            raise PolicyError("Output retry requires an unchanged validating admission")
+        key = f"{doc['cycle']}:validating:{doc['plan_attempt']}"
+        rows = self.journal.connection.execute(
+            "SELECT id FROM runs WHERE source_id=?", (run_id + ":" + key,)
+        ).fetchall()
+        if len(rows) != 1 or key in doc["used_jobs"]:
+            raise PolicyError("Output retry requires one unaccepted validation")
+        job = rows[0]["id"]
+        child, events = self.journal.get(job), self.journal.events(job)
+        launches = [e["data"] for e in events if e["kind"] == "launched"]
+        if len(launches) != 1:
+            raise PolicyError("Output retry cannot replace an unknown launch")
+        launch = launches[0]
+        packet = json.loads(json.loads(child["task"])["requirements"])
+        if (
+            packet["revision"]
+            != {
+                "head": doc["head"],
+                "base": doc["base"],
+                "acceptance_digest": Task(
+                    **json.loads(self.journal.get(run_id)["task"])
+                ).acceptance_digest,
+                "config_digest": config_digest(self.config),
+            }
+            or packet["stage"] != "validating"
+        ):
+            raise PolicyError("Original validation packet differs from its admitted revision")
+        observed = self.workers.platform.observations(launch["session_id"], launch["turn_id"])
+        if observed["turn"]["status"] != "completed" or not observed["turn"].get("finished_at"):
+            raise PolicyError("Output retry cannot replace an unfinished turn")
+        binding = self.workers.binding(
+            select_model("executor", profile=self.config.get("model_policy", "codex"))
+        )
+        runtime_evidence(observed, binding, **{k: launch[k] for k in ("session_id", "turn_id")})
+        user = next(e for e in observed["events"] if e.get("type") == "user.message")
+        if (
+            json.loads(
+                "".join(p.get("text", "") for p in user["content"] if p.get("type") == "text")
+            )
+            != packet
+        ):
+            raise PolicyError("Original validation prompt differs")
+        _, checked = tool_result(
+            observed, packet["checkout_command"], index=1, harness=binding.harness
+        )
+        output = checked.get("output", "")
+        if (
+            not output.startswith("<persisted-output>")
+            or "Output too large" not in output
+            or any(line.startswith("COLLEGIUM_CHECKOUT=") for line in output.splitlines())
+        ):
+            raise PolicyError("Output retry requires the observed persisted-output failure")
+        if child["state"] != "failed":
+            self.workers._reject_checkout(
+                run_id,
+                job,
+                child,
+                observed,
+                {
+                    "observation_digest": self.artifacts.put(observed),
+                    "reason": "Pinned checkout receipt hidden by persisted output",
+                },
+            )
+        elif not any(e["kind"] == "checkout_rejected" for e in events):
+            raise PolicyError("Output retry cannot replace an unrelated failed worker")
+        self.account_usage(run_id, doc)
+        doc.update(
+            plan_attempt=doc["plan_attempt"] + 1,
+            protocol_failures=doc.get("protocol_failures", 0) + 1,
+            feedback={"kind": "validation_output_retry", "rejected_job": job, "head": doc["head"]},
+        )
+        self.journal.record(run_id, "validation_output_retry", doc["feedback"])
+        return self._save(run_id, doc)
+
     def reconfigure_validation(self, run_id, previous_config, reason):
         """Explicit operator correction after a definitively completed invalid validation.
 

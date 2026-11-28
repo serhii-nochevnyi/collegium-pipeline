@@ -27,6 +27,43 @@ spec.loader.exec_module(guard)
 
 
 class EpicServiceTests(unittest.TestCase):
+    def test_verbose_validation_keeps_receipt_small_and_full_log_hashed(self):
+        import contextlib
+        import hashlib
+        import io
+        import shutil
+        import subprocess
+
+        config = {
+            "repository": "owner/repo",
+            "validation_commands": [[sys.executable, "-c", "print('x' * 100000)"]],
+        }
+        command = checkout_command(config, "a" * 40, validate=True)
+        script = "\n".join(command.splitlines()[1:-1])
+        output = io.StringIO()
+        actual_run = subprocess.run
+
+        def execute(argv, **kwargs):
+            if argv[0] == "git":
+                return subprocess.CompletedProcess(argv, 0)
+            return actual_run(argv, **kwargs)
+
+        with (
+            patch("subprocess.run", side_effect=execute),
+            patch("subprocess.check_output", return_value="a" * 40),
+            contextlib.redirect_stdout(output),
+        ):
+            exec(compile(script, "bounded-checkout", "exec"), {})
+        self.assertLess(len(output.getvalue()), 2000)
+        row = json.loads(output.getvalue().split("COLLEGIUM_CHECKOUT=", 1)[1])
+        self.addCleanup(shutil.rmtree, row["directory"])
+        evidence = row["results"][0]
+        self.addCleanup(Path(evidence["log_path"]).unlink)
+        self.assertEqual(evidence["exit_code"], 0)
+        self.assertEqual(evidence["log_bytes"], 100001)
+        self.assertEqual(evidence["log_sha256"], hashlib.sha256(b"x" * 100000 + b"\n").hexdigest())
+        self.assertEqual(Path(evidence["log_path"]).stat().st_size, 100001)
+
     def setUp(self):
         import os
 

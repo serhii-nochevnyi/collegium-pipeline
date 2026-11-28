@@ -408,6 +408,7 @@ def _run(event, state, config, environ, http, hooks, guard, legacy):
         "inspect",
         "crash",
         "retire",
+        "retry-output",
     }:
         raise PolicyError("Fixed epic service mode accepts no arbitrary event fields")
     if config["execution_enabled"] or config["broker_enabled"]:
@@ -492,6 +493,35 @@ def _run(event, state, config, environ, http, hooks, guard, legacy):
                 )
                 root = engine.admit(graph(scoped))["run_id"]
                 verified_base = baseline(engine, root, key)
+                if event["mode"] == "retry-output":
+                    doc = engine.load(root)
+                    if spec.get("revision") != 2:
+                        raise PolicyError("Output correction belongs only to fixture revision2")
+                    if doc.get("output_retry_completed"):
+                        print(
+                            "COLLEGIUM_EPIC_SERVICE_RESULT=" + json.dumps(inspect(engine, root)),
+                            flush=True,
+                        )
+                        return 0
+                    if any(n["merged"] for n in doc["nodes"].values()) or doc["nodes"]["C"][
+                        "state"
+                    ] not in {"queued", "blocked_dependency"}:
+                        raise PolicyError("Output correction cannot rewind an advanced epic")
+                    for name in "AB":
+                        node = doc["nodes"][name]
+                        engine.driver(node["run_id"]).retry_truncated_validation(node["run_id"])
+                        node.update(state="validating", reason="Explicit terminal output retry")
+                        engine.capacity.release(node["run_id"])
+                    doc["nodes"]["C"].update(state="queued", reason="dependencies")
+                    doc["state"] = "running"
+                    doc["output_retry_completed"] = True
+                    engine.save(root, doc)
+                    journal.checkpoint({"kind": "tick", "run_id": root})
+                    print(
+                        "COLLEGIUM_EPIC_SERVICE_RESULT=" + json.dumps(inspect(engine, root)),
+                        flush=True,
+                    )
+                    return 0
                 if event["mode"] == "inspect":
                     print(
                         "COLLEGIUM_EPIC_SERVICE_RESULT="

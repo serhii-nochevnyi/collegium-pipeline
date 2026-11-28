@@ -27,3 +27,5 @@ Tests: actual Ruff on3corrected fixtures, changed source identities/graph digest
 altering legacy acceptance, uncertain retirement retains intent/claim, terminal retirement
 releases claims. Prior native/bundle/recovery tests retained. No replan means acceptance
 silently changed; this explicit new graph is required before continuing live verification.
+
+Resolution verification: both findings in EPIC-LIVE-REPLAN-REVIEW.md are fixed. The retire-mode writer uses the archived profile for its signed checkpoint, and fresh journals check sqlite_master before querying epics. A real HMAC WriteAhead/DiskStore regression retires the old pending worker, preserves both roots, then admits revision2 without another native POST. All281 local tests and bundle validation pass. Installed v19 source d9b79283836cde665bc548365ec3792ade7c909a; native recovery reproduced same2session/turn IDs after a second deliberate cancellation. Full A/B-to-C completion remains under live observation.

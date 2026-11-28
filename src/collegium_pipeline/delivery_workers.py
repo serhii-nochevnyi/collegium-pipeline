@@ -52,6 +52,30 @@ for argv in p["commands"]:
 out={{"head":actual,"directory":d,"results":results}}
 print("COLLEGIUM_CHECKOUT="+json.dumps(out,sort_keys=True))
 """
+    if validate:
+        # Keep the signed receipt visible in the tool result. Claude persists large
+        # stdout as a file and exposes only a preview; that is not acceptance evidence.
+        script = script.replace(
+            "import base64,json,subprocess,tempfile",
+            "import base64,hashlib,json,subprocess,tempfile",
+        )
+        script = script.replace(
+            "  r=subprocess.run(argv,cwd=d,timeout=120,check=False)\n"
+            '  results.append({"argv":argv,"exit_code":r.returncode})',
+            "  with tempfile.NamedTemporaryFile(\n"
+            '   prefix="collegium-validation-",delete=False) as log:\n'
+            "   try:\n    r=subprocess.run(\n"
+            "     argv,cwd=d,timeout=120,check=False,stdout=log,stderr=subprocess.STDOUT)\n"
+            "    code=r.returncode\n"
+            "   except subprocess.TimeoutExpired:\n    code=124\n"
+            "   log.flush()\n   name=log.name\n"
+            "  checksum=hashlib.sha256()\n  size=0\n"
+            '  with open(name,"rb") as stream:\n'
+            '   for chunk in iter(lambda:stream.read(65536),b""):\n'
+            "    checksum.update(chunk)\n    size+=len(chunk)\n"
+            '  results.append({"argv":argv,"exit_code":code,"log_path":name,\n'
+            '   "log_bytes":size,"log_sha256":checksum.hexdigest()})',
+        )
     if hold_seconds:
         if (
             type(hold_seconds) is not int
@@ -370,7 +394,17 @@ class NativeJobs:
             s for s in checked.get("output", "").splitlines() if s.startswith("COLLEGIUM_CHECKOUT=")
         ]
         if len(lines) != 1:
-            raise PolicyError("Pinned checkout result absent or ambiguous")
+            self._reject_checkout(
+                root,
+                job,
+                run,
+                observed,
+                {
+                    "observation_digest": observation_digest,
+                    "reason": "Pinned checkout result absent or ambiguous",
+                },
+            )
+            raise CheckoutProtocolError("Pinned checkout result absent or ambiguous")
         try:
             checkout_result = json.loads(lines[0].split("=", 1)[1])
             result = json.loads(observed["turn"].get("answer"))

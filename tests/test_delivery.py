@@ -496,6 +496,42 @@ class DeliveryTests(unittest.TestCase):
         self.assertEqual(self.http.created, 4)
         self.assertEqual(self.github.writes, [])
 
+    def test_explicit_persisted_validation_retry_preserves_candidate_and_is_idempotent(self):
+        self.until("validating")
+        before = self.driver._load(self.run)
+
+        def truncate(packet, observed):
+            if packet["stage"] == "validating" and packet["job_key"].endswith(":0"):
+                observed["events"][4]["output"] = "<persisted-output>\nOutput too large (40KB)."
+
+        self.http.mutate = truncate
+        self.driver.step(self.run)
+        created, writes = self.http.created, list(self.github.writes)
+        result = self.driver.retry_truncated_validation(self.run)
+        self.assertEqual(result["head"], before["head"])
+        self.assertEqual(result["plan_attempt"], 1)
+        self.assertEqual(result["unaccepted_tokens"], 20)
+        saved = self.driver._load(self.run)
+        self.driver.retry_truncated_validation(self.run)
+        self.assertEqual(self.driver._load(self.run), saved)
+        self.assertEqual(self.http.created, created)
+        self.assertEqual(self.github.writes, writes)
+        self.assertEqual(self.until("reviewing")["head"], before["head"])
+
+    def test_persisted_retry_refuses_unfinished_turn(self):
+        self.until("validating")
+
+        def running(packet, observed):
+            if packet["stage"] == "validating":
+                observed["turn"].update(status="running", finished_at=None)
+
+        self.http.mutate = running
+        self.driver.step(self.run)
+        before = self.driver._load(self.run)
+        with self.assertRaises(PolicyError):
+            self.driver.retry_truncated_validation(self.run)
+        self.assertEqual(self.driver._load(self.run), before)
+
     def test_checkout_rejection_replays_usage_after_interrupted_delivery_save(self):
         def mutate(packet, obs):
             obs["events"][3]["input"]["command"] += " && echo changed"

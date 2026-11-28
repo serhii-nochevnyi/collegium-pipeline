@@ -641,7 +641,7 @@ def restore_checkpoint(
         allowed = allowed or (
             config.get("epic_service_test")
             and data.get("action") == "epic-service"
-            and data.get("mode") in {"run", "crash", "retire"}
+            and data.get("mode") in {"run", "crash", "retire", "retry-output"}
         )
     if getattr(checkpoints, "namespace", "delivery") == "service":
         allowed = data in (
