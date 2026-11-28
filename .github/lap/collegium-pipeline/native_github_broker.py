@@ -299,7 +299,9 @@ def publish_commit(scope, payload):
 
 def execute(scope, request):
     check_scope(scope, request)
-    if request["method"] == "GET" and request["path"].endswith("/logs"):
+    if request["method"] == "GET" and re.fullmatch(
+        re.escape("/repos/" + scope["repository"]) + r"/actions/jobs/\d+/logs", request["path"]
+    ):
         return job_logs(request["path"])
     if request["method"] == "GIT_COMMIT":
         return publish_commit(scope, request["payload"])

@@ -1,3 +1,26 @@
+# Current cloud acceptance continuation
+
+Cloud service source published to existing PR1 via native App immutable cycles8=506d6be,
+9=1acd9472bfbc54f37d5a20610694c1d816cf2d81 (summary CI receipt kind correction).
+Next publisher cycle10 only for NEW content; never alter frozen cycle payloads.
+Source CI46121763548 green. Installation plan f424af5f1c3fc8cc8acce7f3243ac6b393c9715883f79cbcb11b7704b3e6b9e4
+complete/appliable, shown to user, NOT APPLIED yet. Updates only code of existing controller,
+broker1 and store plus installation bookkeeping. New predicted broker pin7951aec4...,
+store92c41331... are frozen in config/claude-service.json and generated settings.
+All source/model/MCP/write scopes unchanged; runtime JSON compact for251945byte controller.
+Source native Opus/high review pending: rootb81bef56-263d-4ba4-99be-01d3e96cbd2c,
+session ses_644df37027bb4b7c84257e1c48538b37, turn run_7c559243406d4bed8c361006163608a8,
+frozen .local/cloud-service-review-packet.json and .local/cloud-service-review.sqlite3.
+First observation loop ended on read-only GET timeout; retry SAME job/session/turn.
+No new service run/admission/worker/PR launched yet. After review PASS apply shown plan,
+verify exact code and bindings, then invoke fixed service preflight (no workers) through
+.local/invoke-cloud-service.py; it only submits/observes manual Run now, NO Delivery/NativeJobs
+service controller locally. It persists submission receipts and refuses ambiguous resubmits.
+Then manual run slices until remote ready_for_acceptance, repeat inspect/run to prove no
+duplicate agents/commits/PR. All8 automations paused, production flagsfalse, no pilot.
+
+--- Earlier state below ---
+
 # In progress: installed Collegium bundle red/fix/green acceptance (no local controller)
 
 User explicitly authorized actual cloud service cycle, no pilot, all automations paused.

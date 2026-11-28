@@ -341,6 +341,28 @@ def save_receipt(path, value):
 
 
 def cloud_service(event, state, config, environ, http):
+    guard = {"fenced": False}
+    try:
+        return _cloud_service(event, state, config, environ, http, guard)
+    finally:
+        if guard["fenced"]:
+            save_receipt(guard["receipt_path"], guard["receipt"])
+        else:
+            from collegium_pipeline.domain import PolicyError
+
+            try:
+                identity = cloud_identity(environ)
+            except PolicyError:
+                identity = None
+            if identity:
+                folder = state / "no-dispatch"
+                folder.mkdir(mode=0o700, parents=True, exist_ok=True)
+                save_receipt(
+                    folder / (identity["run_id"] + "-" + identity["attempt_id"] + ".json"), identity
+                )
+
+
+def _cloud_service(event, state, config, environ, http, guard):
     """Manual, fixed one-file diagnostic; the same Delivery engine runs in Collegium."""
     import time
 
@@ -348,7 +370,12 @@ def cloud_service(event, state, config, environ, http):
     from collegium_pipeline.delivery import Delivery, serial_lock
     from collegium_pipeline.domain import PolicyError, Task, digest
     from collegium_pipeline.native_broker import NativeGithubApp
-    from collegium_pipeline.recovery import Checkpoints, ExternalRecoveryRequired, WriteAhead
+    from collegium_pipeline.recovery import (
+        Checkpoints,
+        ExternalRecoveryRequired,
+        WriteAhead,
+        reconcile_existing,
+    )
     from collegium_pipeline.store import Journal
 
     if (
@@ -443,6 +470,7 @@ def cloud_service(event, state, config, environ, http):
     except ExternalRecoveryRequired:
         reconcile_controller(scoped, state, http, key, namespace="service")
         receipt_path, receipt = cloud_fence(event, state, environ, http, service=True)
+    guard.update(fenced=True, receipt_path=receipt_path, receipt=receipt)
     with serial_lock(state / "journal.sqlite3"):
         journal = Journal(state / "journal.sqlite3")
         try:
@@ -481,6 +509,7 @@ def cloud_service(event, state, config, environ, http):
                     Checkpoints(scoped, http, key, namespace="service"),
                     identity,
                 ).save
+                reconcile_existing(scoped, journal, http, driver.broker.github)
                 until = time.monotonic() + 480
                 while time.monotonic() < until:
                     journal.before_effect({"kind": "tick", "run_id": root})
@@ -581,7 +610,6 @@ def cloud_service(event, state, config, environ, http):
             )
             return 2 if result["state"] in {"blocked", "failed"} else 0
         finally:
-            save_receipt(receipt_path, receipt)
             journal.close()
 
 

@@ -168,7 +168,7 @@
   "broker_transport": "collegium_script",
   "native_broker": {
     "automation_id": "aut_5b17ddca92424243b1feb5aa8732a7a0",
-    "approved_digest": "7951aec41a4da709b17de119457b9149a821ec34620bd9023395d40f73867038"
+    "approved_digest": "23b418abee71bcbccd04f0b490e2472730085a9f713f1f77607f2501ccf9ca81"
   },
   "model_policy": "claude",
   "model_connection": "project/claude-code-subscription",

@@ -149,10 +149,11 @@ class BundleTests(unittest.TestCase):
 
             class Cloud:
                 history = []
+                paused = True
 
                 def request(self, method, path, payload=None, **kwargs):
                     if path == "/api/automations/aut_owner":
-                        return {"status": "paused"}, {}
+                        return {"status": "paused" if self.paused else "active"}, {}
                     row = {
                         "id": environ["LAP_RUN_ID"],
                         "automation_id": "aut_owner",
@@ -185,6 +186,37 @@ class BundleTests(unittest.TestCase):
                 patch("time.sleep"),
                 contextlib.redirect_stdout(io.StringIO()) as output,
             ):
+                from collegium_pipeline.transport import RemoteError
+
+                def prior(status):
+                    return {
+                        "id": environ["LAP_RUN_ID"],
+                        "automation_id": "aut_owner",
+                        "status": status,
+                        "attempts": [{"id": environ["LAP_ATTEMPT_ID"], "n": 1, "status": status}],
+                        "item": {"event": {"data": event.copy()}},
+                    }
+
+                # A rejected run before the fence is harmless and must not wedge history.
+                http.paused = False
+                with self.assertRaisesRegex(PolicyError, "paused installed"):
+                    ENTRY_MODULE["cloud_service"](event, self.path / "state", config, environ, http)
+                marker = self.path / "state/no-dispatch/run_cloud-att_cloud.json"
+                self.assertTrue(marker.exists())
+                http.history = [prior("failed")]
+                http.paused = True
+                environ.update(LAP_RUN_ID="run_afterreject", LAP_ATTEMPT_ID="att_afterreject")
+
+                # Real fixture mutation succeeds, then loses its response in this cloud slice.
+                fixture.github.lose = "commit"
+                with self.assertRaises(RemoteError):
+                    ENTRY_MODULE["cloud_service"](event, self.path / "state", config, environ, http)
+                self.assertEqual([op for op, _ in fixture.github.writes].count("commit"), 1)
+                self.assertFalse(
+                    (self.path / "state/no-dispatch/run_afterreject-att_afterreject.json").exists()
+                )
+                http.history.insert(0, prior("failed"))
+                environ.update(LAP_RUN_ID="run_resume", LAP_ATTEMPT_ID="att_resume")
                 result = ENTRY_MODULE["cloud_service"](
                     event, self.path / "state", config, environ, http
                 )
@@ -193,14 +225,16 @@ class BundleTests(unittest.TestCase):
                 self.assertEqual(summary["state"], "ready_for_acceptance")
                 self.assertEqual(summary["repairs"], 1)
                 self.assertEqual(len(summary["workers"]), 8)
+                self.assertEqual(fixture.http.created, 8)
+                self.assertEqual([op for op, _ in fixture.github.writes].count("commit"), 2)
                 self.assertGreater(len(snapshots), 8)
                 created, writes = fixture.http.created, len(fixture.github.writes)
                 http.history = [
                     {
-                        "id": "run_cloud",
+                        "id": "run_resume",
                         "automation_id": "aut_owner",
                         "status": "succeeded",
-                        "attempts": [{"id": "att_cloud", "n": 1, "status": "succeeded"}],
+                        "attempts": [{"id": "att_resume", "n": 1, "status": "succeeded"}],
                         "item": {"event": {"data": event.copy()}},
                     }
                 ]
