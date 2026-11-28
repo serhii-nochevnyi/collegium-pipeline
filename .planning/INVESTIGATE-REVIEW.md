@@ -25,3 +25,11 @@ noncanonical paths and unpinned revisions. Bundle validation passes with 18 agen
 Known boundaries are explicit in docs/INVESTIGATE.md: Git-only registered evidence,
 per-lane concurrency, proposal-only ADR/tickets, no hard provider spending cap. Runtime
 proof and installation results must be recorded separately after native verification.
+
+Live follow-up: the first native synthesis substituted grep checks for the configured
+unit-test argv. The controller refused it without publishing/executing anything. Added
+bounded synthesis-payload repair with exact controller feedback, immutable rejection
+artifacts and retained usage; the same two-repair budget is shared with review failures.
+Added regressions for successful correction without repeated research and exhaustion
+without review/admission. The blocked v1 service run is retained as negative evidence;
+the updated code receives a separate, explicit service replan, never a silent reset.

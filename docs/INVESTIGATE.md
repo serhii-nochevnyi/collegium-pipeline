@@ -85,8 +85,11 @@ Synthesis must compare at least two alternatives, recommend one, identify source
 risks, preserve open questions, propose an ADR and propose an acyclic ticket graph.
 Paths and validation commands stay within configured ceilings. Review binds the exact
 synthesis and four research artifact digests and checks coverage, sources, uncertainty,
-alternatives, risks and decomposition. Failed review permits at most two synthesis/
-review repairs; malformed or stale evidence blocks rather than weakening the gate.
+alternatives, risks and decomposition. Rejected synthesis payloads (including altered
+commands or invalid citations) and failed reviews share at most two synthesis/review
+repairs, with the exact rejected artifact and controller findings retained. Research is
+reused, paid usage is retained and configured commands never change. Invalid native
+envelopes or stale review identities block; exhausting repairs also blocks.
 
 Success ends at `ready_for_decision`, or `needs_input` when any blocking question
 remains. Both return `decision_approved:false` and `delivered:false`. Human acceptance,

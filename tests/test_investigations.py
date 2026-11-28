@@ -306,6 +306,44 @@ class InvestigationTests(unittest.TestCase):
         self.until("needs_input")
         self.assertFalse(self.engine.load(self.root)["decision_approved"])
 
+    def test_invalid_synthesis_is_repaired_without_weakening_commands_or_repeating_research(self):
+        original = self.payload
+
+        def rejected(packet, observed):
+            original(packet, observed)
+            if packet["stage"] == "synthesizing" and ":1:" in packet["job_key"]:
+                result = json.loads(observed["turn"]["answer"])
+                result["payload"]["tickets"][0]["validation_commands"] = [["true"]]
+                observed["turn"]["answer"] = json.dumps(result)
+
+        self.http.mutate = rejected
+        result = self.until("ready_for_decision")
+        self.assertEqual((result["revision"], self.http.created, result["tokens"]), (2, 8, 160))
+        self.assertEqual(len(result["research"]), 4)
+        self.assertEqual(len(result["rejections"]), 1)
+        self.assertIn("configured commands", result["rejections"][0]["reason"])
+        self.assertEqual(
+            result["feedback"]["required_validation_commands"], self.config["validation_commands"]
+        )
+
+    def test_invalid_synthesis_retry_budget_retains_all_rejections_and_paid_usage(self):
+        original = self.payload
+
+        def rejected(packet, observed):
+            original(packet, observed)
+            if packet["stage"] == "synthesizing":
+                result = json.loads(observed["turn"]["answer"])
+                result["payload"]["tickets"][0]["validation_commands"] = [["true"]]
+                observed["turn"]["answer"] = json.dumps(result)
+
+        self.http.mutate = rejected
+        result = self.until("blocked")
+        self.assertEqual((self.http.created, result["tokens"]), (8, 160))
+        self.assertEqual(len(result["rejections"]), 3)
+        self.assertIsNone(result["review"])
+        self.assertIn("retry limit", result["reason"])
+        self.assertEqual(self.engine.step(self.root)["tokens"], 160)
+
     def test_ambiguous_launch_is_never_replaced(self):
         request = self.http.request
 

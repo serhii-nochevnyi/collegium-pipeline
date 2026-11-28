@@ -364,6 +364,7 @@ class Investigations:
             if doc["synthesis"]
             else None,
             "payload_contract": self.contract(stage, perspective),
+            "required_validation_commands": self.config["validation_commands"],
             "feedback": doc.get("feedback"),
         }
         try:
@@ -384,6 +385,33 @@ class Investigations:
         doc["results"][logical] = identity
         self.save(root, doc)
         return result
+
+    def repair_synthesis(self, doc, result, reason):
+        rejected = self.artifacts.put(result)
+        doc["rejections"].append(
+            {
+                "revision": doc["revision"],
+                "stage": result["stage"],
+                "artifact_digest": rejected,
+                "reason": reason,
+            }
+        )
+        if doc["revision"] > self.config["max_repair_attempts"]:
+            raise PolicyError("Investigation review/synthesis retry limit exhausted: " + reason)
+        doc.update(
+            revision=doc["revision"] + 1,
+            synthesis=None,
+            review=None,
+            state="synthesizing",
+            feedback={
+                "rejected_digest": rejected,
+                "reason": reason,
+                "rejected_result": result,
+                "required_validation_commands": self.config["validation_commands"],
+            },
+        )
+        for key in ("synthesizing", "investigation_review"):
+            doc["results"].pop(key, None)
 
     def step(self, root):
         if not self.config["execution_enabled"] or self.config["broker_enabled"]:
@@ -423,10 +451,16 @@ class Investigations:
             elif not doc["synthesis"]:
                 result = self.step_job(root, doc, "synthesizing")
                 if result:
-                    if result["verdict"] != "pass":
-                        raise PolicyError("Synthesis was inconclusive")
-                    validate_synthesis(result["payload"], sources, self.config)
-                    doc.update(synthesis=self.artifacts.put(result), state="investigation_review")
+                    try:
+                        if result["verdict"] != "pass":
+                            raise PolicyError("Synthesis was inconclusive")
+                        validate_synthesis(result["payload"], sources, self.config)
+                    except PolicyError as exc:
+                        self.repair_synthesis(doc, result, str(exc))
+                    else:
+                        doc.update(
+                            synthesis=self.artifacts.put(result), state="investigation_review"
+                        )
             else:
                 result = self.step_job(root, doc, "investigation_review")
                 if result:
@@ -455,17 +489,7 @@ class Investigations:
                     if result["verdict"] != "pass" or any(
                         v is not True for v in payload["checks"].values()
                     ):
-                        if doc["revision"] > self.config["max_repair_attempts"]:
-                            raise PolicyError("Investigation review retry limit exhausted")
-                        doc.update(
-                            revision=doc["revision"] + 1,
-                            synthesis=None,
-                            review=None,
-                            state="synthesizing",
-                            feedback=result,
-                        )
-                        for key in ("synthesizing", "investigation_review"):
-                            doc["results"].pop(key, None)
+                        self.repair_synthesis(doc, result, "Independent review rejected synthesis")
                     else:
                         qs = (
                             payload["open_questions"]

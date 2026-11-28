@@ -45,6 +45,9 @@ class InvestigationJobs(NativeJobs):
                 "Complexity rubric: 0 absent or trivial, 1 localized and understood, "
                 "2 crosses a boundary or has material uncertainty, 3 broad or irreversible. "
                 "Justify every dimension against the task and captured evidence. "
+                "Every proposed ticket's validation_commands MUST equal "
+                "context.required_validation_commands exactly as a list of argv lists. "
+                "Do not substitute lighter commands even for documentation. Do not run them. "
                 "Review the synthesis independently, including every research perspective. "
                 "Keep DEV/PROD distinctions. ADR and tickets remain proposals, not approval."
             ),
