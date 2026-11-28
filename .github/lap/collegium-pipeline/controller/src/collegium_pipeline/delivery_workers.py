@@ -23,7 +23,7 @@ def validation_commands(config, *, repaired=False):
     )
 
 
-def checkout_command(config, head, *, validate=False, repaired=False):
+def checkout_command(config, head, *, validate=False, repaired=False, hold_seconds=0):
     # Inputs are JSON data, never interpolated as shell syntax. Runs only remotely.
     data = base64.b64encode(
         json.dumps(
@@ -52,6 +52,14 @@ for argv in p["commands"]:
 out={{"head":actual,"directory":d,"results":results}}
 print("COLLEGIUM_CHECKOUT="+json.dumps(out,sort_keys=True))
 """
+    if hold_seconds:
+        if (
+            type(hold_seconds) is not int
+            or hold_seconds != 120
+            or not config.get("epic_service_test")
+        ):
+            raise PolicyError("Checkout hold is reserved for the fixed epic service test")
+        script = script.replace("results=[]\n", "import time\ntime.sleep(120)\nresults=[]\n", 1)
     return "python3 - <<'COLLEGIUM_DELIVERY_CHECKOUT'\n" + script + "COLLEGIUM_DELIVERY_CHECKOUT"
 
 
@@ -147,7 +155,21 @@ class NativeJobs:
         task = Task(**json.loads(self.journal.get(root)["task"]))
         repaired = bool(context.get("service_red"))
         checkout = checkout_command(
-            self.config, head, validate=stage == "validating", repaired=repaired
+            self.config,
+            head,
+            validate=stage == "validating",
+            repaired=repaired,
+            hold_seconds=(
+                120
+                if self.config.get("epic_service_test")
+                and stage == "planning"
+                and task.source_id
+                in {
+                    "epic-service:" + self.config["epic_service_test"]["suite_id"] + ":A",
+                    "epic-service:" + self.config["epic_service_test"]["suite_id"] + ":B",
+                }
+                else 0
+            ),
         )
         revision = {
             "head": head,

@@ -370,6 +370,7 @@
       "notify": "failures",
       "script": {
         "files": [
+          "controller/epic-service-settings.json",
           "controller/runtime.b64",
           "controller/entry.py",
           "controller/settings.json",
@@ -452,6 +453,55 @@
         "environment_ref": "custom",
         "environment": "base",
         "size": "small",
+        "secrets": [
+          "PIPELINE_CONTROL_KEY"
+        ]
+      }
+    },
+    {
+      "name": "pipeline-native-broker-1474663859-v10",
+      "start": "paused",
+      "schedule": "0 0 1 1 *",
+      "notify": "none",
+      "script": {
+        "executor": "aranarium",
+        "environment_ref": "custom",
+        "environment": "base",
+        "size": "small",
+        "files": [
+          "epic-service-broker/native_github_broker.py",
+          "epic-service-broker/broker_scope.json",
+          "epic-service-broker/epic_service_broker.py",
+          "epic-service-broker/epic_service_scope.json"
+        ],
+        "command": "cd epic-service-broker && python3 epic_service_broker.py",
+        "secrets": [
+          "PIPELINE_CONTROL_KEY"
+        ],
+        "repositories": [
+          {
+            "url": "https://github.com/serhii-nochevnyi/collegium-pipeline",
+            "connection": "ghc_7de07519a1e3437a95f98edc4545022d",
+            "access": "contributor"
+          }
+        ]
+      }
+    },
+    {
+      "name": "pipeline-epic-service-recovery-v1",
+      "start": "paused",
+      "schedule": "0 0 1 1 *",
+      "notify": "none",
+      "script": {
+        "executor": "aranarium",
+        "environment_ref": "custom",
+        "environment": "base",
+        "size": "small",
+        "files": [
+          "recovery_store.py",
+          "recovery_scope.json"
+        ],
+        "command": "python3 recovery_store.py",
         "secrets": [
           "PIPELINE_CONTROL_KEY"
         ]

@@ -373,7 +373,7 @@ class Epics:
             "observed_base": base,
         }
 
-    def step(self, root):
+    def step(self, root, *, expected_base=None):
         if not self.config.get("execution_enabled") or not self.config.get("broker_enabled"):
             raise PolicyError("Epic execution and broker are disabled")
         doc = self.load(root)
@@ -386,6 +386,8 @@ class Epics:
             return self.save(root, doc)
         github.scope()
         base = github.ref(self.config["base_branch"])
+        if expected_base is not None and base != expected_base:
+            raise PolicyError("Base changed after service verification; no dispatch")
         if not isinstance(base, str) or not re.fullmatch(r"[a-f0-9]{40}", base):
             raise PolicyError("Epic requires an exact configured base SHA")
         if doc["base"] is None:

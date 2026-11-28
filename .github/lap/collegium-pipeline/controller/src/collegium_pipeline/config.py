@@ -47,6 +47,7 @@ FIELDS = {
     "broker_compress_requests",
     "scheduling",
     "epic",
+    "epic_service_test",
 }
 
 
@@ -54,6 +55,23 @@ def load_config(path: str | Path) -> dict:
     config = json.loads(Path(path).read_text())
     if not isinstance(config, dict) or set(config) - FIELDS:
         raise PolicyError("Unknown pilot configuration fields")
+    if "epic_service_test" in config:
+        spec = config["epic_service_test"]
+        if (
+            not isinstance(spec, dict)
+            or set(spec) != {"suite_id", "hold_seconds", "baseline", "main_sha", "expires_at"}
+            or not isinstance(spec["suite_id"], str)
+            or not re.fullmatch(r"[a-f0-9-]{36}", spec["suite_id"])
+            or type(spec["hold_seconds"]) is not int
+            or spec["hold_seconds"] != 120
+            or any(
+                not isinstance(spec[k], str) or not re.fullmatch(r"[a-f0-9]{40}", spec[k])
+                for k in ("baseline", "main_sha")
+            )
+            or type(spec["expires_at"]) is not int
+            or config.get("base_branch") != "collegium/" + spec["suite_id"]
+        ):
+            raise PolicyError("Only the fixed isolated epic service diagnostic is supported")
     if config.get("schema_version") != "pilot/v1" or config.get("mode") != "local_serial_prototype":
         raise PolicyError("Only the explicit local serial prototype is supported")
     if config.get("execution_profile", "delivery") not in {"delivery", "readiness"}:

@@ -81,7 +81,9 @@ class ScriptTransport:
             or (row["triggers"] and not self.config.get("broker_allow_paused_triggers", False))
             or target.get("kind") != "script"
             or target.get("repositories") != expected
-            or any(target.get(k) for k in ("secrets", "variables", "mcp_servers"))
+            or target.get("secrets", [])
+            != (["project/PIPELINE_CONTROL_KEY"] if self.config.get("epic_service_test") else [])
+            or any(target.get(k) for k in ("variables", "mcp_servers"))
         ):
             raise PolicyError("Native broker scope differs from its admitted project/repository")
         scope_files = [
@@ -113,6 +115,12 @@ class ScriptTransport:
             raise PolicyError("Native broker write authority is disabled")
         self.scope()
         request = {"method": method, "path": path, "payload": payload}
+        if method != "GET" and self.config.get("epic_service_test"):
+            from .epic_service import authorize_rpc
+
+            request["authorization"] = authorize_rpc(
+                self.config, self.journal, self.run_id, request
+            )
         wire = encode_request(request, compress=self.config.get("broker_compress_requests", False))
         key = digest(request)
         mutation = method != "GET"

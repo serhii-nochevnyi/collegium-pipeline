@@ -5,7 +5,7 @@ import os
 import sys
 from pathlib import Path
 
-_BUNDLE_RUNTIME_SHA256 = "676d3f5db80f9f5b909ad3207468c908b00e22a5dc130634c9c7c2e24b3b9f31"
+_BUNDLE_RUNTIME_SHA256 = "a43e69089e9e3ee89f2d560d1094d7f9a4a6747ba4c7aeac8478ec1c32c3386c"
 _BUNDLE_RUNTIME = None
 
 
@@ -310,7 +310,9 @@ def recovered_attempts_accounted(prior, state, automation):
     return True
 
 
-def cloud_fence(event, state, environ, http, *, diagnostic=False, service=False):
+def cloud_fence(
+    event, state, environ, http, *, diagnostic=False, service=False, epic_service=False
+):
     """Refuse replay when the platform discarded a previous attempt's journal.
 
     Platform run history is outside the attempt snapshot. A receipt inside the
@@ -383,6 +385,11 @@ def cloud_fence(event, state, environ, http, *, diagnostic=False, service=False)
                 )
             )
         )
+        if epic_service:
+            unsafe = data.get("action") == "epic-service" and data.get("mode") not in {
+                "preflight",
+                "inspect",
+            }
         if unsafe and not (
             not diagnostic
             and (
@@ -1154,6 +1161,16 @@ def main(event=None, *, root=None, environ=None, http=None):
         key = environ.get("PIPELINE_CONTROL_KEY")
         http = http or (JsonHttp(epic_config["server"], {"X-Api-Key": key}) if key else None)
         return dispatch(event, state, epic_config, environ, http, globals(), profiles=profiles)
+    if action == "epic-service":
+        from collegium_pipeline.epic_service import run
+        from collegium_pipeline.transport import JsonHttp
+
+        diagnostic = load_config(root / "epic-service-settings.json")
+        if config["execution_enabled"] or config["broker_enabled"]:
+            raise PolicyError("Epic service requires disabled production settings")
+        key = environ.get("PIPELINE_CONTROL_KEY")
+        http = http or (JsonHttp(diagnostic["server"], {"X-Api-Key": key}) if key else None)
+        return run(event, state / "cloud-epic-service", diagnostic, environ, http, globals())
     if action == "verify-control":
         if event != {"action": "verify-control"}:
             raise PolicyError("Control verification accepts no event parameters")
