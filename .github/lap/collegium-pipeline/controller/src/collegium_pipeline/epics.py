@@ -13,6 +13,7 @@ from .config import config_digest
 from .delivery import Delivery
 from .delivery_workers import NativeJobs
 from .domain import PolicyError, Task, digest
+from .effort import runtime_evidence, tool_result
 from .platform import confirmed_pending_launch
 from .store import CheckpointError
 
@@ -558,6 +559,107 @@ class Epics:
         )
         return self.save(root, doc)
 
+    def integration_key(self, doc, head, stage):
+        key = "epic:" + head + ":" + stage
+        return key + (":" + str(doc["integration_attempt"]) if doc["integration_attempt"] else "")
+
+    def retry_integration_json(self, root, doc, key):
+        rows = self.journal.connection.execute(
+            "SELECT id FROM runs WHERE source_id=?", (root + ":" + key,)
+        ).fetchall()
+        if len(rows) != 1:
+            raise PolicyError("JSON retry needs exactly one existing integration job")
+        job = rows[0]["id"]
+        if job in doc.get("integration_json_retries", []):
+            return self.save(root, doc)
+        self.settle(root, doc)
+        events = self.journal.events(job)
+        drained = [e["data"] for e in events if e["kind"] == "worker_drained"]
+        if (
+            self.journal.get(job)["state"] != "failed"
+            or len(drained) != 1
+            or doc["settlement"]["pending"]
+        ):
+            raise PolicyError("JSON retry cannot replace an uncertain integration turn")
+        observed = self.artifacts.get(drained[0]["artifact_digest"])
+        packet = json.loads(json.loads(self.journal.get(job)["task"])["requirements"])
+        stage = packet["stage"]
+        admission = self.journal.get(root)
+        if (
+            stage not in {"validating", "reviewing"}
+            or packet["revision"]
+            != {
+                "head": doc["integration_head"],
+                "base": doc["base"],
+                "acceptance_digest": Task(**json.loads(admission["task"])).acceptance_digest,
+                "config_digest": admission["config_digest"],
+            }
+            or admission["config_digest"] != config_digest(self.config)
+        ):
+            raise PolicyError("JSON retry differs from its pinned integration revision")
+        jobs = NativeJobs(self.config, self.journal, self.http, self.artifacts)
+        from .domain import select_model
+
+        binding = jobs.binding(
+            select_model(
+                "executor" if stage == "validating" else "code_reviewer",
+                profile=self.config.get("model_policy", "codex"),
+            )
+        )
+        runtime_evidence(observed, binding, **{k: drained[0][k] for k in ("session_id", "turn_id")})
+        user = next(e for e in observed["events"] if e.get("type") == "user.message")
+        if (
+            json.loads(
+                "".join(p.get("text", "") for p in user["content"] if p.get("type") == "text")
+            )
+            != packet
+        ):
+            raise PolicyError("JSON retry original prompt differs")
+        _, result = tool_result(
+            observed, packet["checkout_command"], index=1, harness=binding.harness
+        )
+        markers = [
+            s for s in result.get("output", "").splitlines() if s.startswith("COLLEGIUM_CHECKOUT=")
+        ]
+        if (
+            len(markers) != 1
+            or json.loads(markers[0].split("=", 1)[1])["head"] != doc["integration_head"]
+        ):
+            raise PolicyError("JSON retry has no pinned checkout evidence")
+        checkout = json.loads(markers[0].split("=", 1)[1])
+        if stage == "validating" and (
+            [r.get("argv") for r in checkout.get("results", [])]
+            != self.config["validation_commands"]
+            or any(
+                type(r.get("exit_code")) is not int or r["exit_code"] != 0
+                for r in checkout["results"]
+            )
+        ):
+            raise PolicyError("JSON retry cannot replace failed validation commands")
+        try:
+            json.loads(observed["turn"].get("answer"))
+        except (ValueError, TypeError):
+            pass
+        else:
+            raise PolicyError("JSON retry cannot replace a syntactically valid verdict")
+        if doc["integration_attempt"] >= self.config["max_repair_attempts"]:
+            doc.update(state="blocked", reason="Integration JSON retry limit exhausted")
+        else:
+            doc["integration_attempt"] += 1
+            doc.setdefault("integration_json_retries", []).append(job)
+            doc.update(
+                state="retrying_integration_" + stage,
+                reason=None,
+                integration_feedback={
+                    "kind": "invalid_result_json",
+                    "instructions": (
+                        "Return exactly one valid result_schema JSON object. No Markdown or prose "
+                        "corrections. Correct values inside that object before returning."
+                    ),
+                },
+            )
+        return self.save(root, doc)
+
     def integrate(self, root, doc, github, head, spent):
         if doc["integration_head"] not in {None, head}:
             doc.update(state="blocked", reason="Integration base changed; explicit replan required")
@@ -572,7 +674,7 @@ class Epics:
             if not self.capacity.acquire(root, epic_owner=root):
                 doc["state"] = "waiting_integration_capacity"
                 return self.save(root, doc)
-            key = "epic:" + head + ":" + stage
+            key = self.integration_key(doc, head, stage)
             existing = self.journal.connection.execute(
                 "SELECT id FROM runs WHERE source_id=?", (root + ":" + key,)
             ).fetchone()
@@ -611,13 +713,21 @@ class Epics:
                 "plan": {"graph": doc["graph"], "merged": doc["nodes"]},
                 "candidate": {"head": head},
                 "validation": doc["validation"],
-                "feedback": None,
+                "feedback": doc.get("integration_feedback"),
             }
             try:
                 result = jobs.step(root, key, stage, head, doc["base"], context)
             except CheckpointError:
                 raise
             except PolicyError as exc:
+                rejected = any(
+                    e["kind"] == "integration_json_rejected" and e["data"]["key"] == key
+                    for e in self.journal.events(root)
+                )
+                if str(exc) == "Invalid worker result JSON" or rejected:
+                    if not rejected:
+                        self.journal.record(root, "integration_json_rejected", {"key": key})
+                    return self.retry_integration_json(root, doc, key)
                 doc.update(state="blocked", reason=str(exc))
                 self.settle(root, doc)
                 return self.save(root, doc)

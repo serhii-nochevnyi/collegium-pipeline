@@ -410,6 +410,7 @@ def _run(event, state, config, environ, http, hooks, guard, legacy):
         "retire",
         "retry-output",
         "reconcile-merges",
+        "retry-integration",
     }:
         raise PolicyError("Fixed epic service mode accepts no arbitrary event fields")
     if config["execution_enabled"] or config["broker_enabled"]:
@@ -494,6 +495,28 @@ def _run(event, state, config, environ, http, hooks, guard, legacy):
                 )
                 root = engine.admit(graph(scoped))["run_id"]
                 verified_base = baseline(engine, root, key)
+                if event["mode"] == "retry-integration":
+                    doc = engine.load(root)
+                    if not doc.get("integration_json_corrected"):
+                        if (
+                            doc["state"] != "blocked"
+                            or doc.get("reason") != "Invalid worker result JSON"
+                            or doc["integration_head"] != verified_base
+                            or not all(n["merged"] for n in doc["nodes"].values())
+                        ):
+                            raise PolicyError(
+                                "Integration correction requires the recorded terminal JSON failure"
+                            )
+                        key_name = engine.integration_key(doc, verified_base, "validating")
+                        engine.retry_integration_json(root, doc, key_name)
+                        doc["integration_json_corrected"] = True
+                        engine.save(root, doc)
+                        journal.checkpoint({"kind": "tick", "run_id": root})
+                    print(
+                        "COLLEGIUM_EPIC_SERVICE_RESULT=" + json.dumps(inspect(engine, root)),
+                        flush=True,
+                    )
+                    return 0
                 if event["mode"] == "reconcile-merges":
                     doc = engine.load(root)
                     if doc.get("merge_metadata_reconciled"):
