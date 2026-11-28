@@ -108,7 +108,7 @@ class Checkpoints:
                         break
             if run:
                 detail, _ = self.http.request("GET", self.path + "/runs/" + run)
-                if detail["status"] != "running":
+                if detail["status"] not in {"queued", "waiting", "running"}:
                     if detail["status"] != "succeeded" or detail.get("output_cut") is not False:
                         raise PolicyError(
                             "Independent checkpoint call failed; external effect refused"

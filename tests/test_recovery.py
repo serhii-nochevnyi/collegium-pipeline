@@ -141,6 +141,41 @@ class AgentsHttp:
 
 
 class RecoveryTests(unittest.TestCase):
+    def test_checkpoint_rpc_waits_for_queued_waiting_and_running_without_resubmission(self):
+        owner = self
+
+        class Http:
+            statuses = ["queued", "waiting", "running", "succeeded"]
+            submissions = 0
+
+            def request(self, method, path, payload=None):
+                if method == "POST":
+                    self.submissions += 1
+                    self.event = payload["data"]
+                    return {"run": {"id": "run_queued"}}, {}
+                status = self.statuses.pop(0)
+                event = self.event
+                result = {
+                    "owner": owner.store.owner,
+                    "namespace": event["namespace"],
+                    "request_id": event["request_id"],
+                    "head": None,
+                }
+                return {
+                    "status": status,
+                    "output_cut": False,
+                    "output_tail": json.dumps({**result, "mac": mac(result, owner.store.key)}),
+                }, {}
+
+        http = Http()
+        checkpoints = Checkpoints(
+            self.config, http, self.store.key, namespace="service", pause=lambda _: None
+        )
+        checkpoints.checked = True
+        self.assertIsNone(checkpoints.head())
+        self.assertEqual(http.submissions, 1)
+        self.assertEqual(http.statuses, [])
+
     def test_service_checkpoint_namespace_is_isolated_and_unknown_names_refused(self):
         with tempfile.TemporaryDirectory() as folder:
             for namespace in ("delivery", "diagnostic", "service"):

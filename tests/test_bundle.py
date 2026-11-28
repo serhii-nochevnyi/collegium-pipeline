@@ -91,6 +91,39 @@ class BundleTests(unittest.TestCase):
                 ENTRY_MODULE["cloud_service"](event, self.path / "state", config, {}, http)
             http.request.assert_not_called()
 
+    def test_cloud_inspect_before_admission_reports_policy_failure_without_creating_task(self):
+        import sqlite3
+
+        config = json.loads((self.path / "controller/settings.json").read_text())
+        owner = config["recovery_store"]["owner"]
+        event = {"action": "service-test", "mode": "inspect"}
+        environ = {
+            "LAP_AUTOMATION_ID": owner,
+            "LAP_RUN_ID": "run_inspectnew",
+            "LAP_ATTEMPT_ID": "att_inspectnew",
+            "PIPELINE_CONTROL_KEY": "fixture",
+        }
+        current = {
+            "id": "run_inspectnew",
+            "automation_id": owner,
+            "status": "running",
+            "attempts": [{"id": "att_inspectnew", "n": 1, "status": "running"}],
+            "item": {"event": {"data": event}},
+        }
+        http = unittest.mock.Mock()
+        http.request.side_effect = [
+            ({"status": "paused"}, {}),
+            (current, {}),
+            ({"runs": [current]}, {}),
+        ]
+        with contextlib.redirect_stdout(io.StringIO()) as output:
+            with self.assertRaisesRegex(PolicyError, "No canonical cloud service"):
+                ENTRY_MODULE["cloud_service"](event, self.path / "state", config, environ, http)
+        self.assertIn("service_policy_failure", output.getvalue())
+        c = sqlite3.connect(self.path / "state/journal.sqlite3")
+        self.assertEqual(c.execute("SELECT count(*) FROM runs").fetchone()[0], 0)
+        c.close()
+
     def test_manual_cloud_service_uses_delivery_engine_and_inspects_without_duplicates(self):
         from test_delivery import DeliveryTests as Harness
 

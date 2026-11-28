@@ -473,6 +473,7 @@ def _cloud_service(event, state, config, environ, http, guard):
     guard.update(fenced=True, receipt_path=receipt_path, receipt=receipt)
     with serial_lock(state / "journal.sqlite3"):
         journal = Journal(state / "journal.sqlite3")
+        root = None
         try:
             if event["mode"] == "inspect":
                 rows = journal.connection.execute(
@@ -609,6 +610,13 @@ def _cloud_service(event, state, config, environ, http, guard):
                 flush=True,
             )
             return 2 if result["state"] in {"blocked", "failed"} else 0
+        except PolicyError as exc:
+            # Our policy errors contain controlled diagnostic text, not HTTP bodies/keys.
+            reason = {"reason": str(exc), "run_id": root}
+            if root is not None:
+                journal.record(root, "service_policy_failure", reason)
+            print(json.dumps({"service_policy_failure": reason}), flush=True)
+            raise
         finally:
             journal.close()
 

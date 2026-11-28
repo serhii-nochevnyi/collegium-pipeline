@@ -1,3 +1,98 @@
+# Cloud live continuation: interrupted BEFORE executor creation, same root retained
+
+Actual cloud run run_49d943a76e6e477db1d5fa4fd1d29c9d FAILED with PolicyError before
+executor session_create. Read-only cloud inspect run_5d093c32023d4d15815c013fc31b239a
+SUCCEEDED, same root6c6d499d-2fee-41fa-be0c-18660001cca2 stateimplementing/tokens363303,
+2 accepted workers (planner+plan reviewer), no commit/branch/PR/executor session yet.
+Latest source still41fa5dd9/version10, all8paused, no pilot.
+
+Read-only OFFICIAL state tar export (no rollback/local controller) saved selected cloud
+namespace into .local/cloud-service-state-diagnostic. SQLite opened mode=ro ONLY.
+Executor child92b2aad8-4271-4629-9be0-ab0e2014b7da reconciling, original intent
+5398da0b-9e1f-4e42-8c58-c96640474d5c; effect_not_started(session_create) proves checkpoint
+failed before session POST. KEEP this exact root/intent; never make a replacement.
+Local checkpointheadab109...; pendingbdb610... upload begun, not finished. Store begin
+run_d4eeac3687924bafb3145cd2a18265d0 eventually succeeded, no chunk/finish for pending.
+Diagnostics .local/cloud-service-store-failure-diagnostic.json and executor-runs-diagnostic
+show no new executor. New model/effort/scopes or budget were NOT selected.
+
+Found concrete checkpoint RPC defect: queued/waiting treated as terminal failure.
+Local fix polls queued/waiting/running until signed terminal response and keeps one RPC;
+regression tests added. Safe PolicyError reason now recorded in service journal/stdout
+(no raw HTTP error/key), with guard for inspect before admission. Frozen CLOUD config
+digest48ffb7870672bfbac4a7a16c45d8bf4f570b19a61737334aa9ef57a560a056c3
+explicitly remains unchanged. Task requirements, worker packets, App/store pins unchanged.
+Next source publisher cycle11 for this reviewed payload; controller-only install then
+manual same mode run. Existing reconcile_existing should adopt the not-started intent;
+uncommitted pending upload can be superseded under the same committed parent.
+All execution must remain in installed Collegium bundle. Observer helper only RunNow,
+no Delivery/NativeJobs service coordination locally. Final read-only audit must retain
+failed run history rather than asserting every slice was successful.
+
+--- Historical state below ---
+
+# LIVE CLOUD SERVICE RUN IN PROGRESS — no local service controller
+
+Installed41fa5dd9e67a76c95425d558fb65384ff34ee1d9/version10 via shown/applied
+plan74522c286f99153ba7318173a2407668db7043eb607fde2750c9c7087283a01c.
+Exact23files/252898bytes;8 worker bindings and new broker/store pins verified;
+all8 automations paused, execution/broker globalflagsfalse. Follow-up native
+source review PASS ses_017cfd16a83e4b06a1e62f471b1d3690/
+run_7d079e88c865463eb74303d28a7f4554, Opus5.5/high/private; receipt
+.local/cloud-service-review-v2.json. Source CI46122448479 green.
+
+Actual CLOUD preflight run_4e81ad82cc8f4e51b61d8897777f376f SUCCEEDED:
+App read job140757275431 and full log; digest44b2e083311acfed22aa2a995ffa5c68be41e0831ff7a0240f0d778d716b955a
+matches original. agent_startedfalse. No host gh fallback.
+
+First actual manual cloud run run_49d943a76e6e477db1d5fa4fd1d29c9d ACTIVE,
+canonical NEW service root6c6d499d-2fee-41fa-be0c-18660001cca2, baseDBE5,
+last stateplanning. Observer exec64408 runs .local/invoke-cloud-service.py run;
+this helper ONLY submits/observes Run now, never imports Delivery/NativeJobs or
+executes service decisions locally. Actual installed cloud code runs full engine
+for480sec, preserves state/fence and signed service-namespace checkpoints.
+History .local/cloud-service-remote-runs.json; full snapshots
+.local/cloud-service-remote-002.json; eventual accepted cloud summary
+.local/cloud-service-remote-result.json. Do NOT resubmit while a remote run is
+queued/running/waiting or outcome uncertain. Poll SAME remote run. After a
+SUCCESSFUL bounded slice still in progress, explicitly invoke same manual input
+again (same canonical task/branch/PR). All stage decisions stay in Collegium.
+
+After remote ready_for_acceptance, run inspect and repeat run to prove replay
+without new workers/commits/PR, then .local/verify-cloud-service.py read-only
+postcompletion audit. Root/new PR MUST differ from earlier local PR3; retain
+PR2/PR3 and all old frozen admissions untouched. No pilot/Jira/merge.
+Source publisher cycles8/9/10 frozen; nextcycle11 only NEW changes.
+
+--- Historical state below ---
+
+# Cloud acceptance follow-up — pending review/installation
+
+Source cycle10=41fa5dd9e67a76c95425d558fb65384ff34ee1d9 (nextcycle11 only for new content),
+frozen .local/cloud-service-recovery-fix-changes.json. Source CI46122448479 GREEN.
+Plan v2 74522c286f99153ba7318173a2407668db7043eb607fde2750c9c7087283a01c complete/appliable,
+NOT APPLIED; oldf424... plan obsolete. Same3 code-only updates + source bookkeeping.
+Broker predicted pin now23b418abee71bcbccd04f0b490e2472730085a9f713f1f77607f2501ccf9ca81;
+store92c41331... unchanged. Bundle252898bytes,156 tests PASS.
+
+Initial source review session ses_644df37027bb4b7c84257e1c48538b37 completed with two
+real blockers AND invalid prose-prefix result. NativeJobs never accepted that result.
+Verified actual runtime+pinned checkout, preserved observation and explicitly failed
+only that DEFINITIVELY COMPLETED review child with review_protocol_rejected.
+Both source findings fixed BEFORE install: outer no-dispatch/fence receipt guard;
+reconcile_existing under lock before first step. Regression now actually rejects a run,
+commits then drops its reply, resumes through same-engine red/fix/green and inspects
+without duplicate agents/commits/PR. Log route made exact jobs/id/logs.
+Fresh revision-bound follow-up native review root5581b32c-259f-4816-94ae-0c7850495e9f,
+.local/cloud-service-review-v2.sqlite3, -v2-packet.json, -v2-artifacts; exec40839 active.
+No new service PR/admission/worker yet. All8 project automations paused, installed source
+still27f71f5/version9/prodflagsfalse. After review PASS show updated plan, apply then
+invoke fixed remote preflight/run slices with .local/invoke-cloud-service.py. This operator
+only submits/observes Run now; no local Delivery engine. Read-only final audit prepared
+.local/verify-cloud-service.py. Do not use the old local service root or PR3 for new test.
+
+--- Prior progress below ---
+
 # Current cloud acceptance continuation
 
 Cloud service source published to existing PR1 via native App immutable cycles8=506d6be,
