@@ -552,7 +552,10 @@ def restore_checkpoint(
     data = prior.get("item", {}).get("event", {}).get("data") or {}
     allowed = data.get("action") == ("recovery-probe" if diagnostic else "deliver")
     if getattr(checkpoints, "namespace", "delivery") == "service":
-        allowed = data == {"action": "service-test", "mode": "run"}
+        allowed = data in (
+            {"action": "service-test", "mode": "run"},
+            {"action": "service-test", "mode": "finalize"},
+        )
     attempts = prior.get("attempts") or []
     if (
         prior.get("automation_id") != owner

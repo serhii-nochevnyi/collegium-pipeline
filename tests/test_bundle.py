@@ -668,6 +668,13 @@ class BundleTests(unittest.TestCase):
         with self.assertRaisesRegex(PolicyError, "Uncertain cloud attempt"):
             FENCE(event, self.path, env, http)
 
+    def test_finalization_receipt_loss_requires_service_reconciliation(self):
+        prior = self.previous(status="failed")
+        prior["item"]["event"]["data"] = {"action": "service-test", "mode": "finalize"}
+        event, env, http = self.fence_fixture([prior])
+        with self.assertRaisesRegex(PolicyError, "Uncheckpointed"):
+            FENCE(event, self.path, env, http, service=True)
+
     def test_adopted_checkpoint_allows_next_delivery_but_bad_receipt_does_not(self):
         prior = self.previous()
         event, env, http = self.fence_fixture([prior])

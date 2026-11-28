@@ -399,6 +399,19 @@ class DeliveryTests(unittest.TestCase):
         with self.assertRaises(PolicyError):
             EvidenceOnly(self.github).mutate("ready", {})
 
+    def test_finalization_cannot_admit_another_repair_when_ci_turns_red(self):
+        self.final_review(launch=True)
+        self.now += 10000
+        self.driver.finalize(self.run)
+        self.driver.finalize(self.run)
+        self.github.ci = "failure"
+        sessions = copy.deepcopy(self.http.sessions)
+        result = self.driver.finalize(self.run)
+        self.assertEqual(result["state"], "blocked")
+        self.assertEqual(result["repairs"], 1)
+        self.assertEqual(self.http.sessions, sessions)
+        self.assertIs(self.driver.github, self.github)
+
     def test_service_premature_green_candidate_is_rejected_before_any_write(self):
         self.service_profile()
 

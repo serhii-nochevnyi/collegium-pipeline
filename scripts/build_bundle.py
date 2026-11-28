@@ -134,6 +134,10 @@ def build(config_path, integrations_path, output=DEFAULT_OUTPUT):
         for k, v in integrations.items()
         if k not in {"bindings", "role_connections", "connections"}
     }
+    runtime_integrations["status"] = [
+        {k: v for k, v in row.items() if k not in {"title", "reason", "auth_type"}}
+        for row in integrations["status"]
+    ]
     write(
         "controller/integrations.json",
         json.dumps(runtime_integrations, sort_keys=True, separators=(",", ":")),

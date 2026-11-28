@@ -313,7 +313,11 @@ def cloud_fence(event, state, environ, http, *, diagnostic=False, service=False)
             data.get("action") == "state-probe" and data.get("mode") == "fenced-hold"
             if diagnostic
             else (
-                data == {"action": "service-test", "mode": "run"}
+                data
+                in (
+                    {"action": "service-test", "mode": "run"},
+                    {"action": "service-test", "mode": "finalize"},
+                )
                 if service
                 else data.get("action") == "deliver"
             )

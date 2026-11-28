@@ -277,6 +277,13 @@ class Delivery:
         return result
 
     def _repair(self, run_id, doc, feedback, fingerprint):
+        if getattr(self, "_evidence_only", False):
+            doc.update(
+                state="blocked",
+                reason="Evidence finalization cannot admit repairs",
+                feedback=feedback,
+            )
+            return
         if self.config.get("service_test") and not doc.get("service_red"):
             doc.update(
                 state="blocked",
@@ -407,6 +414,9 @@ class Delivery:
             try:
                 result = self._worker(run_id, doc, stage, selection)
             except CheckoutProtocolError as exc:
+                if getattr(self, "_evidence_only", False):
+                    doc.update(state="blocked", reason=str(exc))
+                    return self._save(run_id, doc)
                 count = doc.get("protocol_failures", 0) + 1
                 doc.update(
                     protocol_failures=count,

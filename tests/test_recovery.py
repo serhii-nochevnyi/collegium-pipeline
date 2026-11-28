@@ -761,6 +761,17 @@ class RecoveryTests(unittest.TestCase):
             self.journal.connection.execute("SELECT count(*) FROM runs").fetchone()[0], 0
         )
 
+    def test_lost_service_finalization_restores_only_its_signed_existing_admission(self):
+        self.store.namespace = "service"
+        original = self.store.call
+        self.store.call = lambda action, **fields: original(action, namespace="service", **fields)
+        self.http.prior["item"]["event"]["data"] = {"action": "service-test", "mode": "finalize"}
+        self.write.save({"kind": "tick", "run_id": self.root})
+        self.lose_snapshot()
+        self.restore()
+        self.assertEqual(self.journal.get(self.root)["config_digest"], config_digest(self.config))
+        self.assertEqual(self.http.posts, [])
+
 
 if __name__ == "__main__":
     unittest.main()

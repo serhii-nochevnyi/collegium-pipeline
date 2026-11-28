@@ -1,31 +1,25 @@
-# Current cloud service execution — 2026-11-28
+# Installed cloud CI repair — finalization pending
 
-Installed source 2ff757c24f21a8ca344b5016882b332afdf8cf4e, controller version14,
-23 code files/255934bytes, synced installation ins_c70812fb10c042028e414bb01285f56b.
-Source CI46126749289 and164tests PASS; private native source reviewv6 PASS.
-Shown plan9a48e51cb8b083817f635b209fea9cf1cf06cca8869642eff66dd31ae7b8dcc7 applied.
-Latest source fixes private-file HTTP bodies (curl7.88 inline config limit), actual
-native-turn start timer, and bounded retry only after definitively observed abort.
-Preserve all earlier failed attempts/receipts; no uncertain-action replacement.
+PR4: initial red56a76e13, repaired green155133d0; exactly1PR/2servicecommits.
+Actual quality red46127307490/job140924650386 then green46127477065/job140925174307.
+The installed controller ran planner/plan review/executor/initial validator/reviewer,
+createdPR, verified actual red logs, admitted fixer and fresh full validator. Native
+final reviewer ses773e4e57601e4d04a04c063875fc83fe/turn76ef614cd45841cbaf7a642ba9fd6a69
+completed PASS at08:50:36UTC, but cloud8minute slice ended before collecting it.
+Root3600sec deadline is preserved; normal run MUST NOT resume and abort/replace it.
+Installed source2ff757/version14. Root6c6d499d-2fee-41fa-be0c-18660001cca2,
+frozen config48ffb7870672bfbac4a7a16c45d8bf4f570b19a61737334aa9ef57a560a056c3.
 
-Canonical root6c6d499d-2fee-41fa-be0c-18660001cca2 and frozen effective config
-48ffb7870672bfbac4a7a16c45d8bf4f570b19a61737334aa9ef57a560a056c3 unchanged.
-Current cloud run42156e296fd444748bda2b72351b3011 (exec43612 is only observer).
-Cloud controller has created service PR4, initial head56a76e13f933d509ac91c28233f3c725734a63c1,
-proved actual red CI, accepted native fixer, and is publishing cycle1 repair.
-Do NOT claim complete before exact repaired-head validation/review and actual green CI.
-Root deadline is approximately08:49:50UTC; never reset admission or extend secretly.
-Original planner/plan reviewer retained. Original executor ses94fce... was definitively
-aborted after0.8sec by stale admission timer, preserved as rejected; bounded retry
-succeeded after installed fix. Expect8 accepted stages plus1 aborted attempt, not
-8 launched attempts. No duplicate PR, service branch or unknown-session replacement.
-
-All9 project automations PAUSED, installed production flagsfalse. No pilot, Jira,
-merge, main mutation, scheduled trigger or local service engine. Native App only
-for cloud GitHub writes/CI reads. Host helper only submits/polls manualRunNow.
-After readiness use .local/verify-cloud-service.py for independent read-only audit;
-write reports/cloud-ci-repair-verification.json and update this current header.
-Avoid extra mutating RunNow after deadline; use inspect/read-only identity audit.
+Preparing explicit manual observation-only finalize. Requires confirmed existing review
+launch and existingPR/keep_ready. WorkerHTTP denies nonGET; Github denies mutations.
+Normal gates collect same review then check actual exact-head CI. No new job, repair,
+budget extension, config/task rebind or permission. Failed CI/review blocks instead of
+admitting repair. Same signed checkpoint/fence covers finalize and its lost receipts.
+Source b221bae preliminary; final source/check/review/install still pending. Never apply
+stale preliminary plan58cbc... before reviewing updated source. All9automations PAUSED,
+production flagsfalse. No pilot, Jira, merge/main changes or local service controller.
+Native source reviews/host App source publishing are separate authorized maintenance.
+Read-only final audit helper .local/verify-cloud-service.py; finalreport notwritten yet.
 
 --- Historical progress below (superseded by current header) ---
 
