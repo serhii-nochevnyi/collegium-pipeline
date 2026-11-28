@@ -1,0 +1,775 @@
+{
+  "apiVersion": "lap.airslate.com/v1alpha1",
+  "kind": "Bundle",
+  "metadata": {
+    "name": "collegium-pipeline",
+    "description": "Claude workers, durable controller and GitHub App PR broker"
+  },
+  "agents": [
+    {
+      "name": "pipeline-claude-planner-high-broker-v1",
+      "system_file": "agents/planner.md",
+      "harness": "claude-code",
+      "model": "opus",
+      "effort": "high",
+      "model_connection": "claude-code-subscription",
+      "max_runtime_minutes": 5,
+      "rules": [
+        "pipeline-quality"
+      ],
+      "repositories": [
+        {
+          "url": "https://github.com/serhii-nochevnyi/collegium-pipeline",
+          "connection": "ghc_7de07519a1e3437a95f98edc4545022d",
+          "access": "read"
+        }
+      ],
+      "mcp_servers": [
+        "atlassian-rovo",
+        "ak-prod",
+        "grafana-prod",
+        "vmcluster-prod",
+        "backstage-prod",
+        "ak-dev"
+      ]
+    },
+    {
+      "name": "pipeline-claude-plan-reviewer-high-broker-v1",
+      "system_file": "agents/plan_reviewer.md",
+      "harness": "claude-code",
+      "model": "opus",
+      "effort": "high",
+      "model_connection": "claude-code-subscription",
+      "max_runtime_minutes": 5,
+      "rules": [
+        "pipeline-quality"
+      ],
+      "repositories": [
+        {
+          "url": "https://github.com/serhii-nochevnyi/collegium-pipeline",
+          "connection": "ghc_7de07519a1e3437a95f98edc4545022d",
+          "access": "read"
+        }
+      ],
+      "mcp_servers": [
+        "atlassian-rovo",
+        "ak-prod",
+        "grafana-prod",
+        "vmcluster-prod",
+        "backstage-prod",
+        "ak-dev"
+      ]
+    },
+    {
+      "name": "pipeline-claude-executor-low-broker-v1",
+      "system_file": "agents/executor.md",
+      "harness": "claude-code",
+      "model": "sonnet",
+      "effort": "low",
+      "model_connection": "claude-code-subscription",
+      "max_runtime_minutes": 5,
+      "rules": [
+        "pipeline-quality"
+      ],
+      "repositories": [
+        {
+          "url": "https://github.com/serhii-nochevnyi/collegium-pipeline",
+          "connection": "ghc_7de07519a1e3437a95f98edc4545022d",
+          "access": "read"
+        }
+      ],
+      "mcp_servers": [
+        "atlassian-rovo",
+        "ak-prod",
+        "grafana-prod",
+        "vmcluster-prod",
+        "backstage-prod",
+        "ak-dev"
+      ]
+    },
+    {
+      "name": "pipeline-claude-code-reviewer-high-broker-v1",
+      "system_file": "agents/code_reviewer.md",
+      "harness": "claude-code",
+      "model": "opus",
+      "effort": "high",
+      "model_connection": "claude-code-subscription",
+      "max_runtime_minutes": 5,
+      "rules": [
+        "pipeline-quality"
+      ],
+      "repositories": [
+        {
+          "url": "https://github.com/serhii-nochevnyi/collegium-pipeline",
+          "connection": "ghc_7de07519a1e3437a95f98edc4545022d",
+          "access": "read"
+        }
+      ],
+      "mcp_servers": [
+        "atlassian-rovo",
+        "ak-prod",
+        "grafana-prod",
+        "vmcluster-prod",
+        "backstage-prod",
+        "ak-dev"
+      ]
+    },
+    {
+      "name": "pipeline-claude-fixer-low-broker-v1",
+      "system_file": "agents/fixer.md",
+      "harness": "claude-code",
+      "model": "sonnet",
+      "effort": "low",
+      "model_connection": "claude-code-subscription",
+      "max_runtime_minutes": 5,
+      "rules": [
+        "pipeline-quality"
+      ],
+      "repositories": [
+        {
+          "url": "https://github.com/serhii-nochevnyi/collegium-pipeline",
+          "connection": "ghc_7de07519a1e3437a95f98edc4545022d",
+          "access": "read"
+        }
+      ],
+      "mcp_servers": [
+        "atlassian-rovo",
+        "ak-prod",
+        "grafana-prod",
+        "vmcluster-prod",
+        "backstage-prod",
+        "ak-dev"
+      ]
+    },
+    {
+      "name": "pipeline-claude-sentinel-medium-broker-v1",
+      "system_file": "agents/sentinel.md",
+      "harness": "claude-code",
+      "model": "sonnet",
+      "effort": "medium",
+      "model_connection": "claude-code-subscription",
+      "max_runtime_minutes": 5,
+      "rules": [
+        "pipeline-quality"
+      ],
+      "repositories": [
+        {
+          "url": "https://github.com/serhii-nochevnyi/collegium-pipeline",
+          "connection": "ghc_7de07519a1e3437a95f98edc4545022d",
+          "access": "read"
+        }
+      ],
+      "mcp_servers": [
+        "atlassian-rovo",
+        "ak-prod",
+        "grafana-prod",
+        "vmcluster-prod",
+        "backstage-prod",
+        "ak-dev"
+      ]
+    },
+    {
+      "name": "pipeline-claude-fixer-high-broker-v1",
+      "system_file": "agents/fixer-high.md",
+      "harness": "claude-code",
+      "model": "sonnet",
+      "effort": "high",
+      "model_connection": "claude-code-subscription",
+      "max_runtime_minutes": 5,
+      "rules": [
+        "pipeline-quality"
+      ],
+      "repositories": [
+        {
+          "url": "https://github.com/serhii-nochevnyi/collegium-pipeline",
+          "connection": "ghc_7de07519a1e3437a95f98edc4545022d",
+          "access": "read"
+        }
+      ],
+      "mcp_servers": [
+        "atlassian-rovo",
+        "ak-prod",
+        "grafana-prod",
+        "vmcluster-prod",
+        "backstage-prod",
+        "ak-dev"
+      ]
+    },
+    {
+      "name": "pipeline-claude-fixer-max-broker-v1",
+      "system_file": "agents/fixer-max.md",
+      "harness": "claude-code",
+      "model": "opus",
+      "effort": "max",
+      "model_connection": "claude-code-subscription",
+      "max_runtime_minutes": 5,
+      "rules": [
+        "pipeline-quality"
+      ],
+      "repositories": [
+        {
+          "url": "https://github.com/serhii-nochevnyi/collegium-pipeline",
+          "connection": "ghc_7de07519a1e3437a95f98edc4545022d",
+          "access": "read"
+        }
+      ],
+      "mcp_servers": [
+        "atlassian-rovo",
+        "ak-prod",
+        "grafana-prod",
+        "vmcluster-prod",
+        "backstage-prod",
+        "ak-dev"
+      ]
+    },
+    {
+      "name": "pipeline-investigation-assessor-sonnet-low-v1",
+      "system_file": "agents/investigation-assessor-sonnet-low.md",
+      "harness": "claude-code",
+      "model": "sonnet",
+      "effort": "low",
+      "model_connection": "claude-code-subscription",
+      "max_runtime_minutes": 5,
+      "rules": [
+        "pipeline-investigation-quality"
+      ],
+      "mcp_servers": [],
+      "repositories": [
+        {
+          "url": "https://github.com/serhii-nochevnyi/collegium-pipeline",
+          "connection": "ghc_7de07519a1e3437a95f98edc4545022d",
+          "access": "read"
+        }
+      ]
+    },
+    {
+      "name": "pipeline-investigation-researcher-sonnet-low-v1",
+      "system_file": "agents/investigation-researcher-sonnet-low.md",
+      "harness": "claude-code",
+      "model": "sonnet",
+      "effort": "low",
+      "model_connection": "claude-code-subscription",
+      "max_runtime_minutes": 5,
+      "rules": [
+        "pipeline-investigation-quality"
+      ],
+      "mcp_servers": [],
+      "repositories": [
+        {
+          "url": "https://github.com/serhii-nochevnyi/collegium-pipeline",
+          "connection": "ghc_7de07519a1e3437a95f98edc4545022d",
+          "access": "read"
+        }
+      ]
+    },
+    {
+      "name": "pipeline-investigation-researcher-sonnet-high-v1",
+      "system_file": "agents/investigation-researcher-sonnet-high.md",
+      "harness": "claude-code",
+      "model": "sonnet",
+      "effort": "high",
+      "model_connection": "claude-code-subscription",
+      "max_runtime_minutes": 5,
+      "rules": [
+        "pipeline-investigation-quality"
+      ],
+      "mcp_servers": [],
+      "repositories": [
+        {
+          "url": "https://github.com/serhii-nochevnyi/collegium-pipeline",
+          "connection": "ghc_7de07519a1e3437a95f98edc4545022d",
+          "access": "read"
+        }
+      ]
+    },
+    {
+      "name": "pipeline-investigation-researcher-opus-high-v1",
+      "system_file": "agents/investigation-researcher-opus-high.md",
+      "harness": "claude-code",
+      "model": "opus",
+      "effort": "high",
+      "model_connection": "claude-code-subscription",
+      "max_runtime_minutes": 5,
+      "rules": [
+        "pipeline-investigation-quality"
+      ],
+      "mcp_servers": [],
+      "repositories": [
+        {
+          "url": "https://github.com/serhii-nochevnyi/collegium-pipeline",
+          "connection": "ghc_7de07519a1e3437a95f98edc4545022d",
+          "access": "read"
+        }
+      ]
+    },
+    {
+      "name": "pipeline-investigation-researcher-opus-max-v1",
+      "system_file": "agents/investigation-researcher-opus-max.md",
+      "harness": "claude-code",
+      "model": "opus",
+      "effort": "max",
+      "model_connection": "claude-code-subscription",
+      "max_runtime_minutes": 5,
+      "rules": [
+        "pipeline-investigation-quality"
+      ],
+      "mcp_servers": [],
+      "repositories": [
+        {
+          "url": "https://github.com/serhii-nochevnyi/collegium-pipeline",
+          "connection": "ghc_7de07519a1e3437a95f98edc4545022d",
+          "access": "read"
+        }
+      ]
+    },
+    {
+      "name": "pipeline-investigation-synthesizer-sonnet-high-v1",
+      "system_file": "agents/investigation-synthesizer-sonnet-high.md",
+      "harness": "claude-code",
+      "model": "sonnet",
+      "effort": "high",
+      "model_connection": "claude-code-subscription",
+      "max_runtime_minutes": 5,
+      "rules": [
+        "pipeline-investigation-quality"
+      ],
+      "mcp_servers": [],
+      "repositories": [
+        {
+          "url": "https://github.com/serhii-nochevnyi/collegium-pipeline",
+          "connection": "ghc_7de07519a1e3437a95f98edc4545022d",
+          "access": "read"
+        }
+      ]
+    },
+    {
+      "name": "pipeline-investigation-synthesizer-opus-high-v1",
+      "system_file": "agents/investigation-synthesizer-opus-high.md",
+      "harness": "claude-code",
+      "model": "opus",
+      "effort": "high",
+      "model_connection": "claude-code-subscription",
+      "max_runtime_minutes": 5,
+      "rules": [
+        "pipeline-investigation-quality"
+      ],
+      "mcp_servers": [],
+      "repositories": [
+        {
+          "url": "https://github.com/serhii-nochevnyi/collegium-pipeline",
+          "connection": "ghc_7de07519a1e3437a95f98edc4545022d",
+          "access": "read"
+        }
+      ]
+    },
+    {
+      "name": "pipeline-investigation-synthesizer-opus-max-v1",
+      "system_file": "agents/investigation-synthesizer-opus-max.md",
+      "harness": "claude-code",
+      "model": "opus",
+      "effort": "max",
+      "model_connection": "claude-code-subscription",
+      "max_runtime_minutes": 5,
+      "rules": [
+        "pipeline-investigation-quality"
+      ],
+      "mcp_servers": [],
+      "repositories": [
+        {
+          "url": "https://github.com/serhii-nochevnyi/collegium-pipeline",
+          "connection": "ghc_7de07519a1e3437a95f98edc4545022d",
+          "access": "read"
+        }
+      ]
+    },
+    {
+      "name": "pipeline-investigation-reviewer-opus-high-v1",
+      "system_file": "agents/investigation-investigation_reviewer-opus-high.md",
+      "harness": "claude-code",
+      "model": "opus",
+      "effort": "high",
+      "model_connection": "claude-code-subscription",
+      "max_runtime_minutes": 5,
+      "rules": [
+        "pipeline-investigation-quality"
+      ],
+      "mcp_servers": [],
+      "repositories": [
+        {
+          "url": "https://github.com/serhii-nochevnyi/collegium-pipeline",
+          "connection": "ghc_7de07519a1e3437a95f98edc4545022d",
+          "access": "read"
+        }
+      ]
+    },
+    {
+      "name": "pipeline-investigation-reviewer-opus-max-v1",
+      "system_file": "agents/investigation-investigation_reviewer-opus-max.md",
+      "harness": "claude-code",
+      "model": "opus",
+      "effort": "max",
+      "model_connection": "claude-code-subscription",
+      "max_runtime_minutes": 5,
+      "rules": [
+        "pipeline-investigation-quality"
+      ],
+      "mcp_servers": [],
+      "repositories": [
+        {
+          "url": "https://github.com/serhii-nochevnyi/collegium-pipeline",
+          "connection": "ghc_7de07519a1e3437a95f98edc4545022d",
+          "access": "read"
+        }
+      ]
+    }
+  ],
+  "rules": [
+    {
+      "name": "pipeline-quality",
+      "file": "rules/quality.md"
+    },
+    {
+      "name": "pipeline-investigation-quality",
+      "file": "rules/investigation-quality.md"
+    }
+  ],
+  "model_connections": [
+    {
+      "name": "claude-code-subscription",
+      "description": "Owner's private Claude subscription; never the shared gateway"
+    }
+  ],
+  "connections": [
+    {
+      "name": "atlassian-rovo",
+      "description": "Atlassian Rovo (Jira, Confluence); explicit read-only tool ceiling; connected",
+      "url": "https://mcp.atlassian.com/v2/mcp",
+      "tools": [
+        "getAccessibleAtlassianResources",
+        "atlassianUserInfo",
+        "getConfluenceContent",
+        "searchConfluence",
+        "getJiraIssue",
+        "listJiraIssueComments",
+        "searchJiraIssuesUsingJql",
+        "search"
+      ]
+    },
+    {
+      "name": "ak-prod",
+      "description": "Agents Knowledge (PROD); explicit read-only tool ceiling; connected",
+      "url": "https://agents-knowledge.infrateam.xyz/mcp",
+      "tools": [
+        "search_docs",
+        "get_document",
+        "list_workspaces",
+        "list_collections",
+        "get_document_tree",
+        "get_related_documents"
+      ]
+    },
+    {
+      "name": "grafana-prod",
+      "description": "Grafana (PROD); explicit read-only tool ceiling; connected",
+      "url": "https://toolhive.infrateam.xyz/grafana-prod/mcp",
+      "tools": [
+        "alerting_rules_read",
+        "alerting_silences_read",
+        "analyze_loki_labels",
+        "check_datasources_health",
+        "diff_tempo_traces",
+        "get_annotation_tags",
+        "get_annotations",
+        "get_dashboard_by_uid",
+        "get_dashboard_panel_queries",
+        "get_dashboard_property",
+        "get_dashboard_summary",
+        "get_datasource",
+        "get_doc",
+        "get_tempo_trace",
+        "get_tempo_traceql_docs",
+        "list_dashboard_versions",
+        "list_datasources",
+        "list_loki_label_names",
+        "list_loki_label_values",
+        "list_prometheus_label_names",
+        "list_prometheus_label_values",
+        "list_prometheus_metric_metadata",
+        "list_prometheus_metric_names",
+        "list_pyroscope_label_names",
+        "list_pyroscope_label_values",
+        "list_pyroscope_profile_types",
+        "list_tempo_attribute_names",
+        "list_tempo_attribute_values",
+        "query_loki_logs",
+        "query_loki_patterns",
+        "query_loki_stats",
+        "query_prometheus",
+        "query_prometheus_histogram",
+        "query_pyroscope",
+        "query_tempo_metrics",
+        "search_dashboards",
+        "search_folders",
+        "search_tempo_traces"
+      ]
+    },
+    {
+      "name": "vmcluster-prod",
+      "description": "VictoriaMetrics (PROD); explicit read-only tool ceiling; connected",
+      "url": "https://toolhive.infrateam.xyz/vmcluster-prod/mcp",
+      "tools": [
+        "active_queries",
+        "alerts",
+        "documentation",
+        "explain_query",
+        "label_values",
+        "labels",
+        "metric_statistics",
+        "metrics",
+        "metrics_metadata",
+        "prettify_query",
+        "query",
+        "query_range",
+        "rules",
+        "series",
+        "top_queries",
+        "tsdb_status"
+      ]
+    },
+    {
+      "name": "backstage-prod",
+      "description": "Backstage (PROD); explicit read-only tool ceiling; connected",
+      "url": "https://toolhive.infrateam.xyz/backstage-prod/mcp",
+      "tools": [
+        "get-catalog-entity",
+        "validate-entity"
+      ]
+    },
+    {
+      "name": "ak-dev",
+      "description": "Agents Knowledge (DEV); explicit read-only tool ceiling; connected",
+      "url": "https://agents-knowledge.infrateam-dev.xyz/mcp",
+      "tools": [
+        "search_docs",
+        "get_document",
+        "list_workspaces",
+        "list_collections",
+        "get_document_tree",
+        "get_related_documents"
+      ]
+    }
+  ],
+  "secrets": [
+    {
+      "name": "PIPELINE_CONTROL_KEY",
+      "delivery": "env",
+      "description": "Separate space-limited Collegium API key for the controller; separate from the Claude key"
+    }
+  ],
+  "automations": [
+    {
+      "name": "pipeline-controller",
+      "start": "paused",
+      "schedule": "*/5 * * * *",
+      "notify": "failures",
+      "script": {
+        "files": [
+          "controller/epic-service-settings.json",
+          "controller/epic-service-v1-settings.json",
+          "controller/runtime.b64",
+          "controller/entry.py",
+          "controller/settings.json",
+          "controller/epic-settings.json",
+          "controller/integrations.json"
+        ],
+        "command": "python3 controller/entry.py",
+        "executor": "aranarium",
+        "environment_ref": "custom",
+        "environment": "base",
+        "size": "small",
+        "secrets": [
+          "PIPELINE_CONTROL_KEY"
+        ],
+        "mcp_servers": [
+          "atlassian-rovo"
+        ]
+      }
+    },
+    {
+      "name": "pipeline-native-broker-1474663859-v1",
+      "start": "paused",
+      "schedule": "0 0 1 1 *",
+      "notify": "none",
+      "script": {
+        "files": [
+          "native_github_broker.py",
+          "broker_scope.json"
+        ],
+        "command": "python3 native_github_broker.py",
+        "executor": "aranarium",
+        "environment_ref": "custom",
+        "environment": "base",
+        "size": "small",
+        "repositories": [
+          {
+            "url": "https://github.com/serhii-nochevnyi/collegium-pipeline",
+            "connection": "ghc_7de07519a1e3437a95f98edc4545022d",
+            "access": "contributor"
+          }
+        ]
+      }
+    },
+    {
+      "name": "pipeline-native-broker-1474663859-v8",
+      "start": "paused",
+      "schedule": "0 0 1 1 *",
+      "notify": "none",
+      "script": {
+        "files": [
+          "epic-broker/native_github_broker.py",
+          "epic-broker/broker_scope.json"
+        ],
+        "command": "cd epic-broker && python3 native_github_broker.py",
+        "executor": "aranarium",
+        "environment_ref": "custom",
+        "environment": "base",
+        "size": "small",
+        "repositories": [
+          {
+            "url": "https://github.com/serhii-nochevnyi/collegium-pipeline",
+            "connection": "ghc_7de07519a1e3437a95f98edc4545022d",
+            "access": "contributor"
+          }
+        ]
+      }
+    },
+    {
+      "name": "pipeline-recovery-store-v1",
+      "start": "paused",
+      "schedule": "0 0 1 1 *",
+      "notify": "none",
+      "script": {
+        "files": [
+          "recovery_store.py",
+          "recovery_scope.json"
+        ],
+        "command": "python3 recovery_store.py",
+        "executor": "aranarium",
+        "environment_ref": "custom",
+        "environment": "base",
+        "size": "small",
+        "secrets": [
+          "PIPELINE_CONTROL_KEY"
+        ]
+      }
+    },
+    {
+      "name": "pipeline-native-broker-1474663859-v10",
+      "start": "paused",
+      "schedule": "0 0 1 1 *",
+      "notify": "none",
+      "script": {
+        "executor": "aranarium",
+        "environment_ref": "custom",
+        "environment": "base",
+        "size": "small",
+        "files": [
+          "epic-service-broker/native_github_broker.py",
+          "epic-service-broker/broker_scope.json",
+          "epic-service-broker/epic_service_broker.py",
+          "epic-service-broker/epic_service_scope.json"
+        ],
+        "command": "cd epic-service-broker && python3 epic_service_broker.py",
+        "secrets": [
+          "PIPELINE_CONTROL_KEY"
+        ],
+        "repositories": [
+          {
+            "url": "https://github.com/serhii-nochevnyi/collegium-pipeline",
+            "connection": "ghc_7de07519a1e3437a95f98edc4545022d",
+            "access": "contributor"
+          }
+        ]
+      }
+    },
+    {
+      "name": "pipeline-epic-service-recovery-v1",
+      "start": "paused",
+      "schedule": "0 0 1 1 *",
+      "notify": "none",
+      "script": {
+        "executor": "aranarium",
+        "environment_ref": "custom",
+        "environment": "base",
+        "size": "small",
+        "files": [
+          "recovery_store.py",
+          "recovery_scope.json"
+        ],
+        "command": "python3 recovery_store.py",
+        "secrets": [
+          "PIPELINE_CONTROL_KEY"
+        ]
+      }
+    },
+    {
+      "name": "pipeline-investigate",
+      "start": "paused",
+      "schedule": "0 0 1 1 *",
+      "notify": "none",
+      "script": {
+        "executor": "aranarium",
+        "environment_ref": "custom",
+        "environment": "base",
+        "size": "small",
+        "secrets": [
+          "PIPELINE_CONTROL_KEY"
+        ],
+        "files": [
+          "controller/entry.py",
+          "controller/investigation_entry.py",
+          "controller/runtime.b64",
+          "controller/settings.json",
+          "controller/investigation-settings.json",
+          "controller/investigation-mcp.json"
+        ],
+        "command": "python3 controller/investigation_entry.py",
+        "mcp_servers": [
+          "atlassian-rovo",
+          "ak-dev",
+          "ak-prod",
+          "grafana-prod",
+          "vmcluster-prod",
+          "backstage-prod"
+        ],
+        "repositories": [
+          {
+            "url": "https://github.com/serhii-nochevnyi/collegium-pipeline",
+            "connection": "ghc_7de07519a1e3437a95f98edc4545022d",
+            "access": "read"
+          }
+        ]
+      }
+    },
+    {
+      "name": "pipeline-investigation-recovery-v1",
+      "start": "paused",
+      "schedule": "0 0 1 1 *",
+      "notify": "none",
+      "script": {
+        "executor": "aranarium",
+        "environment_ref": "custom",
+        "environment": "base",
+        "size": "small",
+        "secrets": [
+          "PIPELINE_CONTROL_KEY"
+        ],
+        "files": [
+          "investigation-recovery/recovery_store.py",
+          "investigation-recovery/recovery_scope.json"
+        ],
+        "command": "cd investigation-recovery && python3 recovery_store.py"
+      }
+    }
+  ]
+}

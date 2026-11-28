@@ -1,0 +1,167 @@
+{
+  "schema_version": "investigation-mcp/v1",
+  "sources": {
+    "atlassian-rovo": {
+      "connection_id": "mcpc_6922425fd6a845f4b604a8663ab06385",
+      "server_id": "mcp_cec818f18a63466a92c26b43993eb2b4",
+      "url": "https://mcp.atlassian.com/v2/mcp",
+      "environment": "SHARED",
+      "tools": {
+        "atlassianUserInfo": "7a014b717a77aac971ea0ab5c0ff47bb13e6cae7ef9442d9dedb15ce36381b15",
+        "getAccessibleAtlassianResources": "7a014b717a77aac971ea0ab5c0ff47bb13e6cae7ef9442d9dedb15ce36381b15",
+        "getConfluenceContent": "9d3bf7d0c77d4c7b5f361e465944d81aec148f0822141c5dfe9aff5eab51e460",
+        "getJiraIssue": "54ff70dae04ff0ae68e2afe43ffa7d8df637d14f63dd548a2d5430be44d4c95b",
+        "listJiraIssueComments": "93c22c708643e866930cb1531372e7c9228029149e4c578b1888f39fded2cd42",
+        "search": "07ceee9a56b3f386aea6a13a407f65eae2503e90d6a4eef71bb1fb919d663d6e",
+        "searchConfluence": "b13e2f8cadbd3826db527fb629352c872a4adead5af2082c2226ccd8b9e0e79d",
+        "searchJiraIssuesUsingJql": "ecd1ec73bec7b725fb21d500afa7f8cb155e1db44b3fd335761061584efb67cd"
+      }
+    },
+    "ak-dev": {
+      "connection_id": "mcpc_b692cbf768e14262a510f49b15337ded",
+      "server_id": "mcp_bdfecb0459e84bb0b2f0cf87047e484b",
+      "url": "https://agents-knowledge.infrateam-dev.xyz/mcp",
+      "environment": "DEV",
+      "tools": {
+        "get_document": "4bc75b30580ad79c43ab479f8ec624f4d191c74a96e232fc94c4b8683e5f8585",
+        "get_document_tree": "89b49e92765f0b56982c9aa6f3e7b47eee703cecb8b4b7303104e6ae5dbefa36",
+        "get_related_documents": "10a1315181ad0b6334d1f2e64872ab0da66a23859cd7336e5eff415e090a4c70",
+        "list_collections": "b14101c9d67da70ca907b4f125f339a6b28bbe1b56c3269c663f7e1ca19d433d",
+        "list_workspaces": "416fba24765467687aa1835342a29741371ca192faa40dab1ab24da1544d9b1b",
+        "search_docs": "494c2f842ca16219e198cff62e3b890ba4127a990e145cda97f50b25984afcbf"
+      }
+    },
+    "ak-prod": {
+      "connection_id": "mcpc_27eec2a3866b4c26b04bba961bae9159",
+      "server_id": "mcp_8492db3630294a228f9742098bdb88a0",
+      "url": "https://agents-knowledge.infrateam.xyz/mcp",
+      "environment": "PROD",
+      "tools": {
+        "get_document": "4bc75b30580ad79c43ab479f8ec624f4d191c74a96e232fc94c4b8683e5f8585",
+        "get_document_tree": "89b49e92765f0b56982c9aa6f3e7b47eee703cecb8b4b7303104e6ae5dbefa36",
+        "get_related_documents": "10a1315181ad0b6334d1f2e64872ab0da66a23859cd7336e5eff415e090a4c70",
+        "list_collections": "b14101c9d67da70ca907b4f125f339a6b28bbe1b56c3269c663f7e1ca19d433d",
+        "list_workspaces": "416fba24765467687aa1835342a29741371ca192faa40dab1ab24da1544d9b1b",
+        "search_docs": "494c2f842ca16219e198cff62e3b890ba4127a990e145cda97f50b25984afcbf"
+      }
+    },
+    "grafana-prod": {
+      "connection_id": "mcpc_e33ecc0ae7154059b9b17efe5e967331",
+      "server_id": "mcp_1344b2e627b04128830b01f1cd759383",
+      "url": "https://toolhive.infrateam.xyz/grafana-prod/mcp",
+      "environment": "PROD",
+      "tools": {
+        "alerting_rules_read": "e09a2453bce6ceb808dd492c9a4b3b37ff7a8a2f14fbc43918f3f8c8e4b50d22",
+        "alerting_silences_read": "e6f827e7459fa81d9425582cc956593f9e745f5b4f54522a264ba8f6f6c18b4c",
+        "analyze_loki_labels": "c085ebc660e03fbdb438a0ffac4a67f38483ac061ad86d7b28764845801cda94",
+        "check_datasources_health": "a165100ee359e82369be5d092d9395a13f811d65731fbcb359b5ec587ff8f03a",
+        "diff_tempo_traces": "4fffcffbfd4bced5dffd7216dfee090a5580a0710d43586f0ab54cf9a975a6eb",
+        "get_annotation_tags": "35bc327ce1434c78a5586c278e03e6d1d53e5975354628397354609ae2e90d70",
+        "get_annotations": "62af628312f7e051a74f7c39e01c23abd0add0ac1d1e8227eb7276f26e2cd116",
+        "get_dashboard_by_uid": "ed0a4aea00e1a57dc8ce59ff616da2828e1c52de1d9b43ed79fe23731b2ba8db",
+        "get_dashboard_panel_queries": "518fc9b6298b3699706d7792b7b3d634f9a283e383247abca7f3a18b30969237",
+        "get_dashboard_property": "39856b2cc396c32c19b1b2da7626e1726a0c7afae03bc09c38354b20d412ee65",
+        "get_dashboard_summary": "693ebf45320ff4e850a20f03389d9c2d7d4c2d3b793fc0db5cfff8d23c9f4ba8",
+        "get_datasource": "6d73511454d11b5fa5867da03f5eb0c25265f479e7070da8d2f831733a642bf8",
+        "get_doc": "635812c3344a492df998fe63251844cefc2d3658a56e738e448871f2a0052f8c",
+        "get_tempo_trace": "2246b35654463121762043e75919ecdbfeffb2c23263a725e17e43c83889b49f",
+        "get_tempo_traceql_docs": "df8837b88b17eb177f9254b838e7ee5f41655c579a7e915a87d5771e3544644e",
+        "list_dashboard_versions": "b057b26b89554e883b11a5a4822ce80029eeee77c681a316e9cbaf8c755bc13c",
+        "list_datasources": "834a893f486d1b2b92e50b6b1c001567eab93e2e91478c48885f4c7b3299993a",
+        "list_loki_label_names": "c58b0df163e6c37115d5097f7c4ca431bd0e4485c1a904859569203b3bc3fcce",
+        "list_loki_label_values": "0e6a6642f9d97a0444665d37cdd73b9ef371127cb995757e3ed14ad4a146482c",
+        "list_prometheus_label_names": "1abb5f5534c643582b068cdc19c1860467c6fd4a77e937ddd60d11fe05ca7e99",
+        "list_prometheus_label_values": "ccacd0a00508cdb25e9f37501f262c15a4b8cc0d77085c1920d1b8ff556b909a",
+        "list_prometheus_metric_metadata": "f93891aa106777c35b82bcf79e5e685b3362e2a0dd03dc4d914d1b1f340e64b0",
+        "list_prometheus_metric_names": "dd07d3c175ce35519dbceeb706af78efa3a1a376448bc738380fee9230c102fe",
+        "list_pyroscope_label_names": "25573cbfeaf5ebad72846063731a4348a860511c2ba1c0666204cc8b6044b323",
+        "list_pyroscope_label_values": "874979e170c7c24960e1eec682f2604fe8637c6624ff9036d586f58bfc44b9de",
+        "list_pyroscope_profile_types": "593a321e4ef8bfbdcfd211f4eddaa5ff98c316686d206a50ac2a9b2ab2187c36",
+        "list_tempo_attribute_names": "484ba91266c2588a75a09fc386a17d3ab6ba631d717b8e70ae704f6a72051552",
+        "list_tempo_attribute_values": "fb8b064441429ea1446f4ace2b92ddc23d61d53c99abaa1dbe72f7940b05fd6d",
+        "query_loki_logs": "d382770504d16a398153f1b7f859a53856f8124489fe268fe80a8cd43a606ac7",
+        "query_loki_patterns": "92364b898154f12de4907a135357bde53f95df924f8d561fda7bea13de071daa",
+        "query_loki_stats": "946842965787610145e6f1022086ec733a820fc02029592d4b2edecd3951bc1a",
+        "query_prometheus": "9af39a75966a881390b14f0446cc6623cef50822011caf709360826271b22ff1",
+        "query_prometheus_histogram": "b427ff70cc1279b84d3f91743d803ca0cb3a6953f0b2bf50d4ff547ea47c5560",
+        "query_pyroscope": "56aaa52e71950264def5decca187ec66e95b745244e1fa3a64de4f8738921351",
+        "query_tempo_metrics": "24dcc4ba990ff38e71a977a62aa21ccbe89176080f04b264a8b0e479c3cd6676",
+        "search_dashboards": "c85b36e17bb31d094213b33699ea4cdf23c4b17d6430ac32b7f1a44de603269b",
+        "search_folders": "41f3187361f65b750896e1b31d22121e2e76d3fb50b00a9dde5b91b69b54c86a",
+        "search_tempo_traces": "04f72308522fc076789653159b17b513d73f91762f6629b17adf6303c3de8c10"
+      }
+    },
+    "vmcluster-prod": {
+      "connection_id": "mcpc_729b8150e4074b0f9164946e27998b40",
+      "server_id": "mcp_bb7dad460a5b4dcdb39d4c4b72e06465",
+      "url": "https://toolhive.infrateam.xyz/vmcluster-prod/mcp",
+      "environment": "PROD",
+      "tools": {
+        "active_queries": "c8a1ac469a826ea3547ac220c7bbfdcd6b58080d4ec596ff2a0149c5ccb9b699",
+        "alerts": "090f3bcf6f3dc227f092396fe12fb8c357d029cbf55de476534e780aa23e6a88",
+        "documentation": "cf8d37be5f7f6964691d32ccae8547e23ccd61e6b4b94f396ceabd19e6a768ca",
+        "explain_query": "e408753606e27cd7c718cae6e2dce0440224b6d1cae337f46a3156eb5de5940f",
+        "label_values": "47a4622a74e0302c6c18a4b74026cff5d9cba67499c21e3677cd9db89ae21f03",
+        "labels": "31301fa7150464f9dc70a7e42e80417fb036f66a574e41f44b095446226fd6e2",
+        "metric_statistics": "5b4f6b74155da7e3bc807e411988a87585ad2752189e0c3488af3d31f1d9af28",
+        "metrics": "e04cacaf874c5417c9b10f997c461d02460780356c9c44334953ed04b1ebf363",
+        "metrics_metadata": "cd5b7393bdbc55c0e1d87be56861de8067d0542aba85396adac8c5f4faf5a851",
+        "prettify_query": "d1557bba1ee89c87b1eb74facfc80588a2f4f86b6096c66888e56a8a1b89c1ee",
+        "query": "72d8330c13a7e6cc3dc953e178118c198aaef687bcd8f3309ba85ba1419a2f91",
+        "query_range": "c7634bec42b7950daf6850aa3e0896c4281a20bdd10b59eb293060296ca4ee18",
+        "rules": "890a5a7f0451c3f7e8a66a54cfb79b096ae5bb3c25e623dd1885dd8b85ad9c90",
+        "series": "03c38cf4f55833303af30df025fbca72fe2351e663bec1e9e2084c7990ec9907",
+        "top_queries": "39c6dbf4cc59b328400aaf3cf5109df9b93100f2f17fa3ea52847caa3200b616",
+        "tsdb_status": "24f20a3569370e1ab219b90188de0bd6e4002d2842cb31f8ac870da0b5d99002"
+      }
+    },
+    "backstage-prod": {
+      "connection_id": "mcpc_948ef97eb40d41f5a0b25f1e0240937b",
+      "server_id": "mcp_95b80624a5db45f0b6b10959fa09a4e5",
+      "url": "https://toolhive.infrateam.xyz/backstage-prod/mcp",
+      "environment": "PROD",
+      "tools": {
+        "get-catalog-entity": "c89a8e54499126ea6a52048a73279d7e3c8f5a7a662be73884fc987393ad9fd1",
+        "validate-entity": "979d3061c3f6a6316e1a75f5ae0718c4b307005740a0aef5e78471758d1a4cae"
+      }
+    }
+  },
+  "unavailable": [
+    {
+      "need": "pipeline-github",
+      "state": "oauth_client_not_configured",
+      "url": "https://api.githubcopilot.com/mcp/readonly",
+      "connection_id": "mcpc_c7171c5349b74291a30a1d1bd2f14eaf"
+    },
+    {
+      "need": "grafana-dev",
+      "state": "unreachable",
+      "url": "https://toolhive.infrateam-dev.xyz/grafana/mcp",
+      "connection_id": "mcpc_7922a081c5a147a4be5c62c245326631"
+    },
+    {
+      "need": "vmcluster-dev",
+      "state": "unreachable",
+      "url": "https://toolhive.infrateam-dev.xyz/vmcluster-dev/mcp",
+      "connection_id": "mcpc_a49117e37fa442f58472d3fd616ea240"
+    },
+    {
+      "need": "backstage-dev",
+      "state": "unreachable",
+      "url": "https://toolhive.infrateam-dev.xyz/backstage/mcp",
+      "connection_id": "mcpc_a608cfadd7334e479e7a52c54d7495c2"
+    },
+    {
+      "need": "langfuse-dev",
+      "state": "unreachable",
+      "url": "https://langfuse.infrateam-dev.xyz/api/public/mcp",
+      "connection_id": "mcpc_84da8f43fdc94ad3873fe3a927dce615"
+    },
+    {
+      "need": "langfuse-prod",
+      "state": "needs_project_credentials",
+      "url": "https://langfuse.infrateam.xyz/api/public/mcp",
+      "connection_id": "mcpc_b32d4a17575c44a194d126af8ad6e62f"
+    }
+  ]
+}

@@ -9,13 +9,12 @@ from pathlib import Path
 
 from .adapters import Github
 from .config import config_digest, load_config
-from .doctor import doctor
 from .domain import Task, digest, select_model
 from .quality import verify_checks, verify_pr
 from .store import Journal
 
 
-def main(argv=None):
+def main(argv=None, *, recovery=None):
     parser = argparse.ArgumentParser(prog="collegium-pipeline")
     commands = parser.add_subparsers(dest="command", required=True)
     for name in ("doctor", "prepare-text", "verify-pr", "status", "recheck-result"):
@@ -53,6 +52,14 @@ def main(argv=None):
     delivery.add_argument("--once", action="store_true")
     delivery.add_argument("--timeout", type=int, default=3600)
     delivery.add_argument("--live", action="store_true")
+    correction = commands.add_parser("reconfigure-validation")
+    correction.add_argument("--config", required=True)
+    correction.add_argument("--previous-config", required=True)
+    correction.add_argument("--journal", required=True)
+    correction.add_argument("--artifacts", required=True)
+    correction.add_argument("--run-id", required=True)
+    correction.add_argument("--reason", required=True)
+    correction.add_argument("--apply", action="store_true")
     args = parser.parse_args(argv)
     try:
         if args.command == "explain-route":
@@ -63,10 +70,27 @@ def main(argv=None):
             )
         else:
             config = load_config(args.config)
-            if args.command == "deliver":
-                from .broker import GithubApp
+            if args.command == "reconfigure-validation":
+                from .delivery import Delivery, serial_lock
+
+                if not args.apply or not Path(args.journal).is_file():
+                    raise ValueError("Validation correction needs --apply and an existing journal")
+                with serial_lock(args.journal):
+                    journal = Journal(args.journal)
+                    try:
+                        result = Delivery(
+                            config, journal, None, None, args.artifacts
+                        ).reconfigure_validation(
+                            args.run_id, load_config(args.previous_config), args.reason
+                        )
+                    finally:
+                        journal.close()
+                print(json.dumps(result, indent=2))
+                return 0
+            elif args.command == "deliver":
                 from .credentials import local_platform
                 from .delivery import Delivery, serial_lock
+                from .native_broker import github_broker
 
                 if (
                     not args.live
@@ -82,13 +106,37 @@ def main(argv=None):
                 with serial_lock(args.journal):
                     journal = Journal(args.journal)
                     try:
+                        if recovery is not None:
+                            from .recovery import Checkpoints, WriteAhead, recovery_owner
+
+                            if len(recovery) == 3:
+                                http, key, identity = recovery
+                                profiles = None
+                            else:
+                                http, key, identity, profiles = recovery
+                            recovery_owner(config, identity)
+                            journal.before_effect = WriteAhead(
+                                config,
+                                journal,
+                                args.artifacts,
+                                Checkpoints(config, http, key),
+                                identity,
+                                profiles=profiles,
+                            ).save
                         coordinator = Delivery(
                             config,
                             journal,
-                            GithubApp.from_environment(config),
+                            github_broker(config, local_platform(), journal, args.run_id),
                             local_platform(),
                             args.artifacts,
                         )
+                        if recovery is not None:
+                            from .recovery import reconcile_existing
+
+                            reconcile_existing(
+                                config, journal, http, coordinator.broker.github, profiles=profiles
+                            )
+                            journal.before_effect({"kind": "tick", "run_id": args.run_id})
                         deadline = time.monotonic() + args.timeout
                         while time.monotonic() < deadline:
                             result = coordinator.step(args.run_id)
@@ -144,6 +192,8 @@ def main(argv=None):
                 finally:
                     journal.close()
             if args.command == "doctor":
+                from .doctor import doctor
+
                 result = doctor(config)
                 print(json.dumps(result, indent=2))
                 return 0 if result["execution_ready"] else 2

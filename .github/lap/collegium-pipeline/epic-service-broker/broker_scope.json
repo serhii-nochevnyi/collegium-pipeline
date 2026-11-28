@@ -1,0 +1,1 @@
+{"allowed_paths": ["tests/test_epic_service_a.py", "tests/test_epic_service_b.py", "tests/test_epic_service_c.py"], "base_branch": "collegium/c5b7d3d9-9db7-4552-8e0e-fbfe99b27001", "repository": "serhii-nochevnyi/collegium-pipeline"}

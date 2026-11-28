@@ -17,6 +17,8 @@ from collegium_pipeline.store import Journal
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--config", default="config/delivery.example.json")
+    parser.add_argument("--task-id", default="delivery-checkout-v3")
+    parser.add_argument("--output", default="reports/delivery-checkout.json")
     parser.add_argument(
         "--run", action="store_true", help="Start/resume a paid read-only diagnostic"
     )
@@ -29,7 +31,7 @@ def main():
     journal = Journal(folder / "delivery-diagnostic.sqlite3")
     task = Task(
         "text",
-        "delivery-checkout-v3",
+        args.task_id,
         config["repository"],
         "Read-only checkout diagnostic",
         (
@@ -64,9 +66,7 @@ def main():
                     "repository_modified": False,
                     "pr_created": False,
                 }
-                Path("reports/delivery-checkout.json").write_text(
-                    json.dumps(report, indent=2) + "\n"
-                )
+                Path(args.output).write_text(json.dumps(report, indent=2) + "\n")
                 print(json.dumps(report))
                 return 0 if result["verdict"] == "pass" else 2
             time.sleep(2)

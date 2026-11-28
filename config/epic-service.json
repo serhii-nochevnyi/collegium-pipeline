@@ -1,0 +1,24 @@
+{
+  "suite_id": "c5b7d3d9-9db7-4552-8e0e-fbfe99b27001",
+  "base_branch": "collegium/c5b7d3d9-9db7-4552-8e0e-fbfe99b27001",
+  "baseline": "ed79efbdd3db3734ad901375ce0a99dc8795f230",
+  "main_sha": "dbe5e20955dee07fab2a7bc9ab93aa0bcd1b0451",
+  "ci_probe": {
+    "number": 5,
+    "node_id": "PR_kwDOV-WVs88AAAABSkQQJQ",
+    "url": "https://github.com/serhii-nochevnyi/collegium-pipeline/pull/5"
+  },
+  "broker_name": "pipeline-native-broker-1474663859-v10",
+  "native_broker": {
+    "automation_id": "aut_0631ecd7ec2b4ae9a166f9f9b2b9ed77",
+    "approved_digest": "04c341be9d0a8d9c6078514ee52676176928b9bf210aa0603141537cad557877"
+  },
+  "recovery_name": "pipeline-epic-service-recovery-v1",
+  "recovery_store": {
+    "automation_id": "aut_56e599d0747448479acb75f385baf23e",
+    "approved_digest": "8c92a7ea707234d9e9f6b2bce63f8b5103ddeedd8d66fca68defc71e6c9f22e4",
+    "owner": "aut_2ea6d08b772f41d5a9fa236cb19f93d8"
+  },
+  "expires_at": 1795961938,
+  "revision": 2
+}

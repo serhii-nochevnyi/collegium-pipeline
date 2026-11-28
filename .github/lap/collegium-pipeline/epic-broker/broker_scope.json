@@ -1,0 +1,1 @@
+{"allowed_paths": ["src/collegium_pipeline/", "tests/", "docs/", "README.md", "pyproject.toml", "uv.lock"], "base_branch": "main", "repository": "serhii-nochevnyi/collegium-pipeline"}

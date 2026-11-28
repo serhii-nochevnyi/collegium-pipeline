@@ -1,0 +1,39 @@
+{
+  "scheduling": {
+    "project": 2,
+    "repository": 2,
+    "epic": 2
+  },
+  "epic": {
+    "max_tickets": 100,
+    "max_total_tokens": 6000000,
+    "integration_token_reserve": 1500000,
+    "jira": {
+      "cloud_id": "3e1c0d80-f6e4-4767-ad1c-f06c182b0f93",
+      "epic_type_id": "10000",
+      "blocks_link_type_id": "10000",
+      "dependency_links": [
+        {
+          "type_id": "10400",
+          "direction": "outward"
+        }
+      ]
+    },
+    "scopes": {}
+  },
+  "working_broker": {
+    "name": "pipeline-native-broker-1474663859-v8",
+    "allowed_paths": [
+      "src/collegium_pipeline/",
+      "tests/",
+      "docs/",
+      "README.md",
+      "pyproject.toml",
+      "uv.lock"
+    ],
+    "native_broker": {
+      "automation_id": "aut_25092aee432946ceade2ea4c6bc2a2d7",
+      "approved_digest": "66dd3ffb35d5010244ca4a9ab303a86f4ff0d0ab7da4711e792651e04a99e69c"
+    }
+  }
+}

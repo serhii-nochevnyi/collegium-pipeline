@@ -1,0 +1,246 @@
+{
+  "schema_version": "pilot/v1",
+  "mode": "local_serial_prototype",
+  "server": "https://agentic-platform.infrateam.xyz",
+  "mcp_endpoint": "https://agentic-platform-mcp.infrateam.xyz/mcp",
+  "space_id": "spc_abd49a5569154751a43c006659d9f535",
+  "project_id": "prj_7e76b4e4920141a2abbedd46ccb713da",
+  "github_connection_id": "ghc_7de07519a1e3437a95f98edc4545022d",
+  "repository": "serhii-nochevnyi/collegium-pipeline",
+  "repository_id": 1474663859,
+  "base_branch": "main",
+  "required_checks": [
+    "quality"
+  ],
+  "workers": {
+    "assessor:sonnet:low": {
+      "agent_id": "agent_e6c4312d769542c7991a1e929cb747e2",
+      "project_id": "prj_7e76b4e4920141a2abbedd46ccb713da",
+      "runtime": "aranarium-aws",
+      "environment_id": "base",
+      "api_model": "sonnet",
+      "selection": {
+        "role": "assessor",
+        "model": "sonnet",
+        "effort": "low",
+        "reason": "investigation_policy/v1"
+      },
+      "approved_agent_digest": "10107e61204f154aaa8f3aef364fb232c82d3020c0a382f6aca1d27d3fcf67f3",
+      "harness": "claude-code",
+      "model_connection_id": "mcn_699c8e51528e4438a359acfd4dced40f"
+    },
+    "researcher:sonnet:low": {
+      "agent_id": "agent_b52cb7974bfc43ca870eb62dbc3bd6cf",
+      "project_id": "prj_7e76b4e4920141a2abbedd46ccb713da",
+      "runtime": "aranarium-aws",
+      "environment_id": "base",
+      "api_model": "sonnet",
+      "selection": {
+        "role": "researcher",
+        "model": "sonnet",
+        "effort": "low",
+        "reason": "investigation_policy/v1"
+      },
+      "approved_agent_digest": "926ea8436c2629fe2e08755ba8e38459a752bf621b364efe1e491b51860697f8",
+      "harness": "claude-code",
+      "model_connection_id": "mcn_699c8e51528e4438a359acfd4dced40f"
+    },
+    "researcher:sonnet:high": {
+      "agent_id": "agent_97d920664bc94c17b5af2e94d7f4c69c",
+      "project_id": "prj_7e76b4e4920141a2abbedd46ccb713da",
+      "runtime": "aranarium-aws",
+      "environment_id": "base",
+      "api_model": "sonnet",
+      "selection": {
+        "role": "researcher",
+        "model": "sonnet",
+        "effort": "high",
+        "reason": "investigation_policy/v1"
+      },
+      "approved_agent_digest": "aca29cdb317bf0e51a12e68e5192d4418b81eb81429832d784ee287e478331c6",
+      "harness": "claude-code",
+      "model_connection_id": "mcn_699c8e51528e4438a359acfd4dced40f"
+    },
+    "researcher:opus:high": {
+      "agent_id": "agent_14af9e044c694ef2a000403697e1d34a",
+      "project_id": "prj_7e76b4e4920141a2abbedd46ccb713da",
+      "runtime": "aranarium-aws",
+      "environment_id": "base",
+      "api_model": "opus",
+      "selection": {
+        "role": "researcher",
+        "model": "opus",
+        "effort": "high",
+        "reason": "investigation_policy/v1"
+      },
+      "approved_agent_digest": "e5ca2adbf7db701ad2fade7b1408fcb3307a777729650258d0285503f94215c7",
+      "harness": "claude-code",
+      "model_connection_id": "mcn_699c8e51528e4438a359acfd4dced40f"
+    },
+    "researcher:opus:max": {
+      "agent_id": "agent_539f3ea98be843ae8661836e21709d73",
+      "project_id": "prj_7e76b4e4920141a2abbedd46ccb713da",
+      "runtime": "aranarium-aws",
+      "environment_id": "base",
+      "api_model": "opus",
+      "selection": {
+        "role": "researcher",
+        "model": "opus",
+        "effort": "max",
+        "reason": "investigation_policy/v1"
+      },
+      "approved_agent_digest": "7bfe056e3cddc811196553d20621c250f5e84bd5b6252c8d33216b3527aaeccc",
+      "harness": "claude-code",
+      "model_connection_id": "mcn_699c8e51528e4438a359acfd4dced40f"
+    },
+    "synthesizer:sonnet:high": {
+      "agent_id": "agent_696712237d5e4d31b1f156fc6d9147da",
+      "project_id": "prj_7e76b4e4920141a2abbedd46ccb713da",
+      "runtime": "aranarium-aws",
+      "environment_id": "base",
+      "api_model": "sonnet",
+      "selection": {
+        "role": "synthesizer",
+        "model": "sonnet",
+        "effort": "high",
+        "reason": "investigation_policy/v1"
+      },
+      "approved_agent_digest": "6ddbce676f54206f6a64988f28cc5f9b821e5c857787876d635c9e46c6593916",
+      "harness": "claude-code",
+      "model_connection_id": "mcn_699c8e51528e4438a359acfd4dced40f"
+    },
+    "synthesizer:opus:high": {
+      "agent_id": "agent_41793dad7afe41b8bf8841823b89a4c6",
+      "project_id": "prj_7e76b4e4920141a2abbedd46ccb713da",
+      "runtime": "aranarium-aws",
+      "environment_id": "base",
+      "api_model": "opus",
+      "selection": {
+        "role": "synthesizer",
+        "model": "opus",
+        "effort": "high",
+        "reason": "investigation_policy/v1"
+      },
+      "approved_agent_digest": "4daf32fd2cf790bc88a2811aa13420eddda70d802940786c2fd67fa88cb93e06",
+      "harness": "claude-code",
+      "model_connection_id": "mcn_699c8e51528e4438a359acfd4dced40f"
+    },
+    "synthesizer:opus:max": {
+      "agent_id": "agent_f4f165760f6b455a8e15b6bcb862101a",
+      "project_id": "prj_7e76b4e4920141a2abbedd46ccb713da",
+      "runtime": "aranarium-aws",
+      "environment_id": "base",
+      "api_model": "opus",
+      "selection": {
+        "role": "synthesizer",
+        "model": "opus",
+        "effort": "max",
+        "reason": "investigation_policy/v1"
+      },
+      "approved_agent_digest": "b86e15ddbb7bc9774d76cca32dda6568b1cec67bbb55568704fe47258b782a26",
+      "harness": "claude-code",
+      "model_connection_id": "mcn_699c8e51528e4438a359acfd4dced40f"
+    },
+    "investigation_reviewer:opus:high": {
+      "agent_id": "agent_837fd64a4a404e4cb7083dcd96b8d1be",
+      "project_id": "prj_7e76b4e4920141a2abbedd46ccb713da",
+      "runtime": "aranarium-aws",
+      "environment_id": "base",
+      "api_model": "opus",
+      "selection": {
+        "role": "investigation_reviewer",
+        "model": "opus",
+        "effort": "high",
+        "reason": "investigation_policy/v1"
+      },
+      "approved_agent_digest": "2df363f2aae6a618be2c9a1af7162d5a470e5931251644c0a6c1dd72eea3d0d4",
+      "harness": "claude-code",
+      "model_connection_id": "mcn_699c8e51528e4438a359acfd4dced40f"
+    },
+    "investigation_reviewer:opus:max": {
+      "agent_id": "agent_9962745668164f2da7f67cde66b7f01b",
+      "project_id": "prj_7e76b4e4920141a2abbedd46ccb713da",
+      "runtime": "aranarium-aws",
+      "environment_id": "base",
+      "api_model": "opus",
+      "selection": {
+        "role": "investigation_reviewer",
+        "model": "opus",
+        "effort": "max",
+        "reason": "investigation_policy/v1"
+      },
+      "approved_agent_digest": "363dfa87ad24f364c9fd5e22f0bc18198c19cc64d23d1f486034fa76df1a048f",
+      "harness": "claude-code",
+      "model_connection_id": "mcn_699c8e51528e4438a359acfd4dced40f"
+    }
+  },
+  "execution_enabled": false,
+  "max_cost_usd": 5,
+  "max_repair_attempts": 2,
+  "execution_profile": "delivery",
+  "max_stage_seconds": 300,
+  "max_stage_attempts": 8,
+  "max_total_tokens": 2000000,
+  "broker_enabled": false,
+  "allowed_paths": [
+    "tests/test_live_service.py"
+  ],
+  "validation_commands": [
+    [
+      "env",
+      "PYTHONPATH=src",
+      "python3",
+      "-m",
+      "unittest",
+      "discover",
+      "-s",
+      "tests",
+      "-v"
+    ]
+  ],
+  "ci_timeout_seconds": 900,
+  "max_delivery_seconds": 3600,
+  "max_worker_jobs": 16,
+  "repair_pr_mode": "keep_ready",
+  "broker_transport": "collegium_script",
+  "native_broker": {
+    "automation_id": "aut_5b17ddca92424243b1feb5aa8732a7a0",
+    "approved_digest": "23b418abee71bcbccd04f0b490e2472730085a9f713f1f77607f2501ccf9ca81"
+  },
+  "model_policy": "claude",
+  "model_connection": "project/claude-code-subscription",
+  "model_connection_id": "mcn_699c8e51528e4438a359acfd4dced40f",
+  "repair_validation_commands": [
+    [
+      "env",
+      "PYTHONPATH=src",
+      "python3",
+      "-m",
+      "unittest",
+      "discover",
+      "-s",
+      "tests",
+      "-v"
+    ]
+  ],
+  "broker_reads": "native_script",
+  "broker_allow_paused_triggers": true,
+  "recovery_store": {
+    "automation_id": "aut_be700e7e2ba241e99dc611f6025db54d",
+    "owner": "aut_3725cac20b4a46e398a005b0199da7bf",
+    "approved_digest": "72a79a648ae335ef09776b3cd698a5f1c582bf86cfe2852d255d938f5096247c"
+  },
+  "investigation": {
+    "schema_version": "investigation-policy/v1",
+    "parallelism": 2,
+    "max_jobs": 16,
+    "minimum_complexity": "simple",
+    "source_paths": [
+      "src/collegium_pipeline/",
+      "tests/",
+      "docs/",
+      "README.md",
+      "SPEC.md"
+    ]
+  }
+}

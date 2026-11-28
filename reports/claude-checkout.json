@@ -1,0 +1,32 @@
+{
+  "schema_version": "delivery-checkout/v1",
+  "scope": "native read-only service diagnostic; no product task",
+  "run_id": "680f2e87-727a-496a-a93f-f7f2f8169c33",
+  "head": "dbe5e20955dee07fab2a7bc9ab93aa0bcd1b0451",
+  "verdict": "pass",
+  "session_id": "ses_a779d7e8d3c94a0dbeda41de1d58e964",
+  "runtime_evidence": {
+    "verified_by_platform": true,
+    "harness": "claude-code",
+    "model": "opus",
+    "effort": "high",
+    "session_id": "ses_a779d7e8d3c94a0dbeda41de1d58e964",
+    "turn_id": "run_80fc3cc3c71d448385892c8d0baf7aae",
+    "agent_id": "agent_9c74ac49c7fa4989843c984ed2cd40a1",
+    "harness_release": "claude-code-2.1.289-9162edd4",
+    "runtime": "aranarium-aws",
+    "proof_kind": "first_tool_claude_code_process_arguments",
+    "process_id": 7,
+    "tool_use_id": "toolu_01SzVaXeYkAv2tuWCZQ8wonB",
+    "tool_result_event_id": "evt_01M8F0YR8R6TMCB1NA67M468ZZ",
+    "command_digest": "419021bec18b972b5b5e9ec44658eeb4996f504eeab3cda4c8f051a4bbd9f6b4",
+    "command_normalization": "same_python_ast_and_pinned_shell_frame",
+    "model_connection_id": "mcn_699c8e51528e4438a359acfd4dced40f",
+    "served_model": "claude-opus-5-5",
+    "effort_verification": "explicit_launch_argument_and_supported_served_model",
+    "provider_internal_reasoning_verified": false
+  },
+  "artifact_digest": "eef714e69f6885c7ce3aafdf9c810e1f191ef875946752817f55dc48f5c28e69",
+  "repository_modified": false,
+  "pr_created": false
+}

@@ -1,0 +1,7 @@
+{
+  "repository": "serhii-nochevnyi/collegium-pipeline",
+  "base_branch": "main",
+  "allowed_paths": [
+    "tests/test_live_service.py"
+  ]
+}

@@ -2,7 +2,9 @@
 
 import base64
 import importlib.util
+import json
 import unittest
+import zlib
 from pathlib import Path
 
 spec = importlib.util.spec_from_file_location(
@@ -15,6 +17,39 @@ SCOPE = {"repository": "owner/repo", "base_branch": "main", "allowed_paths": ["t
 
 
 class NativeBrokerScopeTests(unittest.TestCase):
+    def test_compressed_utf8_git_changes_restore_exact_original_payload(self):
+        from collegium_pipeline.native_broker import encode_request
+
+        contents = base64.b64encode(("Source with unicode: Україна\n" * 5000).encode()).decode()
+        request = {
+            "method": "GIT_COMMIT",
+            "path": "/repos/owner/repo/git/commit-on-branch",
+            "payload": {
+                "fileChanges": {"additions": [{"path": "tests/test.py", "contents": contents}]}
+            },
+        }
+        wire = encode_request(request, compress=True)
+        self.assertEqual(wire["encoding"], "git-text-zlib-base64")
+        self.assertEqual(broker.decode_request(wire), request)
+        self.assertLess(len(json.dumps({"data": wire}).encode()), 250000)
+
+    def test_compressed_rpc_rejects_forged_digest_trailing_data_and_expansion_bombs(self):
+        request = {"method": "GET", "path": "/repos/owner/repo", "payload": None}
+        raw = json.dumps(request).encode()
+        wire = {
+            "encoding": "zlib-base64",
+            "data": base64.b64encode(zlib.compress(raw)).decode(),
+            "request_digest": broker.identity(request),
+        }
+        self.assertEqual(broker.decode_request(wire), request)
+        for changed in (
+            {"request_digest": "wrong"},
+            {"data": base64.b64encode(zlib.compress(raw) + b"trailing").decode()},
+            {"data": base64.b64encode(zlib.compress(b"x" * 2_000_001)).decode()},
+        ):
+            with self.assertRaises(ValueError):
+                broker.decode_request({**wire, **changed})
+
     def test_reads_are_repository_bound_and_never_include_credentials(self):
         broker.check_scope(SCOPE, {"method": "GET", "path": "/repos/owner/repo/pulls?state=all"})
         for path in (
@@ -28,6 +63,15 @@ class NativeBrokerScopeTests(unittest.TestCase):
         ):
             with self.subTest(path=path), self.assertRaises(ValueError):
                 broker.check_scope(SCOPE, {"method": "GET", "path": path})
+
+    def test_actions_read_scope_does_not_allow_mutations_or_secrets(self):
+        for path in ("/actions/jobs/12", "/actions/jobs/12/logs", "/actions/runs/13"):
+            broker.check_scope(SCOPE, {"method": "GET", "path": "/repos/owner/repo" + path})
+            with self.assertRaises(ValueError):
+                broker.check_scope(SCOPE, {"method": "POST", "path": "/repos/owner/repo" + path})
+        for path in ("/actions/secrets", "/actions/runs/13/rerun", "/actions/jobs/../logs"):
+            with self.assertRaises(ValueError):
+                broker.check_scope(SCOPE, {"method": "GET", "path": "/repos/owner/repo" + path})
 
     def test_default_branch_and_arbitrary_mutations_are_refused(self):
         for request in (

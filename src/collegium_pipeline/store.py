@@ -2,6 +2,7 @@
 
 import json
 import sqlite3
+import time
 from contextlib import contextmanager
 from dataclasses import asdict
 from pathlib import Path
@@ -13,12 +14,32 @@ STAGES = ("planning", "plan_review", "implementing", "validating", "reviewing", 
 TERMINAL = {"ready_for_acceptance", "failed", "cancelled"}
 
 
+class CheckpointError(PolicyError):
+    """Persistence failed before an external effect; abort the entire dispatcher tick."""
+
+
 class Journal:
     def __init__(self, path: str | Path):
+        self.before_effect = None
         self.connection = sqlite3.connect(path, isolation_level=None, timeout=10)
         self.connection.row_factory = sqlite3.Row
         self.connection.execute("PRAGMA foreign_keys=ON")
-        self.connection.execute("PRAGMA journal_mode=WAL")
+        # Concurrent first-open journal-mode changes may return SQLITE_BUSY without
+        # using SQLite's busy timeout. Retry only that initialization, never a task/effect.
+        deadline = time.monotonic() + 10
+        while True:
+            try:
+                self.connection.execute("PRAGMA journal_mode=WAL")
+                break
+            except sqlite3.OperationalError as exc:
+                code = getattr(exc, "sqlite_errorcode", 0) & 0xFF
+                if (
+                    code not in {sqlite3.SQLITE_BUSY, sqlite3.SQLITE_LOCKED}
+                    or time.monotonic() >= deadline
+                ):
+                    self.connection.close()
+                    raise
+                time.sleep(0.01)
         self.connection.executescript("""
             CREATE TABLE IF NOT EXISTS runs (
                 id TEXT PRIMARY KEY, repository TEXT NOT NULL, source TEXT NOT NULL,
@@ -34,11 +55,41 @@ class Journal:
             );
         """)
 
+    def checkpoint(self, operation):
+        if self.before_effect is not None:
+            self.record(operation["run_id"], "effect_attempt", {"operation": operation})
+            try:
+                self.before_effect(operation)
+            except Exception as exc:
+                # The actual external call follows this hook and was never reached.
+                self.record(operation["run_id"], "effect_not_started", {"operation": operation})
+                raise CheckpointError(str(exc)) from exc
+
+    def effect_not_started(self, operation):
+        events = [
+            e
+            for e in self.events(operation["run_id"])
+            if e["kind"] in {"effect_attempt", "effect_not_started"}
+            and e["data"]["operation"] == operation
+        ]
+        return bool(events and events[-1]["kind"] == "effect_not_started")
+
     def close(self):
         self.connection.close()
 
     @contextmanager
     def transaction(self):
+        if self.connection.in_transaction:
+            name = "nested_" + uuid4().hex
+            self.connection.execute("SAVEPOINT " + name)
+            try:
+                yield
+            except BaseException:
+                self.connection.execute("ROLLBACK TO " + name)
+                raise
+            finally:
+                self.connection.execute("RELEASE " + name)
+            return
         self.connection.execute("BEGIN IMMEDIATE")
         try:
             yield
@@ -55,7 +106,14 @@ class Journal:
         )
 
     def admit(self, task: Task, config_digest: str, *, purpose="delivery") -> str:
-        if purpose not in {"delivery", "readiness", "calibration", "delivery_worker"}:
+        if purpose not in {
+            "delivery",
+            "readiness",
+            "calibration",
+            "delivery_worker",
+            "epic",
+            "investigation",
+        }:
             raise PolicyError("Unknown run purpose")
         with self.transaction():
             existing = self.connection.execute(
@@ -214,7 +272,9 @@ class Journal:
             if any(e["kind"] == "launched" and e["data"]["intent"] == intent for e in prior):
                 raise PolicyError("Launch already recorded; reconcile existing identity")
             self._event(
-                run_id, "launched", {"intent": intent, "session_id": session_id, "turn_id": turn_id}
+                run_id,
+                "launched",
+                {"intent": intent, "session_id": session_id, "turn_id": turn_id, "at": time.time()},
             )
 
     def unknown_launch(self, run_id: str, intent: str):

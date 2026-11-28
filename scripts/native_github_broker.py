@@ -7,6 +7,7 @@ import os
 import re
 import subprocess
 import tempfile
+import zlib
 from pathlib import Path
 from urllib.parse import unquote, urlsplit
 
@@ -17,6 +18,46 @@ def identity(value):
     return hashlib.sha256(
         json.dumps(value, sort_keys=True, separators=(",", ":")).encode()
     ).hexdigest()
+
+
+def decode_request(value):
+    if not isinstance(value, dict):
+        raise ValueError("RPC data must be an object")
+    if "encoding" not in value:
+        return value
+    if set(value) != {"encoding", "data", "request_digest"} or value["encoding"] not in {
+        "zlib-base64",
+        "git-text-zlib-base64",
+    }:
+        raise ValueError("Unknown RPC encoding")
+    data = value["data"]
+    if not isinstance(data, str) or len(data) > 256_000:
+        raise ValueError("Compressed RPC exceeds the input limit")
+    try:
+        decoder = zlib.decompressobj()
+        raw = decoder.decompress(base64.b64decode(data, validate=True), 2_000_001)
+        if (
+            len(raw) > 2_000_000
+            or not decoder.eof
+            or decoder.unused_data
+            or decoder.unconsumed_tail
+        ):
+            raise ValueError("RPC exceeds its expansion limit or has trailing data")
+        request = json.loads(raw)
+    except (zlib.error, UnicodeError) as exc:
+        raise ValueError("Invalid compressed RPC") from exc
+    if isinstance(request, dict) and value["encoding"] == "git-text-zlib-base64":
+        if request.get("method") != "GIT_COMMIT":
+            raise ValueError("Text transport is only for Git commits")
+        changes = (request.get("payload") or {}).get("fileChanges", {})
+        for row in changes.get("additions", []):
+            text = row.pop("text")
+            if not isinstance(text, str) or "contents" in row:
+                raise ValueError("Text transport contains an invalid file")
+            row["contents"] = base64.b64encode(text.encode("utf-8")).decode()
+    if not isinstance(request, dict) or identity(request) != value["request_digest"]:
+        raise ValueError("RPC digest differs after decompression")
+    return request
 
 
 def branch_name(value):
@@ -48,7 +89,7 @@ def check_scope(scope, request):
     suffix = decoded[len(prefix) :]
     if method == "GET":
         if not re.fullmatch(
-            r"(?:|/git/(?:ref/heads/.+|commits/[0-9a-f]{40}|trees/[0-9a-f]{40})|/pulls(?:/\d+)?|/commits/[0-9a-f]{40}/(?:check-runs|statuses)|/check-runs/\d+/annotations)",
+            r"(?:|/git/(?:ref/heads/.+|commits/[0-9a-f]{40}|trees/[0-9a-f]{40})|/pulls(?:/\d+)?|/commits/[0-9a-f]{40}/(?:check-runs|statuses)|/check-runs/\d+/annotations|/actions/(?:runs/\d+|jobs/\d+(?:/logs)?))",
             suffix,
         ):
             raise ValueError("Read endpoint is not permitted")
@@ -100,6 +141,54 @@ def http_request(method, path, payload=None):
     )
     body, status = result.stdout.rsplit("\n", 1)
     return int(status), json.loads(body) if body else {}
+
+
+def job_logs(path):
+    # curl never forwards credentials on redirects; the native egress proxy owns auth.
+    # Only this fixed Actions endpoint may return text instead of JSON.
+    with tempfile.TemporaryDirectory(prefix="collegium-logs-") as folder:
+        target = Path(folder) / "logs"
+        result = subprocess.run(
+            [
+                "curl",
+                "--silent",
+                "--show-error",
+                "--location",
+                "--max-redirs",
+                "3",
+                "--proto",
+                "=https",
+                "--proto-redir",
+                "=https",
+                "--max-time",
+                "45",
+                "--max-filesize",
+                "2000000",
+                "--output",
+                str(target),
+                "--write-out",
+                "%{http_code}",
+                "https://api.github.com" + path,
+            ],
+            capture_output=True,
+            text=True,
+            timeout=50,
+            check=True,
+        )
+        status = int(result.stdout)
+        if status != 200:
+            return status, {"code": "actions_logs_unavailable"}
+        raw = target.read_bytes()
+        if len(raw) > 2_000_000:
+            raise ValueError("Actions logs exceed the diagnostic limit")
+        packed = base64.b64encode(zlib.compress(raw, 9)).decode()
+        if len(packed) > 50_000:
+            raise ValueError("Compressed Actions logs exceed the response limit")
+        return 200, {
+            "encoding": "zlib-base64",
+            "data": packed,
+            "sha256": hashlib.sha256(raw).hexdigest(),
+        }
 
 
 def decode_changes(scope, payload):
@@ -210,6 +299,10 @@ def publish_commit(scope, payload):
 
 def execute(scope, request):
     check_scope(scope, request)
+    if request["method"] == "GET" and re.fullmatch(
+        re.escape("/repos/" + scope["repository"]) + r"/actions/jobs/\d+/logs", request["path"]
+    ):
+        return job_logs(request["path"])
     if request["method"] == "GIT_COMMIT":
         return publish_commit(scope, request["payload"])
     return http_request(request["method"], request["path"], request.get("payload"))
@@ -218,8 +311,9 @@ def execute(scope, request):
 def main():
     scope = json.loads(Path("broker_scope.json").read_text())
     event = json.loads(Path("/job/event.json").read_text())
-    request = event["data"]
+    request = None
     try:
+        request = decode_request(event["data"])
         status, body = execute(scope, request)
     except ValueError as exc:
         status, body = 400, {"code": "broker_scope_refused", "message": str(exc)}

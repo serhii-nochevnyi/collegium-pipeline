@@ -6,6 +6,7 @@ import unittest
 from dataclasses import asdict
 from hashlib import sha1
 from pathlib import Path
+from unittest.mock import patch
 from urllib.parse import unquote
 
 from test_runner import FakeHttp
@@ -218,6 +219,7 @@ class WorkersHttp(FakeHttp):
                 "id": row["turn_id"],
                 "session_id": session_id,
                 "status": "completed",
+                "finished_at": "1970-01-01T00:03:20+00:00",
                 "cut_off": False,
                 "error": None,
                 "trace_id": "trace-id",
@@ -305,6 +307,144 @@ class DeliveryTests(unittest.TestCase):
                 return r
         self.fail("Never reached " + target + ": " + r["state"])
 
+    def service_profile(self):
+        self.config["service_test"] = {
+            "initial_changes_digest": digest({"src/app.py": "value = 1\n"}),
+            "repaired_changes_digest": digest({"src/app.py": "value = 2\n"}),
+            "check_name": "test",
+            "failure_signature": "AssertionError",
+            "test_name": "test_service",
+        }
+        self.config["repair_validation_commands"] = [["python3", "-m", "unittest"]]
+        self.run = self.journal.admit(
+            Task("text", "service", "owner/repo", "Service diagnostic", "Red then green"),
+            config_digest(self.config),
+        )
+
+    @staticmethod
+    def service_failure(config, doc, checks, ci, **kwargs):
+        return {
+            "pr_number": doc["pr"]["number"],
+            "head": doc["head"],
+            "run_id": 1,
+            "job_id": 2,
+            "check_id": 3,
+            "logs_digest": digest("observed fixture log"),
+        }
+
+    def test_service_requires_real_red_receipt_before_repair_and_same_pr_green(self):
+        self.service_profile()
+        with patch("collegium_pipeline.delivery.failure_evidence", self.service_failure):
+            result = self.until("ready_for_acceptance")
+        self.assertEqual(result["repairs"], 1)
+        self.assertEqual(result["service_red"]["head"], result["service_initial_head"])
+        self.assertNotEqual(result["head"], result["service_initial_head"])
+        self.assertEqual(result["service_red"]["pr_number"], result["pr"]["number"])
+
+    def test_service_initial_green_blocks_instead_of_claiming_test_success(self):
+        self.service_profile()
+        self.github.ci = "success"
+        result = self.until("blocked")
+        self.assertEqual(result["repairs"], 0)
+        self.assertNotIn("ci_green", result)
+        self.assertEqual([op for op, _ in self.github.writes].count("commit"), 1)
+
+    def final_review(self, *, launch):
+        self.config["repair_pr_mode"] = "keep_ready"
+        self.service_profile()
+        with patch("collegium_pipeline.delivery.failure_evidence", self.service_failure):
+            for _ in range(80):
+                r = self.driver.step(self.run)
+                if r["state"] == "reviewing" and r["cycle"] == 1:
+                    if launch:
+                        self.driver.step(self.run)
+                    return
+        self.fail("No repaired final review")
+
+    def test_expired_run_can_finalize_confirmed_review_without_dispatch_or_writes(self):
+        self.final_review(launch=True)
+        self.now += 10000
+        writes, sessions = copy.deepcopy(self.github.writes), copy.deepcopy(self.http.sessions)
+        before_config = config_digest(self.config)
+        original_http = self.http.request
+
+        def read_only(method, *args, **kwargs):
+            self.assertEqual(method, "GET")
+            return original_http(method, *args, **kwargs)
+
+        with patch.object(self.http, "request", side_effect=read_only):
+            for _ in range(3):
+                result = self.driver.finalize(self.run)
+        self.assertEqual(result["state"], "ready_for_acceptance")
+        self.assertTrue(result["ci_green"])
+        self.assertEqual(self.github.writes, writes)
+        self.assertEqual(self.http.sessions, sessions)
+        self.assertEqual(config_digest(self.config), before_config)
+        self.assertEqual(result["started_at"], 100)
+        self.assertFalse(self.driver._evidence_only)
+
+    def test_finalization_refuses_an_unlaunched_review_and_normal_deadline_stays_enforced(self):
+        self.final_review(launch=False)
+        self.now += 10000
+        sessions = copy.deepcopy(self.http.sessions)
+        with self.assertRaisesRegex(PolicyError, "cannot create a review"):
+            self.driver.finalize(self.run)
+        self.assertEqual(self.http.sessions, sessions)
+        self.assertEqual(self.driver.step(self.run)["state"], "blocked")
+
+    def test_evidence_only_guard_refuses_dispatch_and_repository_writes(self):
+        from collegium_pipeline.delivery import EvidenceOnly
+
+        with self.assertRaises(PolicyError):
+            EvidenceOnly(self.http).request("POST", "/session")
+        with self.assertRaises(PolicyError):
+            EvidenceOnly(self.github).mutate("ready", {})
+
+    def test_finalization_cannot_admit_another_repair_when_ci_turns_red(self):
+        self.final_review(launch=True)
+        self.now += 10000
+        self.driver.finalize(self.run)
+        self.driver.finalize(self.run)
+        self.github.ci = "failure"
+        sessions = copy.deepcopy(self.http.sessions)
+        result = self.driver.finalize(self.run)
+        self.assertEqual(result["state"], "blocked")
+        self.assertEqual(result["repairs"], 1)
+        self.assertEqual(self.http.sessions, sessions)
+        self.assertIs(self.driver.github, self.github)
+
+    def test_service_premature_green_candidate_is_rejected_before_any_write(self):
+        self.service_profile()
+
+        def mutate(packet, observed):
+            if packet["stage"] == "implementing":
+                result = json.loads(observed["turn"]["answer"])
+                result["payload"]["changes"]["src/app.py"] = "value = 2\n"
+                observed["turn"]["answer"] = json.dumps(result)
+
+        self.http.mutate = mutate
+        with self.assertRaises(PolicyError):
+            self.until("ready_for_acceptance")
+        self.assertFalse(self.github.writes)
+
+    def test_service_local_failure_does_not_authorize_a_fixer(self):
+        self.service_profile()
+        doc = {"repairs": 0}
+        self.driver._repair(self.run, doc, {"kind": "local_failure"}, "signature")
+        self.assertEqual(doc["state"], "blocked")
+        self.assertEqual(doc["repairs"], 0)
+
+    def test_service_unrelated_red_ci_cannot_launch_a_fixer(self):
+        self.service_profile()
+        self.until("waiting_ci")
+        with patch(
+            "collegium_pipeline.delivery.failure_evidence",
+            side_effect=PolicyError("Wrong assertion"),
+        ):
+            with self.assertRaises(PolicyError):
+                self.driver.step(self.run)
+        self.assertEqual(self.driver._load(self.run)["repairs"], 0)
+
     def test_red_fix_validate_review_green_and_replay(self):
         r = self.until("ready_for_acceptance")
         self.assertTrue(r["ci_green"])
@@ -322,11 +462,360 @@ class DeliveryTests(unittest.TestCase):
         self.driver.step(self.run)
         self.assertEqual((self.http.created, len(self.github.writes)), (count, writes))
 
-    def test_lost_pr_response_reconciles_without_second_pr(self):
-        self.until("opening_pr")
-        self.github.lose = "pr"
-        with self.assertRaises(RemoteError):
+    def test_keep_ready_mode_repairs_without_graphql_transitions(self):
+        self.config["repair_pr_mode"] = "keep_ready"
+        self.journal.connection.execute(
+            "UPDATE runs SET config_digest=? WHERE id=?", (config_digest(self.config), self.run)
+        )
+        result = self.until("ready_for_acceptance")
+        self.assertEqual(result["repairs"], 1)
+        self.assertFalse(any(op in {"draft", "ready"} for op, _ in self.github.writes))
+
+    def test_completed_checkout_protocol_failure_retries_without_weakening_proof(self):
+        def mutate(packet, obs):
+            if packet["stage"] == "planning" and packet["job_key"].endswith(":0"):
+                obs["events"][3]["input"]["command"] += " && echo changed"
+
+        self.http.mutate = mutate
+        result = self.until("plan_review")
+        self.assertEqual(result["protocol_failures"], 1)
+        self.assertEqual(result["tokens"], 40)
+        self.assertEqual(self.http.created, 2)
+        self.assertEqual(self.github.writes, [])
+        self.assertTrue(
+            any(e["kind"] == "worker_protocol_rejected" for e in self.journal.events(self.run))
+        )
+
+    def test_checkout_protocol_retry_is_bounded(self):
+        def mutate(packet, obs):
+            obs["events"][3]["input"]["command"] += " && echo changed"
+
+        self.http.mutate = mutate
+        result = self.until("failed")
+        self.assertEqual(result["protocol_failures"], 4)
+        self.assertEqual(self.http.created, 4)
+        self.assertEqual(self.github.writes, [])
+
+    def test_explicit_persisted_validation_retry_preserves_candidate_and_is_idempotent(self):
+        self.until("validating")
+        before = self.driver._load(self.run)
+
+        def truncate(packet, observed):
+            if packet["stage"] == "validating" and packet["job_key"].endswith(":0"):
+                observed["events"][4]["output"] = "<persisted-output>\nOutput too large (40KB)."
+
+        self.http.mutate = truncate
+        self.driver.step(self.run)
+        created, writes = self.http.created, list(self.github.writes)
+        result = self.driver.retry_truncated_validation(self.run)
+        self.assertEqual(result["head"], before["head"])
+        self.assertEqual(result["plan_attempt"], 1)
+        self.assertEqual(result["unaccepted_tokens"], 20)
+        saved = self.driver._load(self.run)
+        self.driver.retry_truncated_validation(self.run)
+        self.assertEqual(self.driver._load(self.run), saved)
+        self.assertEqual(self.http.created, created)
+        self.assertEqual(self.github.writes, writes)
+        self.assertEqual(self.until("reviewing")["head"], before["head"])
+
+    def test_persisted_retry_refuses_unfinished_turn(self):
+        self.until("validating")
+
+        def running(packet, observed):
+            if packet["stage"] == "validating":
+                observed["turn"].update(status="running", finished_at=None)
+
+        self.http.mutate = running
+        self.driver.step(self.run)
+        before = self.driver._load(self.run)
+        with self.assertRaises(PolicyError):
+            self.driver.retry_truncated_validation(self.run)
+        self.assertEqual(self.driver._load(self.run), before)
+
+    def test_checkout_rejection_replays_usage_after_interrupted_delivery_save(self):
+        def mutate(packet, obs):
+            obs["events"][3]["input"]["command"] += " && echo changed"
+            obs["events"][-1]["usage"] = {"input_tokens": self.config["max_total_tokens"] + 1}
+
+        self.http.mutate = mutate
+        self.driver.step(self.run)
+        with patch.object(self.driver, "_save", side_effect=RuntimeError("save interrupted")):
+            with self.assertRaisesRegex(RuntimeError, "save interrupted"):
+                self.driver.step(self.run)
+        self.assertEqual(self.driver._load(self.run)["tokens"], 0)
+        tokens = self.config["max_total_tokens"] + 1
+        self.assertEqual(self.driver.workers.unaccepted_usage(self.run), tokens)
+        recovered = self.driver.step(self.run)
+        self.assertEqual(recovered["tokens"], tokens)
+        self.assertEqual(recovered["unaccepted_tokens"], tokens)
+        self.assertEqual(recovered["protocol_failures"], 1)
+        with self.assertRaisesRegex(PolicyError, "token admission budget exhausted"):
             self.driver.step(self.run)
+        self.assertEqual(self.http.created, 1)
+        ledger = [e["data"] for e in self.journal.events(self.run) if e["kind"] == "rejected_usage"]
+        self.assertEqual(len(ledger), 1)
+        self.journal.record(self.run, "drain_usage", ledger[0])
+        self.assertEqual(self.driver.workers.drain(self.run)["tokens"], tokens)
+        doc = self.driver._load(self.run)
+        self.driver.account_usage(self.run, doc)
+        self.assertEqual(doc["tokens"], tokens)
+
+    def test_discarded_usage_requires_known_integer_counters(self):
+        for usage in ({}, {"unknown_tokens": 1}, {"input_tokens": True, "output_tokens": -1}):
+            with self.subTest(usage=usage):
+                observed = {"events": [{"type": "session.status_idle", "usage": usage}]}
+                self.assertEqual(
+                    self.driver.workers._worker_usage(observed),
+                    {"observed_tokens": self.config["max_total_tokens"], "usage_verified": False},
+                )
+        observed = {
+            "events": [
+                {"type": "session.status_idle", "usage": {"input_tokens": 0, "output_tokens": 0}}
+            ]
+        }
+        self.assertEqual(
+            self.driver.workers._worker_usage(observed),
+            {"observed_tokens": 0, "usage_verified": True},
+        )
+
+    def test_discarded_usage_includes_cache_and_keeps_partial_overrun(self):
+        usage = {
+            "input_tokens": 10,
+            "output_tokens": 20,
+            "cache_creation_input_tokens": 30,
+            "cache_read_input_tokens": 40,
+            "unknown_tokens": 900,
+        }
+        observed = {"events": [{"type": "session.status_idle", "usage": usage}]}
+        self.assertEqual(
+            self.driver.workers._worker_usage(observed),
+            {"observed_tokens": 100, "usage_verified": True},
+        )
+        large_input = self.config["max_total_tokens"] + 1
+        usage.update(input_tokens=large_input, output_tokens=-1)
+        self.assertEqual(
+            self.driver.workers._worker_usage(observed),
+            {"observed_tokens": large_input + 70, "usage_verified": False},
+        )
+        usage["input_tokens"] = 10
+        self.assertEqual(
+            self.driver.workers._worker_usage(observed),
+            {"observed_tokens": self.config["max_total_tokens"], "usage_verified": False},
+        )
+
+    def test_accepted_plan_without_usage_consumes_reservation(self):
+        def mutate(packet, observed):
+            observed["events"][-1].pop("usage")
+
+        self.http.mutate = mutate
+        self.driver.step(self.run)
+        result = self.driver.step(self.run)
+        self.assertEqual(result["state"], "plan_review")
+        self.assertEqual(result["tokens"], self.config["max_total_tokens"])
+        with self.assertRaisesRegex(PolicyError, "token admission budget exhausted"):
+            self.driver.step(self.run)
+        self.assertEqual(self.http.created, 1)
+
+    def test_accepted_results_settle_recognized_counters_once(self):
+        reservation = self.config["max_total_tokens"]
+        cases = (
+            ({"input_tokens": reservation + 1, "output_tokens": "bad"}, reservation + 1, False),
+            (
+                {
+                    "input_tokens": 10,
+                    "output_tokens": 20,
+                    "cache_creation_input_tokens": 30,
+                    "cache_read_input_tokens": 40,
+                    "unrelated_tokens": 900,
+                },
+                100,
+                True,
+            ),
+            ({"unrelated_tokens": 1}, reservation, False),
+        )
+        for index, (usage, tokens, verified) in enumerate(cases):
+            with self.subTest(usage=usage):
+
+                def mutate(packet, observed, usage=usage):
+                    observed["events"][-1]["usage"] = usage
+
+                self.http.mutate = mutate
+                args = (self.run, f"usage:{index}", "planning", BASE, BASE, {})
+                self.assertIsNone(self.driver.workers.step(*args))
+                result = self.driver.workers.step(*args)
+                self.assertEqual(result["observed_tokens"], tokens)
+                self.assertIs(result["usage_verified"], verified)
+                self.assertEqual(self.driver.workers.step(*args), result)
+                self.assertEqual(self.http.created, index + 1)
+
+    def test_accepted_result_waits_for_missing_idle_then_charges_reservation(self):
+        def mutate(packet, observed):
+            observed["turn"]["started_at"] = "1970-01-01T00:01:40+00:00"
+            observed["events"].pop()
+
+        self.http.mutate = mutate
+        args = (self.run, "usage:missing-idle", "planning", BASE, BASE, {})
+        self.assertIsNone(self.driver.workers.step(*args))
+        self.assertIsNone(self.driver.workers.step(*args))
+        self.now += 181
+        result = self.driver.workers.step(*args)
+        self.assertEqual(result["observed_tokens"], self.config["max_total_tokens"])
+        self.assertFalse(result["usage_verified"])
+        self.assertEqual(self.http.created, 1)
+
+    def test_malformed_worker_json_can_be_drained_and_charges_reservation(self):
+        def mutate(packet, obs):
+            obs["turn"]["answer"] = "not JSON"
+            obs["events"][-1]["usage"] = {}
+
+        self.http.mutate = mutate
+        self.driver.step(self.run)
+        with self.assertRaisesRegex(PolicyError, "Invalid worker result JSON"):
+            self.driver.step(self.run)
+        drained = self.driver.workers.drain(self.run)
+        self.assertEqual(drained["pending"], [])
+        self.assertEqual(len(drained["settled"]), 1)
+        self.assertEqual(drained["tokens"], self.config["max_total_tokens"])
+        doc = self.driver._load(self.run)
+        doc["tokens"] = drained["tokens"]
+        doc["drained_tokens"] = drained["tokens"]
+        self.driver.account_usage(self.run, doc)
+        self.assertEqual(doc["tokens"], drained["tokens"])
+
+    def test_worker_runtime_budget_uses_actual_turn_start_after_long_admission_wait(self):
+        def mutate(packet, observed):
+            observed["turn"].update(status="running", started_at="1970-01-01T00:16:40+00:00")
+
+        self.http.mutate = mutate
+        self.driver.step(self.run)
+        self.now = 1001
+        result = self.driver.step(self.run)
+        self.assertEqual(result["state"], "planning")
+        self.assertEqual(self.http.created, 1)
+        child = self.journal.connection.execute(
+            "SELECT id FROM runs WHERE id!=?", (self.run,)
+        ).fetchone()[0]
+        self.assertFalse(any(e["kind"] == "job_timeout" for e in self.journal.events(child)))
+
+    def test_timed_out_turn_must_be_definitively_terminal_before_bounded_retry(self):
+        def mutate(packet, observed):
+            observed["turn"].update(status="running", started_at="1970-01-01T00:01:40+00:00")
+
+        self.http.mutate = mutate
+        self.driver.step(self.run)
+        self.now = 400
+        with self.assertRaisesRegex(PolicyError, "timed out"):
+            self.driver.step(self.run)
+        with self.assertRaisesRegex(PolicyError, "still uncertain"):
+            self.driver.step(self.run)
+        self.assertEqual(self.http.created, 1)
+        observed = self.http.sessions["session-1"]["observation"]
+        observed["turn"].update(
+            status="failed", error="aborted", finished_at="1970-01-01T00:06:41+00:00"
+        )
+        result = self.driver.step(self.run)
+        self.assertEqual(result["protocol_failures"], 1)
+        self.assertEqual(result["tokens"], 20)
+        self.assertEqual(result["plan_attempt"], 1)
+        self.assertEqual(self.http.created, 1)
+        self.http.mutate = lambda packet, observed: None
+        self.until("plan_review")
+        self.assertEqual(self.http.created, 2)
+
+    def rejected_validation(self):
+        self.until("validating")
+
+        def mutate(packet, obs):
+            if packet["stage"] == "validating":
+                checkout = json.loads(obs["events"][4]["output"].split("=", 1)[1])
+                checkout["results"][0]["exit_code"] = 1
+                obs["events"][4]["output"] = "COLLEGIUM_CHECKOUT=" + json.dumps(checkout)
+
+        self.http.mutate = mutate
+        self.driver.step(self.run)
+        with self.assertRaisesRegex(PolicyError, "contradicts actual"):
+            self.driver.step(self.run)
+
+    def test_explicit_validation_correction_preserves_candidate_and_failed_evidence(self):
+        self.rejected_validation()
+        before = self.driver._load(self.run)
+        old = copy.deepcopy(self.config)
+        self.config["validation_commands"] = [["python3", "-m", "unittest", "-v"]]
+        result = self.driver.reconfigure_validation(self.run, old, "Correct test environment")
+        self.assertEqual(result["head"], before["head"])
+        self.assertEqual(result["branch"], before["branch"])
+        self.assertEqual(result["plan_attempt"], 1)
+        self.assertEqual(result["tokens"], before["tokens"] + 20)
+        self.assertEqual(self.journal.get(self.run)["config_digest"], config_digest(self.config))
+        events = self.journal.events(self.run)
+        correction = next(e for e in events if e["kind"] == "delivery_validation_reconfigured")
+        child = self.journal.get(correction["data"]["job"])
+        self.assertEqual(child["state"], "failed")
+        self.assertIsNone(child["pending_intent"])
+        self.assertEqual(self.driver.artifacts.get(correction["data"]["previous_config"]), old)
+
+        def mutate(packet, obs):
+            if packet["stage"] == "validating":
+                checkout = json.loads(obs["events"][4]["output"].split("=", 1)[1])
+                checkout["results"][0]["argv"] = self.config["validation_commands"][0]
+                obs["events"][4]["output"] = "COLLEGIUM_CHECKOUT=" + json.dumps(checkout)
+
+        self.http.mutate = mutate
+        created = self.http.created
+        self.restart_controller()
+        self.driver.step(self.run)
+        self.assertEqual(self.http.created, created + 1)
+        self.assertEqual(self.driver.step(self.run)["state"], "reviewing")
+        with self.assertRaises(PolicyError):
+            self.driver.reconfigure_validation(self.run, old, "Repeat must not duplicate")
+
+    def test_validation_correction_refuses_scope_change_or_uncertain_launch(self):
+        self.until("validating")
+        self.driver.step(self.run)
+        old = copy.deepcopy(self.config)
+        self.config["validation_commands"] = [["python3", "-m", "unittest", "-v"]]
+        with self.assertRaises(PolicyError):
+            self.driver.reconfigure_validation(self.run, old, "Still running, no observation")
+        self.config["allowed_paths"] = ["/"]
+        with self.assertRaises(PolicyError):
+            self.driver.reconfigure_validation(self.run, old, "Scope must stay frozen")
+        self.assertEqual(self.journal.get(self.run)["config_digest"], config_digest(old))
+
+    def test_validation_correction_cli_does_not_fall_through_to_github(self):
+        from collegium_pipeline.cli import main
+
+        self.rejected_validation()
+        old = copy.deepcopy(self.config)
+        self.config["validation_commands"] = [["python3", "-m", "unittest", "-v"]]
+        with (
+            patch("collegium_pipeline.cli.load_config", side_effect=[self.config, old]),
+            patch("builtins.print"),
+            patch("collegium_pipeline.cli.Github") as github,
+        ):
+            code = main(
+                [
+                    "reconfigure-validation",
+                    "--config",
+                    "new.json",
+                    "--previous-config",
+                    "old.json",
+                    "--journal",
+                    str(self.path / "journal.sqlite3"),
+                    "--artifacts",
+                    str(self.path / "artifacts"),
+                    "--run-id",
+                    self.run,
+                    "--reason",
+                    "Correct environment",
+                    "--apply",
+                ]
+            )
+        self.assertEqual(code, 0)
+        github.assert_not_called()
+
+    def restart_controller(self):
+        self.journal.close()
+        self.journal = Journal(self.path / "journal.sqlite3")
         self.driver = Delivery(
             self.config,
             self.journal,
@@ -335,6 +824,26 @@ class DeliveryTests(unittest.TestCase):
             self.path / "artifacts",
             clock=lambda: self.now,
         )
+
+    def test_github_ref_preserves_branch_path_separators(self):
+        calls = []
+
+        class Http:
+            def request(self, method, path):
+                calls.append((method, path))
+                return {"object": {"sha": BASE}}, {}
+
+        app = GithubApp("owner/repo", 123, Http())
+        branch = "collegium/" + self.run
+        self.assertEqual(app.ref(branch), BASE)
+        self.assertEqual(calls, [("GET", "/repos/owner/repo/git/ref/heads/" + branch)])
+
+    def test_lost_pr_response_reconciles_without_second_pr(self):
+        self.until("opening_pr")
+        self.github.lose = "pr"
+        with self.assertRaises(RemoteError):
+            self.driver.step(self.run)
+        self.restart_controller()
         self.driver.step(self.run)
         self.assertEqual(sum(op == "pr" for op, _ in self.github.writes), 1)
 
@@ -343,6 +852,7 @@ class DeliveryTests(unittest.TestCase):
         self.github.lose = "commit"
         with self.assertRaises(RemoteError):
             self.driver.step(self.run)
+        self.restart_controller()
         r = self.driver.step(self.run)
         self.assertEqual(r["state"], "validating")
         self.assertEqual(sum(op == "commit" for op, _ in self.github.writes), 1)
@@ -356,6 +866,8 @@ class DeliveryTests(unittest.TestCase):
         self.github.mutate = fail
         with self.assertRaises(RemoteError):
             broker.branch(self.run, BASE)
+        self.restart_controller()
+        broker = self.driver.broker
         with self.assertRaises(PolicyError):
             broker.branch(self.run, BASE)
 

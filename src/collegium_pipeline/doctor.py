@@ -7,6 +7,7 @@ from .adapters import Github, command_json
 from .broker import GithubApp
 from .credentials import local_platform
 from .domain import Selection, select_model
+from .native_broker import ScriptTransport
 from .platform import WorkerBinding, agent_digest
 from .readiness import verify_report
 from .runner import worker_binding
@@ -68,13 +69,17 @@ def doctor(config: dict) -> dict:
         for role in config["workers"]:
             if ":" in role:
                 base, effort = role.split(":", 1)
-                repeats = {"high": 1, "xhigh": 2}.get(effort)
+                repeats = {"high": 1, "xhigh": 2, "max": 2}.get(effort)
                 if base != "fixer" or repeats is None:
                     raise ValueError("Unrecognized worker variant")
                 row = dict(config["workers"][role])
                 row["selection"] = Selection(**row["selection"])
                 binding = WorkerBinding(**row)
-                if binding.selection != select_model(base, same_cause_failures=repeats):
+                if binding.selection != select_model(
+                    base,
+                    same_cause_failures=repeats,
+                    profile=config.get("model_policy", "codex"),
+                ):
                     raise ValueError("Variant does not match effort policy")
             else:
                 binding = worker_binding(config, role)
@@ -100,7 +105,12 @@ def doctor(config: dict) -> dict:
         check("worker_bindings", workers)
     if profile == "readiness":
         check("native_readiness", report)
-    if "broker_enabled" in config:
+    if config.get("broker_transport") == "collegium_script":
+        check(
+            "broker_managed_scope",
+            lambda: ScriptTransport(config, local_platform(), None, None).scope(),
+        )
+    elif "broker_enabled" in config:
         check(
             "broker_installation_scope",
             lambda: GithubApp.from_environment(config).scope() or {"scoped": True},

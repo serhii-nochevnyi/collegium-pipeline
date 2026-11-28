@@ -1,0 +1,588 @@
+{
+  "schema_version": "pipeline-integrations/v1",
+  "connections": [
+    {
+      "name": "pipeline-github",
+      "description": "GitHub MCP; explicit read-only tool ceiling; oauth_client_not_configured",
+      "url": "https://api.githubcopilot.com/mcp/readonly",
+      "tools": []
+    },
+    {
+      "name": "atlassian-rovo",
+      "description": "Atlassian Rovo (Jira, Confluence); explicit read-only tool ceiling; connected",
+      "url": "https://mcp.atlassian.com/v2/mcp",
+      "tools": [
+        "getAccessibleAtlassianResources",
+        "atlassianUserInfo",
+        "getConfluenceContent",
+        "searchConfluence",
+        "getJiraIssue",
+        "listJiraIssueComments",
+        "searchJiraIssuesUsingJql",
+        "search"
+      ]
+    },
+    {
+      "name": "ak-prod",
+      "description": "Agents Knowledge (PROD); explicit read-only tool ceiling; connected",
+      "url": "https://agents-knowledge.infrateam.xyz/mcp",
+      "tools": [
+        "search_docs",
+        "get_document",
+        "list_workspaces",
+        "list_collections",
+        "get_document_tree",
+        "get_related_documents"
+      ]
+    },
+    {
+      "name": "grafana-prod",
+      "description": "Grafana (PROD); explicit read-only tool ceiling; connected",
+      "url": "https://toolhive.infrateam.xyz/grafana-prod/mcp",
+      "tools": [
+        "alerting_rules_read",
+        "alerting_silences_read",
+        "analyze_loki_labels",
+        "check_datasources_health",
+        "diff_tempo_traces",
+        "get_annotation_tags",
+        "get_annotations",
+        "get_dashboard_by_uid",
+        "get_dashboard_panel_queries",
+        "get_dashboard_property",
+        "get_dashboard_summary",
+        "get_datasource",
+        "get_doc",
+        "get_tempo_trace",
+        "get_tempo_traceql_docs",
+        "list_dashboard_versions",
+        "list_datasources",
+        "list_loki_label_names",
+        "list_loki_label_values",
+        "list_prometheus_label_names",
+        "list_prometheus_label_values",
+        "list_prometheus_metric_metadata",
+        "list_prometheus_metric_names",
+        "list_pyroscope_label_names",
+        "list_pyroscope_label_values",
+        "list_pyroscope_profile_types",
+        "list_tempo_attribute_names",
+        "list_tempo_attribute_values",
+        "query_loki_logs",
+        "query_loki_patterns",
+        "query_loki_stats",
+        "query_prometheus",
+        "query_prometheus_histogram",
+        "query_pyroscope",
+        "query_tempo_metrics",
+        "search_dashboards",
+        "search_folders",
+        "search_tempo_traces"
+      ]
+    },
+    {
+      "name": "grafana-dev",
+      "description": "Grafana (DEV); explicit read-only tool ceiling; unreachable",
+      "url": "https://toolhive.infrateam-dev.xyz/grafana/mcp",
+      "tools": []
+    },
+    {
+      "name": "vmcluster-dev",
+      "description": "VictoriaMetrics (DEV); explicit read-only tool ceiling; unreachable",
+      "url": "https://toolhive.infrateam-dev.xyz/vmcluster-dev/mcp",
+      "tools": []
+    },
+    {
+      "name": "vmcluster-prod",
+      "description": "VictoriaMetrics (PROD); explicit read-only tool ceiling; connected",
+      "url": "https://toolhive.infrateam.xyz/vmcluster-prod/mcp",
+      "tools": [
+        "active_queries",
+        "alerts",
+        "documentation",
+        "explain_query",
+        "label_values",
+        "labels",
+        "metric_statistics",
+        "metrics",
+        "metrics_metadata",
+        "prettify_query",
+        "query",
+        "query_range",
+        "rules",
+        "series",
+        "top_queries",
+        "tsdb_status"
+      ]
+    },
+    {
+      "name": "backstage-dev",
+      "description": "Backstage (DEV); explicit read-only tool ceiling; unreachable",
+      "url": "https://toolhive.infrateam-dev.xyz/backstage/mcp",
+      "tools": []
+    },
+    {
+      "name": "backstage-prod",
+      "description": "Backstage (PROD); explicit read-only tool ceiling; connected",
+      "url": "https://toolhive.infrateam.xyz/backstage-prod/mcp",
+      "tools": [
+        "get-catalog-entity",
+        "validate-entity"
+      ]
+    },
+    {
+      "name": "langfuse-dev",
+      "description": "Langfuse (DEV); explicit read-only tool ceiling; unreachable",
+      "url": "https://langfuse.infrateam-dev.xyz/api/public/mcp",
+      "tools": []
+    },
+    {
+      "name": "langfuse-prod",
+      "description": "Langfuse (PROD); explicit read-only tool ceiling; needs_project_credentials",
+      "url": "https://langfuse.infrateam.xyz/api/public/mcp",
+      "tools": []
+    },
+    {
+      "name": "ak-dev",
+      "description": "Agents Knowledge (DEV); explicit read-only tool ceiling; connected",
+      "url": "https://agents-knowledge.infrateam-dev.xyz/mcp",
+      "tools": [
+        "search_docs",
+        "get_document",
+        "list_workspaces",
+        "list_collections",
+        "get_document_tree",
+        "get_related_documents"
+      ]
+    }
+  ],
+  "bindings": {
+    "pipeline-github": {
+      "target": "project/pipeline-github",
+      "connection_id": "mcpc_c7171c5349b74291a30a1d1bd2f14eaf"
+    },
+    "atlassian-rovo": {
+      "target": "project/atlassian-rovo",
+      "connection_id": "mcpc_6922425fd6a845f4b604a8663ab06385"
+    },
+    "ak-prod": {
+      "target": "project/ak-prod",
+      "connection_id": "mcpc_27eec2a3866b4c26b04bba961bae9159"
+    },
+    "grafana-prod": {
+      "target": "project/grafana-prod",
+      "connection_id": "mcpc_e33ecc0ae7154059b9b17efe5e967331"
+    },
+    "grafana-dev": {
+      "target": "project/grafana-dev",
+      "connection_id": "mcpc_7922a081c5a147a4be5c62c245326631"
+    },
+    "vmcluster-dev": {
+      "target": "project/vmcluster-dev",
+      "connection_id": "mcpc_a49117e37fa442f58472d3fd616ea240"
+    },
+    "vmcluster-prod": {
+      "target": "project/vmcluster-prod",
+      "connection_id": "mcpc_729b8150e4074b0f9164946e27998b40"
+    },
+    "backstage-dev": {
+      "target": "project/backstage-dev",
+      "connection_id": "mcpc_a608cfadd7334e479e7a52c54d7495c2"
+    },
+    "backstage-prod": {
+      "target": "project/backstage-prod",
+      "connection_id": "mcpc_948ef97eb40d41f5a0b25f1e0240937b"
+    },
+    "langfuse-dev": {
+      "target": "project/langfuse-dev",
+      "connection_id": "mcpc_84da8f43fdc94ad3873fe3a927dce615"
+    },
+    "langfuse-prod": {
+      "target": "project/langfuse-prod",
+      "connection_id": "mcpc_b32d4a17575c44a194d126af8ad6e62f"
+    },
+    "ak-dev": {
+      "target": "project/ak-dev",
+      "connection_id": "mcpc_b692cbf768e14262a510f49b15337ded"
+    }
+  },
+  "status": [
+    {
+      "title": "GitHub MCP",
+      "server_id": "mcp_f84a50bbf0124203abb51ecc7941ccfb",
+      "connection_id": "mcpc_c7171c5349b74291a30a1d1bd2f14eaf",
+      "url": "https://api.githubcopilot.com/mcp/readonly",
+      "auth_type": "oauth2",
+      "need": "pipeline-github",
+      "environment": "shared",
+      "state": "oauth_client_not_configured",
+      "http_status": null,
+      "allowed_tools": [],
+      "attached_to_live_agents": false,
+      "backend_read_verified": false,
+      "authenticated_discovery": false,
+      "reason": "Authorization server does not support dynamic client registration; server has no configured client_id. Existing repository App is independent."
+    },
+    {
+      "title": "Atlassian Rovo (Jira, Confluence)",
+      "server_id": "mcp_cec818f18a63466a92c26b43993eb2b4",
+      "connection_id": "mcpc_6922425fd6a845f4b604a8663ab06385",
+      "url": "https://mcp.atlassian.com/v2/mcp",
+      "auth_type": "oauth2",
+      "need": "atlassian-rovo",
+      "environment": "shared",
+      "state": "connected",
+      "http_status": 200,
+      "allowed_tools": [
+        "getAccessibleAtlassianResources",
+        "atlassianUserInfo",
+        "getConfluenceContent",
+        "searchConfluence",
+        "getJiraIssue",
+        "listJiraIssueComments",
+        "searchJiraIssuesUsingJql",
+        "search"
+      ],
+      "attached_to_live_agents": true,
+      "backend_read_verified": false,
+      "authenticated_discovery": true,
+      "backend_tool_call_verified": true,
+      "backend_probe_tool": "mcp__atlassian-rovo__getAccessibleAtlassianResources",
+      "backend_probe_session": "ses_091e22d78d8d4cd981e1e56cee4efda7",
+      "backend_probe_observation_digest": "d51de187390e9a33394c6578617664e4e7c5a40f0cc98393f00705469a55295b"
+    },
+    {
+      "title": "Agents Knowledge (PROD)",
+      "server_id": "mcp_8492db3630294a228f9742098bdb88a0",
+      "connection_id": "mcpc_27eec2a3866b4c26b04bba961bae9159",
+      "url": "https://agents-knowledge.infrateam.xyz/mcp",
+      "auth_type": "oauth2",
+      "need": "ak-prod",
+      "environment": "PROD",
+      "state": "connected",
+      "http_status": 200,
+      "allowed_tools": [
+        "search_docs",
+        "get_document",
+        "list_workspaces",
+        "list_collections",
+        "get_document_tree",
+        "get_related_documents"
+      ],
+      "attached_to_live_agents": true,
+      "backend_read_verified": false,
+      "authenticated_discovery": true,
+      "backend_tool_call_verified": true,
+      "backend_probe_tool": "mcp__ak-prod__list_workspaces",
+      "backend_probe_session": "ses_091e22d78d8d4cd981e1e56cee4efda7",
+      "backend_probe_observation_digest": "d51de187390e9a33394c6578617664e4e7c5a40f0cc98393f00705469a55295b"
+    },
+    {
+      "title": "Grafana (PROD)",
+      "server_id": "mcp_1344b2e627b04128830b01f1cd759383",
+      "connection_id": "mcpc_e33ecc0ae7154059b9b17efe5e967331",
+      "url": "https://toolhive.infrateam.xyz/grafana-prod/mcp",
+      "auth_type": "oauth2",
+      "need": "grafana-prod",
+      "environment": "PROD",
+      "state": "connected",
+      "http_status": 200,
+      "allowed_tools": [
+        "alerting_rules_read",
+        "alerting_silences_read",
+        "analyze_loki_labels",
+        "check_datasources_health",
+        "diff_tempo_traces",
+        "get_annotation_tags",
+        "get_annotations",
+        "get_dashboard_by_uid",
+        "get_dashboard_panel_queries",
+        "get_dashboard_property",
+        "get_dashboard_summary",
+        "get_datasource",
+        "get_doc",
+        "get_tempo_trace",
+        "get_tempo_traceql_docs",
+        "list_dashboard_versions",
+        "list_datasources",
+        "list_loki_label_names",
+        "list_loki_label_values",
+        "list_prometheus_label_names",
+        "list_prometheus_label_values",
+        "list_prometheus_metric_metadata",
+        "list_prometheus_metric_names",
+        "list_pyroscope_label_names",
+        "list_pyroscope_label_values",
+        "list_pyroscope_profile_types",
+        "list_tempo_attribute_names",
+        "list_tempo_attribute_values",
+        "query_loki_logs",
+        "query_loki_patterns",
+        "query_loki_stats",
+        "query_prometheus",
+        "query_prometheus_histogram",
+        "query_pyroscope",
+        "query_tempo_metrics",
+        "search_dashboards",
+        "search_folders",
+        "search_tempo_traces"
+      ],
+      "attached_to_live_agents": true,
+      "backend_read_verified": false,
+      "authenticated_discovery": true,
+      "backend_tool_call_verified": true,
+      "backend_probe_tool": "mcp__grafana-prod__list_datasources",
+      "backend_probe_session": "ses_091e22d78d8d4cd981e1e56cee4efda7",
+      "backend_probe_observation_digest": "d51de187390e9a33394c6578617664e4e7c5a40f0cc98393f00705469a55295b"
+    },
+    {
+      "title": "Grafana (DEV)",
+      "server_id": "mcp_9d62d2d5a8f54c0a9940fb968a7cc656",
+      "connection_id": "mcpc_7922a081c5a147a4be5c62c245326631",
+      "url": "https://toolhive.infrateam-dev.xyz/grafana/mcp",
+      "auth_type": null,
+      "need": "grafana-dev",
+      "environment": "DEV",
+      "state": "unreachable",
+      "http_status": 502,
+      "allowed_tools": [],
+      "attached_to_live_agents": false,
+      "backend_read_verified": false,
+      "authenticated_discovery": false
+    },
+    {
+      "title": "VictoriaMetrics (DEV)",
+      "server_id": "mcp_c13b77ef2bcf4b769ed5f01093669826",
+      "connection_id": "mcpc_a49117e37fa442f58472d3fd616ea240",
+      "url": "https://toolhive.infrateam-dev.xyz/vmcluster-dev/mcp",
+      "auth_type": null,
+      "need": "vmcluster-dev",
+      "environment": "DEV",
+      "state": "unreachable",
+      "http_status": 502,
+      "allowed_tools": [],
+      "attached_to_live_agents": false,
+      "backend_read_verified": false,
+      "authenticated_discovery": false
+    },
+    {
+      "title": "VictoriaMetrics (PROD)",
+      "server_id": "mcp_bb7dad460a5b4dcdb39d4c4b72e06465",
+      "connection_id": "mcpc_729b8150e4074b0f9164946e27998b40",
+      "url": "https://toolhive.infrateam.xyz/vmcluster-prod/mcp",
+      "auth_type": "oauth2",
+      "need": "vmcluster-prod",
+      "environment": "PROD",
+      "state": "connected",
+      "http_status": 200,
+      "allowed_tools": [
+        "active_queries",
+        "alerts",
+        "documentation",
+        "explain_query",
+        "label_values",
+        "labels",
+        "metric_statistics",
+        "metrics",
+        "metrics_metadata",
+        "prettify_query",
+        "query",
+        "query_range",
+        "rules",
+        "series",
+        "top_queries",
+        "tsdb_status"
+      ],
+      "attached_to_live_agents": true,
+      "backend_read_verified": false,
+      "authenticated_discovery": true,
+      "backend_tool_call_verified": true,
+      "backend_probe_tool": "mcp__vmcluster-prod__query",
+      "backend_probe_session": "ses_091e22d78d8d4cd981e1e56cee4efda7",
+      "backend_probe_observation_digest": "d51de187390e9a33394c6578617664e4e7c5a40f0cc98393f00705469a55295b"
+    },
+    {
+      "title": "Backstage (DEV)",
+      "server_id": "mcp_bd0126109af844ea86607930db5853b9",
+      "connection_id": "mcpc_a608cfadd7334e479e7a52c54d7495c2",
+      "url": "https://toolhive.infrateam-dev.xyz/backstage/mcp",
+      "auth_type": null,
+      "need": "backstage-dev",
+      "environment": "DEV",
+      "state": "unreachable",
+      "http_status": 502,
+      "allowed_tools": [],
+      "attached_to_live_agents": false,
+      "backend_read_verified": false,
+      "authenticated_discovery": false
+    },
+    {
+      "title": "Backstage (PROD)",
+      "server_id": "mcp_95b80624a5db45f0b6b10959fa09a4e5",
+      "connection_id": "mcpc_948ef97eb40d41f5a0b25f1e0240937b",
+      "url": "https://toolhive.infrateam.xyz/backstage-prod/mcp",
+      "auth_type": "oauth2",
+      "need": "backstage-prod",
+      "environment": "PROD",
+      "state": "connected",
+      "http_status": 200,
+      "allowed_tools": [
+        "get-catalog-entity",
+        "validate-entity"
+      ],
+      "attached_to_live_agents": true,
+      "backend_read_verified": false,
+      "authenticated_discovery": true,
+      "backend_tool_call_verified": true,
+      "backend_probe_tool": "mcp__backstage-prod__validate-entity",
+      "backend_probe_session": "ses_091e22d78d8d4cd981e1e56cee4efda7",
+      "backend_probe_observation_digest": "d51de187390e9a33394c6578617664e4e7c5a40f0cc98393f00705469a55295b"
+    },
+    {
+      "title": "Langfuse (DEV)",
+      "server_id": "mcp_e4a56c7e88814bd5b3120f35028fa2bd",
+      "connection_id": "mcpc_84da8f43fdc94ad3873fe3a927dce615",
+      "url": "https://langfuse.infrateam-dev.xyz/api/public/mcp",
+      "auth_type": null,
+      "need": "langfuse-dev",
+      "environment": "DEV",
+      "state": "unreachable",
+      "http_status": 502,
+      "allowed_tools": [],
+      "attached_to_live_agents": false,
+      "backend_read_verified": false,
+      "authenticated_discovery": false,
+      "auth_requirement": "Project-scoped Basic authentication (public key and secret key); project selection pending. Do not store keys in source."
+    },
+    {
+      "title": "Langfuse (PROD)",
+      "server_id": "mcp_965a38079e80461296117a86841e75c1",
+      "connection_id": "mcpc_b32d4a17575c44a194d126af8ad6e62f",
+      "url": "https://langfuse.infrateam.xyz/api/public/mcp",
+      "auth_type": null,
+      "need": "langfuse-prod",
+      "environment": "PROD",
+      "state": "needs_project_credentials",
+      "http_status": 424,
+      "allowed_tools": [],
+      "attached_to_live_agents": false,
+      "backend_read_verified": false,
+      "authenticated_discovery": false,
+      "auth_requirement": "Project-scoped Basic authentication (public key and secret key); project selection pending. Do not store keys in source."
+    },
+    {
+      "title": "Agents Knowledge (DEV)",
+      "server_id": "mcp_bdfecb0459e84bb0b2f0cf87047e484b",
+      "connection_id": "mcpc_b692cbf768e14262a510f49b15337ded",
+      "url": "https://agents-knowledge.infrateam-dev.xyz/mcp",
+      "auth_type": "oauth2",
+      "need": "ak-dev",
+      "environment": "DEV",
+      "state": "connected",
+      "http_status": 200,
+      "allowed_tools": [
+        "search_docs",
+        "get_document",
+        "list_workspaces",
+        "list_collections",
+        "get_document_tree",
+        "get_related_documents"
+      ],
+      "attached_to_live_agents": true,
+      "backend_read_verified": false,
+      "authenticated_discovery": true,
+      "backend_tool_call_verified": true,
+      "backend_probe_tool": "mcp__ak-dev__list_workspaces",
+      "backend_probe_session": "ses_091e22d78d8d4cd981e1e56cee4efda7",
+      "backend_probe_observation_digest": "d51de187390e9a33394c6578617664e4e7c5a40f0cc98393f00705469a55295b"
+    }
+  ],
+  "role_connections": {
+    "planner": [
+      "pipeline-github",
+      "atlassian-rovo",
+      "ak-prod",
+      "grafana-prod",
+      "grafana-dev",
+      "vmcluster-dev",
+      "vmcluster-prod",
+      "backstage-dev",
+      "backstage-prod",
+      "langfuse-dev",
+      "langfuse-prod",
+      "ak-dev"
+    ],
+    "plan_reviewer": [
+      "pipeline-github",
+      "atlassian-rovo",
+      "ak-prod",
+      "grafana-prod",
+      "grafana-dev",
+      "vmcluster-dev",
+      "vmcluster-prod",
+      "backstage-dev",
+      "backstage-prod",
+      "langfuse-dev",
+      "langfuse-prod",
+      "ak-dev"
+    ],
+    "executor": [
+      "pipeline-github",
+      "atlassian-rovo",
+      "ak-prod",
+      "grafana-prod",
+      "grafana-dev",
+      "vmcluster-dev",
+      "vmcluster-prod",
+      "backstage-dev",
+      "backstage-prod",
+      "langfuse-dev",
+      "langfuse-prod",
+      "ak-dev"
+    ],
+    "code_reviewer": [
+      "pipeline-github",
+      "atlassian-rovo",
+      "ak-prod",
+      "grafana-prod",
+      "grafana-dev",
+      "vmcluster-dev",
+      "vmcluster-prod",
+      "backstage-dev",
+      "backstage-prod",
+      "langfuse-dev",
+      "langfuse-prod",
+      "ak-dev"
+    ],
+    "fixer": [
+      "pipeline-github",
+      "atlassian-rovo",
+      "ak-prod",
+      "grafana-prod",
+      "grafana-dev",
+      "vmcluster-dev",
+      "vmcluster-prod",
+      "backstage-dev",
+      "backstage-prod",
+      "langfuse-dev",
+      "langfuse-prod",
+      "ak-dev"
+    ],
+    "sentinel": [
+      "pipeline-github",
+      "atlassian-rovo",
+      "ak-prod",
+      "grafana-prod",
+      "grafana-dev",
+      "vmcluster-dev",
+      "vmcluster-prod",
+      "backstage-dev",
+      "backstage-prod",
+      "langfuse-dev",
+      "langfuse-prod",
+      "ak-dev"
+    ]
+  },
+  "default_tools_policy": "explicit read-only lists; unresolved connections deny all tools",
+  "environment_substitution_allowed": false
+}

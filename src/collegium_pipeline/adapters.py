@@ -73,6 +73,4 @@ def jira_snapshot(issue: dict, repository: str) -> Task:
     requirements = fields.get("description")
     if isinstance(requirements, dict):  # Preserve ADF structurally, without dropping requirements.
         requirements = json.dumps(requirements, sort_keys=True)
-    return Task(
-        "jira", str(issue.get("id", "")), repository, fields.get("summary", ""), requirements or ""
-    )
+    return Task("jira", issue["id"], repository, fields.get("summary", ""), requirements or "")

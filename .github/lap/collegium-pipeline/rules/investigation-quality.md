@@ -1,0 +1,1 @@
+Read-only investigation. Preserve exact task/config/head and registered source citations. Separate facts, assumptions and open questions. Independent review must bind exact synthesis/research digests. Never publish, mutate Jira, delegate, expose credentials or fabricate human approval. ADR/tickets are proposals.

@@ -117,6 +117,7 @@ def verify_report(config, report):
             or proof.get("model") != binding.selection.model
             or proof.get("effort") != binding.selection.effort
             or not proof.get("tool_result_event_id")
-            or proof.get("proof_kind") != "first_tool_codex_process_arguments"
+            or proof.get("proof_kind")
+            != "first_tool_" + binding.harness.replace("-", "_") + "_process_arguments"
         ):
             raise PolicyError(f"Readiness has no matching native proof for {role}")

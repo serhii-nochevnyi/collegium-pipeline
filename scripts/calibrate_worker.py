@@ -9,7 +9,7 @@ from collegium_pipeline.artifacts import Artifacts
 from collegium_pipeline.config import config_digest, load_config
 from collegium_pipeline.credentials import local_platform
 from collegium_pipeline.domain import PolicyError, Task
-from collegium_pipeline.effort import PROBE_COMMAND, runtime_evidence
+from collegium_pipeline.effort import probe_command, runtime_evidence
 from collegium_pipeline.platform import Collegium
 from collegium_pipeline.runner import worker_binding
 from collegium_pipeline.store import Journal
@@ -48,7 +48,7 @@ def calibrate(config, role, journal, artifact_directory, output, *, attempt="v1"
             "run_id": run_id,
             "stage": "runtime_diagnostic",
             "role": role,
-            "runtime_probe_command": PROBE_COMMAND,
+            "runtime_probe_command": probe_command(binding.harness),
             "instructions": "Run only the runtime probe as your first tool call; then return JSON.",
             "result_schema": {
                 "schema_version": "worker-result/v1",

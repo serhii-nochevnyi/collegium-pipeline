@@ -4,7 +4,7 @@ import base64
 import json
 
 from .domain import PolicyError
-from .effort import PROBE_COMMAND
+from .effort import probe_command
 
 REQUIREMENTS = (
     "Implement normalize_names(values) in solution.py. Accept a list of strings; trim each, "
@@ -41,7 +41,7 @@ def validation_command(candidate):
     )
 
 
-def readiness_packet(run_id, stage, role, revision, *, subject=None):
+def readiness_packet(run_id, stage, role, revision, *, subject=None, harness="codex"):
     instructions = {
         "planning": (
             "Produce a concise implementation and test plan. "
@@ -72,7 +72,7 @@ def readiness_packet(run_id, stage, role, revision, *, subject=None):
         "stage": stage,
         "role": role,
         "revision": revision,
-        "runtime_probe_command": PROBE_COMMAND,
+        "runtime_probe_command": probe_command(harness),
         "instructions": instructions[stage],
         "requirements": REQUIREMENTS,
         "result_schema": {
