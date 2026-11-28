@@ -285,6 +285,9 @@ class Epics:
                 not re.fullmatch(r"[a-f0-9]{40}", p.get("sha", "")) for p in parents
             ):
                 raise PolicyError("Incomplete Git ancestry response")
+            if any(p["sha"] == merge for p in parents):
+                seen.add(merge)
+                break
             # Prefer mainline while retaining every alternate parent for completeness.
             pending.extend(p["sha"] for p in reversed(parents))
         result = True if merge in seen else None if pending else False
@@ -343,14 +346,15 @@ class Epics:
             )
         ):
             raise PolicyError("Prerequisite PR identity or accepted revision changed")
-        if not pr.get("merged"):
+        if pr.get("merged") is not True:
             if pr.get("state") != "open":
                 raise PolicyError("Prerequisite PR was closed without merge")
             return None
+        merge = pr.get("merge_commit_sha")
         if (
             pr.get("state") != "closed"
             or not pr.get("merged_at")
-            or not re.fullmatch(r"[a-f0-9]{40}", pr.get("merge_commit_sha", ""))
+            or (merge is not None and not re.fullmatch(r"[a-f0-9]{40}", merge))
         ):
             raise PolicyError("Merged prerequisite identity differs")
         checks, statuses = commit_evidence(github, delivery["head"])
@@ -361,7 +365,10 @@ class Epics:
             != "green"
         ):
             raise PolicyError("Merged prerequisite exact-head CI is no longer green")
-        contained = self.contains(github, base, pr["merge_commit_sha"])
+        # REST 2026-03-10 removed merge_commit_sha. For a head-preserving merge,
+        # actual merged lifecycle plus accepted-head ancestry is sufficient. A
+        # squash/rebase whose accepted head is absent remains fail-closed.
+        contained = self.contains(github, base, merge or delivery["head"])
         if contained is None:
             raise AncestryPending("Continuing bounded ancestry verification at the selected base")
         if not contained:
@@ -369,7 +376,9 @@ class Epics:
         return {
             "pr": delivery["pr"],
             "head": delivery["head"],
-            "merge_commit": pr["merge_commit_sha"],
+            "merge_commit": merge,
+            "contained_commit": merge or delivery["head"],
+            "ancestry_proof": "merge_commit" if merge else "accepted_head",
             "observed_base": base,
         }
 
