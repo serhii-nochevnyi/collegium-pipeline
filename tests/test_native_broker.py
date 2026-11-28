@@ -162,6 +162,31 @@ class NativeTransportTests(unittest.TestCase):
         self.transport.request("POST", "/repos/owner/repo/pulls", {"head": "branch"})
         self.assertEqual(self.platform.submissions, 1)
 
+    def test_known_queued_receipt_survives_observation_failure_without_second_post(self):
+        original = self.platform.request
+        failed_lookup = False
+
+        def request(method, path, payload=None):
+            nonlocal failed_lookup
+            if method == "POST":
+                original(method, path, payload)
+                return {"run": None, "item": {"id": "itm_queued"}}, {}
+            if path.endswith("/runs?limit=100"):
+                if not failed_lookup:
+                    failed_lookup = True
+                    raise RemoteError("Read failed", unknown_outcome=False)
+                return {"runs": [{"id": "1", "item_id": "itm_queued"}]}, {}
+            return original(method, path, payload)
+
+        self.platform.request = request
+        with self.assertRaises(RemoteError) as raised:
+            self.transport.request("POST", "/repos/owner/repo/pulls", {"head": "branch"})
+        self.assertTrue(raised.exception.unknown_outcome)
+        self.assertEqual(self.platform.submissions, 1)
+        self.transport.request("POST", "/repos/owner/repo/pulls", {"head": "branch"})
+        self.transport.request("POST", "/repos/owner/repo/pulls", {"head": "branch"})
+        self.assertEqual(self.platform.submissions, 1)
+
     def test_forged_or_truncated_reply_is_rejected(self):
         self.platform.forge = True
         with self.assertRaises(RemoteError):

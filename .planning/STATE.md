@@ -1,3 +1,35 @@
+# Cloud continuation: queued item/run receipt handling fix pending
+
+Second cloud run run_9efbfa966c244d66b434fc8ca73f927a failed BEFORE first resumed tick,
+with safely recorded reason Checkpoint acknowledgement unknown; external effect refused.
+Store head run74491... and begin run841db... both eventually SUCCEEDED; no executor
+session has been created for original intent5398... (complete73-session read-only list).
+Source currently INSTALLED e13279c2edaa2e0dda5df04d19b6fe58d1806ca1/version11, plan
+76be3b4dbb2e1c5fdfa851ca2e0b6aa9f9fedafa8326e9772b521b37593751a0 applied.
+Config hash48ff... stays FROZEN, all8paused, same service root6c6d499d... retained.
+
+Actual API contract (official source) permits POST /run -> {item:{id,status:queued},run:null}.
+Checkpoint client lost the known item and scanned100 unrelated run details sequentially,
+exhausting120sec before refreshing the run list; run summaries include item_id.
+Fix now tracks exact returned item_id, waits for its run via summaries without scanning
+old details, still verifies final run.item_id, HMAC, request_id, owner, namespace/status.
+Native App transport now persists broker_rpc_queued receipt and resumes the SAME queued
+item after observation failure instead of another POST. Unknown submissions still never
+blindly retry. Tests prove100old summaries ignored, onePOST, queued receipt replay after
+failed observation, all160 tests PASS. Runtime integration JSON drops only unused
+bindings/role_connections catalog fields; full repository config and manifest/agent scope
+unchanged. Runtime keeps status/connections/policy/schema. Controller253250bytes.
+
+Next publisher cycle12 for NEW frozen payload, source review then controller-only plan
+and install. Do not use old source plans. Original task/worker packet/config/model/effort
+unchanged; continue same remote admission from checkpoint, no local controller.
+Partial accepted2workers .local/cloud-service-before-recovery.json. Observer history
+.local/cloud-service-remote-runs.json preserves failed modes; no active remote run now.
+Current final audit script must not require all historical slices succeeded.
+No service commit/PR yet, no pilot/Jira/merge; prior PR2/3 remain untouched.
+
+--- Prior state below ---
+
 # Cloud live continuation: interrupted BEFORE executor creation, same root retained
 
 Actual cloud run run_49d943a76e6e477db1d5fa4fd1d29c9d FAILED with PolicyError before

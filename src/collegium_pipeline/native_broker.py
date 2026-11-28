@@ -124,8 +124,24 @@ class ScriptTransport:
             if mutation
             else []
         )
+        queued = (
+            [
+                e["data"]
+                for e in events
+                if e["kind"] == "broker_rpc_queued" and e["data"]["key"] == key
+            ]
+            if mutation
+            else []
+        )
         if prior:
             remote_run = prior[-1]["remote_run"]
+        elif queued:
+            remote_run = self.assigned_run(queued[-1]["item_id"], mutation)
+            self.journal.record(
+                self.run_id,
+                "broker_rpc_started",
+                {"key": key, "remote_run": remote_run, "mutation": mutation},
+            )
         else:
             if intents:
                 raise PolicyError("Unresolved broker submission; never launch a replacement")
@@ -141,9 +157,17 @@ class ScriptTransport:
                         {"key": key, "status": 413, "remote_run_created": False},
                     )
                 raise
-            remote_run = started.get("run", {}).get("id")
+            remote_run = (started.get("run") or {}).get("id")
             if not remote_run:
-                raise RemoteError("Broker submission omitted its run ID", unknown_outcome=mutation)
+                item_id = (started.get("item") or {}).get("id")
+                if not item_id:
+                    raise RemoteError(
+                        "Broker submission omitted its run ID", unknown_outcome=mutation
+                    )
+                self.journal.record(
+                    self.run_id, "broker_rpc_queued", {"key": key, "item_id": item_id}
+                )
+                remote_run = self.assigned_run(item_id, mutation)
             self.journal.record(
                 self.run_id,
                 "broker_rpc_started",
@@ -180,6 +204,25 @@ class ScriptTransport:
             return result["body"], {}
         raise RemoteError(
             "Broker job deadline exceeded; retain its run ID", unknown_outcome=mutation
+        )
+
+    def assigned_run(self, item_id, mutation):
+        until = self.clock() + 180
+        while self.clock() < until:
+            try:
+                rows, _ = self.http.request("GET", self.path + "/runs?limit=100")
+            except RemoteError as exc:
+                raise RemoteError(
+                    "Broker queue observation unavailable; retain receipt", unknown_outcome=mutation
+                ) from exc
+            matches = [r for r in rows["runs"] if r.get("item_id") == item_id]
+            if len(matches) > 1:
+                raise PolicyError("Native broker queued item has ambiguous runs")
+            if matches:
+                return matches[0]["id"]
+            self.pause(1)
+        raise RemoteError(
+            "Broker item is still queued; retain its receipt", unknown_outcome=mutation
         )
 
 

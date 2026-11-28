@@ -90,9 +90,11 @@ class Checkpoints:
         # An unknown submission is looked up, never blindly resubmitted.
         from .transport import RemoteError
 
+        item_id = None
         try:
             started, _ = self.http.request("POST", self.path + "/run", {"data": body})
             run = (started.get("run") or {}).get("id")
+            item_id = (started.get("item") or {}).get("id")
         except RemoteError as exc:
             if not exc.unknown_outcome:
                 raise
@@ -101,13 +103,21 @@ class Checkpoints:
         while self.clock() < deadline:
             if not run:
                 history, _ = self.http.request("GET", self.path + "/runs?limit=100")
-                for summary in history["runs"]:
-                    detail, _ = self.http.request("GET", self.path + "/runs/" + summary["id"])
-                    if detail.get("item", {}).get("event", {}).get("data") == body:
-                        run = detail["id"]
-                        break
+                if item_id:
+                    matches = [r for r in history["runs"] if r.get("item_id") == item_id]
+                    if len(matches) > 1:
+                        raise PolicyError("Checkpoint queue identity is ambiguous")
+                    run = matches[0]["id"] if matches else None
+                else:
+                    for summary in history["runs"]:
+                        detail, _ = self.http.request("GET", self.path + "/runs/" + summary["id"])
+                        if detail.get("item", {}).get("event", {}).get("data") == body:
+                            run = detail["id"]
+                            break
             if run:
                 detail, _ = self.http.request("GET", self.path + "/runs/" + run)
+                if item_id and detail.get("item_id") != item_id:
+                    raise PolicyError("Checkpoint run differs from its queued item")
                 if detail["status"] not in {"queued", "waiting", "running"}:
                     if detail["status"] != "succeeded" or detail.get("output_cut") is not False:
                         raise PolicyError(
@@ -124,7 +134,10 @@ class Checkpoints:
                         raise PolicyError("Checkpoint response authentication differs")
                     return result
             self.pause(1)
-        raise PolicyError("Checkpoint acknowledgement unknown; external effect refused")
+        raise PolicyError(
+            f"Checkpoint acknowledgement unknown (action={action}, item={item_id}, run={run}); "
+            "external effect refused"
+        )
 
     def head(self):
         return self.call("head")["head"]

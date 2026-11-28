@@ -141,6 +141,54 @@ class AgentsHttp:
 
 
 class RecoveryTests(unittest.TestCase):
+    def test_checkpoint_queued_post_tracks_item_without_scanning_old_run_details(self):
+        owner = self
+
+        class Http:
+            submissions = 0
+            lists = 0
+            details = 0
+
+            def request(self, method, path, payload=None):
+                if method == "POST":
+                    self.submissions += 1
+                    self.event = payload["data"]
+                    return {"run": None, "item": {"id": "itm_queued"}}, {}
+                if path.endswith("?limit=100"):
+                    self.lists += 1
+                    rows = [{"id": str(n), "item_id": "itm_other"} for n in range(100)]
+                    if self.lists > 1:
+                        rows = [{"id": "run_found", "item_id": "itm_queued"}]
+                    return {"runs": rows}, {}
+                self.assert_detail_path(path)
+                self.details += 1
+                event = self.event
+                result = {
+                    "owner": owner.store.owner,
+                    "namespace": "service",
+                    "request_id": event["request_id"],
+                    "head": None,
+                }
+                return {
+                    "status": "succeeded",
+                    "item_id": "itm_queued",
+                    "output_cut": False,
+                    "output_tail": json.dumps({**result, "mac": mac(result, owner.store.key)}),
+                }, {}
+
+            @staticmethod
+            def assert_detail_path(path):
+                if not path.endswith("/runs/run_found"):
+                    raise AssertionError("Must not scan unrelated old run details")
+
+        http = Http()
+        checkpoints = Checkpoints(
+            self.config, http, self.store.key, namespace="service", pause=lambda _: None
+        )
+        checkpoints.checked = True
+        self.assertIsNone(checkpoints.head())
+        self.assertEqual((http.submissions, http.lists, http.details), (1, 2, 1))
+
     def test_checkpoint_rpc_waits_for_queued_waiting_and_running_without_resubmission(self):
         owner = self
 
