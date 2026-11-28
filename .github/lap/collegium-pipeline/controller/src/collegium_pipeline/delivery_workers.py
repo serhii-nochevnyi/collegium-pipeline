@@ -60,6 +60,57 @@ class NativeJobs:
         self.config, self.journal, self.http, self.artifacts = config, journal, http, artifacts
         self.platform, self.clock = Collegium(http), clock
 
+    def _worker_usage(self, observed):
+        idle = next(
+            (e for e in reversed(observed["events"]) if e.get("type") == "session.status_idle"),
+            {},
+        )
+        usage = idle.get("usage")
+        usage = usage if isinstance(usage, dict) else {}
+        required = ("input_tokens", "output_tokens")
+        cache = ("cache_creation_input_tokens", "cache_read_input_tokens")
+        counters = {
+            key: usage[key]
+            for key in (*required, *cache)
+            if type(usage.get(key)) is int and usage[key] >= 0
+        }
+        verified = all(key in counters for key in required) and all(
+            key not in usage or key in counters for key in cache
+        )
+        observed_tokens = sum(counters.values())
+        return {
+            "observed_tokens": observed_tokens
+            if verified
+            else max(observed_tokens, self.config.get("max_total_tokens", 100000)),
+            "usage_verified": verified,
+        }
+
+    def unaccepted_usage(self, root):
+        """Return the first terminal usage record for each discarded native turn."""
+        tokens = {}
+        for event in self.journal.events(root):
+            if event["kind"] in {"rejected_usage", "drain_usage"}:
+                tokens.setdefault(event["data"]["child"], event["data"]["tokens"])
+        return sum(tokens.values())
+
+    def _reject_checkout(self, root, job, run, observed, evidence):
+        usage = self._worker_usage(observed)
+        with self.journal.transaction():
+            if self.journal.get(job) != run:
+                raise PolicyError("Worker changed while rejecting checkout")
+            if run["state"] == "reconciling":
+                self.journal.connection.execute(
+                    "UPDATE runs SET state='failed',pending_intent=NULL,version=version+1 "
+                    "WHERE id=?",
+                    (job,),
+                )
+            else:
+                self.journal.fail(job, run["version"], evidence["reason"])
+            self.journal._event(job, "checkout_rejected", {**evidence, **usage})
+            self.journal._event(
+                root, "rejected_usage", {"child": job, "tokens": usage["observed_tokens"]}
+            )
+
     def binding(self, selection):
         key = (
             selection.role
@@ -250,15 +301,7 @@ class NativeJobs:
                 "session_id": launch["session_id"],
                 "turn_id": launch["turn_id"],
             }
-            with self.journal.transaction():
-                if self.journal.get(job) != run:
-                    raise PolicyError("Timed-out worker changed during reconciliation")
-                self.journal.connection.execute(
-                    "UPDATE runs SET state='failed',pending_intent=NULL,version=version+1 "
-                    "WHERE id=?",
-                    (job,),
-                )
-                self.journal._event(job, "checkout_rejected", evidence)
+            self._reject_checkout(root, job, run, observed, evidence)
             raise CheckoutProtocolError("Definitively terminated timed-out worker: " + job)
         if run["state"] == "reconciling":
             raise PolicyError("Timed-out worker is still uncertain; no replacement allowed")
@@ -287,13 +330,12 @@ class NativeJobs:
         try:
             _, checked = tool_result(observed, checkout, index=1, harness=binding.harness)
         except PolicyError as exc:
-            self.journal.record(
+            self._reject_checkout(
+                root,
                 job,
-                "checkout_rejected",
+                run,
+                observed,
                 {"observation_digest": observation_digest, "reason": str(exc)},
-            )
-            self.journal.fail(
-                job, run["version"], "Completed worker changed or failed the pinned checkout"
             )
             raise CheckoutProtocolError(
                 "Completed worker changed or failed the pinned checkout: " + job
@@ -303,10 +345,13 @@ class NativeJobs:
         ]
         if len(lines) != 1:
             raise PolicyError("Pinned checkout result absent or ambiguous")
-        checkout_result = json.loads(lines[0].split("=", 1)[1])
-        if checkout_result.get("head") != head:
+        try:
+            checkout_result = json.loads(lines[0].split("=", 1)[1])
+            result = json.loads(observed["turn"].get("answer"))
+        except (ValueError, TypeError) as exc:
+            raise PolicyError("Invalid worker result JSON") from exc
+        if not isinstance(checkout_result, dict) or checkout_result.get("head") != head:
             raise PolicyError("Worker checked out a different revision")
-        result = json.loads(observed["turn"]["answer"])
         expected = packet["result_schema"]
         if (
             not isinstance(result, dict)
@@ -340,24 +385,72 @@ class NativeJobs:
             and (not result["payload"].get("plan") or not result["payload"].get("acceptance"))
         ):
             raise PolicyError("Plan lacks acceptance mapping")
-        idle = [e for e in observed["events"] if e.get("type") == "session.status_idle"]
-        if not idle:
-            if self.clock() - started < self.config.get("max_stage_seconds", 180):
-                return None
-            raise PolicyError("Worker usage history did not settle")
-        usage = idle[-1].get("usage", {})
+        idle_observed = any(e.get("type") == "session.status_idle" for e in observed["events"])
+        if not idle_observed and self.clock() - started < self.config.get("max_stage_seconds", 180):
+            return None
         result.update(
             session_id=launch["session_id"],
             runtime_evidence=proof,
-            observed_tokens=sum(
-                v for k, v in usage.items() if k.endswith("tokens") and type(v) is int and v >= 0
-            ),
             observation_digest=observation_digest,
+            **self._worker_usage(observed),
         )
         self.journal.complete_worker(
             job, run["version"], {"artifact_digest": self.artifacts.put(result)}
         )
         return result
+
+    def drain(self, root):
+        """Observe only confirmed turns; discard stale results and never dispatch/abort."""
+        pending, settled = [], []
+        rows = self.journal.connection.execute(
+            "SELECT id FROM runs WHERE source_id LIKE ? AND pending_intent IS NOT NULL",
+            (root + ":%",),
+        ).fetchall()
+        for row in rows:
+            child = self.journal.get(row[0])
+            events = self.journal.events(row[0])
+            launches = [e["data"] for e in events if e["kind"] == "launched"]
+            requests = [e["data"]["request"] for e in events if e["kind"] == "dispatch_request"]
+            if len(launches) != 1 or len(requests) != 1:
+                pending.append(row[0])
+                continue
+            launch, binding = launches[0], requests[0]["binding"]
+            observed = self.platform.observations(launch["session_id"], launch["turn_id"])
+            turn, session = observed["turn"], observed["session"]
+            if (
+                session.get("id") != launch["session_id"]
+                or session.get("agent_id") != binding["agent_id"]
+                or session.get("project_id") != binding["project_id"]
+                or turn.get("id") != launch["turn_id"]
+                or turn.get("session_id") != launch["session_id"]
+            ):
+                raise PolicyError("Drain observation differs from the original launch")
+            if turn.get("status") not in {"completed", "failed", "cancelled"} or not turn.get(
+                "finished_at"
+            ):
+                pending.append(row[0])
+                continue
+            usage = self._worker_usage(observed)
+            evidence = {
+                "artifact_digest": self.artifacts.put(observed),
+                **launch,
+                **usage,
+                "accepted": False,
+            }
+            with self.journal.transaction():
+                if self.journal.get(row[0]) != child:
+                    raise PolicyError("Worker changed while draining")
+                self.journal.connection.execute(
+                    "UPDATE runs SET state='failed',pending_intent=NULL,version=version+1 "
+                    "WHERE id=?",
+                    (row[0],),
+                )
+                self.journal._event(row[0], "worker_drained", evidence)
+                self.journal._event(
+                    root, "drain_usage", {"child": row[0], "tokens": usage["observed_tokens"]}
+                )
+            settled.append(row[0])
+        return {"pending": pending, "settled": settled, "tokens": self.unaccepted_usage(root)}
 
     def stop_root(self, root):
         rows = self.journal.connection.execute(

@@ -23,8 +23,12 @@ class Task:
     requirements: str
 
     def __post_init__(self):
-        if self.source not in {"text", "jira"}:
+        if not isinstance(self.source, str) or self.source not in {"text", "jira"}:
             raise PolicyError("Task source must be text or jira")
+        if self.source == "jira" and (
+            not isinstance(self.source_id, str) or not re.fullmatch(r"[1-9][0-9]*", self.source_id)
+        ):
+            raise PolicyError("Jira issue ID must be a canonical positive decimal string")
         if not all(isinstance(v, str) and v.strip() for v in asdict(self).values()):
             raise PolicyError("Task fields cannot be empty")
         if not re.fullmatch(r"[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+", self.repository):

@@ -13,6 +13,7 @@ from dataclasses import asdict
 from pathlib import Path
 from uuid import uuid4
 
+from .config import config_digest
 from .domain import PolicyError, digest
 from .native_broker import binding_digest
 
@@ -23,6 +24,71 @@ MAX_COMPRESSED = 8_000_000
 
 class ExternalRecoveryRequired(PolicyError):
     """A previous attempt has no adopted journal/receipt."""
+
+
+def intended_execution(config):
+    return {**config, "execution_enabled": True, "broker_enabled": True}
+
+
+def recovery_profiles(*configs):
+    """Index only installed configurations and their intended execution variants."""
+    return {
+        config_digest(profile): profile
+        for config in configs
+        for profile in (config, intended_execution(config))
+    }
+
+
+def resolve_recovery_profile(config, admitted_digest, profiles=None):
+    if profiles is None:
+        profile = config
+    else:
+        profile = profiles.get(admitted_digest)
+    if profile is None or config_digest(profile) != admitted_digest:
+        raise PolicyError("Recovery admission has a different frozen configuration")
+    scope = (
+        "server",
+        "project_id",
+        "recovery_store",
+        "repository",
+        "repository_id",
+        "base_branch",
+        "allowed_paths",
+        "github_connection_id",
+        "native_broker",
+        "broker_transport",
+        "broker_reads",
+        "broker_allow_paused_triggers",
+        "broker_compress_requests",
+    )
+    if any(profile.get(key) != config.get(key) for key in scope):
+        raise PolicyError("Frozen recovery profile has a different controller or broker scope")
+    return profile
+
+
+def recovery_owner(config, identity):
+    owner = (config.get("recovery_store") or {}).get("owner")
+    if not owner or identity.get("automation_id") != owner:
+        raise PolicyError("Recovery owner differs from the cloud controller")
+    return owner
+
+
+def checkpoint_origin_profile(config, checkpoint_data, profiles=None):
+    _, value = checkpoint_data
+    admitted_digest = value.get("config_digest")
+    if not isinstance(admitted_digest, str) or value.get("schema_version") != "checkpoint/v1":
+        raise PolicyError("Invalid recovery checkpoint configuration")
+    profile = resolve_recovery_profile(config, admitted_digest, profiles)
+    recovery_owner(profile, value["identity"])
+    return profile
+
+
+def root_profile(config, journal, root, profiles):
+    run = journal.get(root)
+    profile = resolve_recovery_profile(config, run["config_digest"], profiles)
+    if run["repository"] != profile["repository"]:
+        raise PolicyError("Recovery admission repository differs from its frozen configuration")
+    return profile
 
 
 def canonical(value):
@@ -182,7 +248,8 @@ class Checkpoints:
 
 
 class WriteAhead:
-    def __init__(self, config, journal, artifacts, checkpoints, identity):
+    def __init__(self, config, journal, artifacts, checkpoints, identity, *, profiles=None):
+        recovery_owner(config, identity)
         self.config, self.journal = config, journal
         self.artifacts, self.checkpoints, self.identity = Path(artifacts), checkpoints, identity
         head = checkpoints.head()
@@ -190,15 +257,21 @@ class WriteAhead:
         self.local_head = self.artifacts.parent / "checkpoint-head.json"
         local = json.loads(self.local_head.read_text()) if self.local_head.exists() else None
         if local != self.parent:
-            adopted = adopt_pending_head(config, journal, self.artifacts, checkpoints)
+            checkpoint_data = None
+            origin = config
+            if profiles is not None and head:
+                checkpoint_data = checkpoints.get()
+                origin = checkpoint_origin_profile(config, checkpoint_data, profiles)
+            adopted = adopt_pending_head(
+                origin, journal, self.artifacts, checkpoints, checkpoint_data=checkpoint_data
+            )
             if not adopted:
                 raise PolicyError(
                     "Independent checkpoint advanced; reconcile before another effect"
                 )
 
     def save(self, operation):
-        from .config import config_digest
-
+        root_profile(self.config, self.journal, operation["run_id"], None)
         if self.journal.connection.in_transaction:
             raise PolicyError("Checkpoint cannot capture an open journal transaction")
         with tempfile.TemporaryDirectory() as folder:
@@ -246,8 +319,6 @@ class WriteAhead:
 
 def adopt_pending_head(config, journal, artifacts, checkpoints, *, checkpoint_data=None):
     """Adopt only our exact committed upload whose actual effect was never called."""
-    from .config import config_digest
-
     state = Path(artifacts).parent
     pending_path = state / "checkpoint-pending.json"
     if not pending_path.exists():
@@ -255,16 +326,17 @@ def adopt_pending_head(config, journal, artifacts, checkpoints, *, checkpoint_da
     pending = json.loads(pending_path.read_text())
     local_path = state / "checkpoint-head.json"
     local = json.loads(local_path.read_text()) if local_path.exists() else None
-    if local == pending["checkpoint"]:
-        current = checkpoints.head()
-        if not current or current["checkpoint"] != local:
-            return False
-        pending_path.unlink()
-        return True
-    if local != pending["parent"] or pending["config_digest"] != config_digest(config):
+    already_adopted = local == pending["checkpoint"]
+    if (not already_adopted and local != pending["parent"]) or pending[
+        "config_digest"
+    ] != config_digest(config):
         return False
     head = checkpoints.head()
-    if not head or head["checkpoint"] != pending["checkpoint"] or head["parent"] != local:
+    if (
+        not head
+        or head["checkpoint"] != pending["checkpoint"]
+        or head["parent"] != pending["parent"]
+    ):
         return False
     checkpoint, value = checkpoint_data if checkpoint_data is not None else checkpoints.get()
     if (
@@ -276,6 +348,10 @@ def adopt_pending_head(config, journal, artifacts, checkpoints, *, checkpoint_da
     ):
         return False
     operation = value["operation"]
+    root_profile(config, journal, operation["run_id"], None)
+    if already_adopted:
+        pending_path.unlink()
+        return True
     if not journal.effect_not_started(operation):
         if operation["kind"] != "tick":
             return False
@@ -329,17 +405,21 @@ def session_name(intent):
     return "pipeline-" + intent.replace("-", "")
 
 
-def reconcile_workers(config, journal, http):
+def reconcile_workers(config, journal, http, *, run_ids=None):
     """Observe identities only. No new session, prompt or quality acceptance."""
     from .domain import Selection
     from .platform import Collegium, WorkerBinding, agent_digest
 
+    pending = journal.connection.execute(
+        "SELECT id FROM runs WHERE pending_intent IS NOT NULL"
+    ).fetchall()
+    selected = [root for (root,) in pending if run_ids is None or root in run_ids]
+    for root in selected:
+        root_profile(config, journal, root, None)
     sessions = None
     recovered = []
-    for row in journal.connection.execute(
-        "SELECT id FROM runs WHERE pending_intent IS NOT NULL"
-    ).fetchall():
-        run = journal.get(row[0])
+    for root in selected:
+        run = journal.get(root)
         events = journal.events(run["id"])
         intent = run["pending_intent"]
         launch = [e for e in events if e["kind"] == "launched" and e["data"]["intent"] == intent]
@@ -528,29 +608,36 @@ def validate_import_receipt(journal, receipt):
 
 
 def restore_checkpoint(
-    config, state, checkpoints, http, github, *, diagnostic=False, checkpoint_data=None
+    config,
+    state,
+    checkpoints,
+    http,
+    github,
+    *,
+    diagnostic=False,
+    checkpoint_data=None,
+    profiles=None,
 ):
     """Verify a lost attempt independently, reconcile in staging, then atomically import."""
     from .artifacts import Artifacts
-    from .config import config_digest
     from .store import Journal
 
     state = Path(state)
     checkpoint, value = checkpoint_data if checkpoint_data is not None else checkpoints.get()
-    if value.get("schema_version") != "checkpoint/v1" or value.get(
-        "config_digest"
-    ) != config_digest(config):
-        raise PolicyError("Recovery checkpoint configuration differs; no implicit rebind")
+    config = checkpoint_origin_profile(config, (checkpoint, value), profiles)
     identity = value["identity"]
     owner = config["recovery_store"]["owner"]
-    if identity.get("automation_id") != owner:
-        raise PolicyError("Recovery checkpoint belongs to another controller")
     for key, prefix in (("automation_id", "aut"), ("run_id", "run"), ("attempt_id", "att")):
         if not re.fullmatch(prefix + r"_[A-Za-z0-9]+", identity.get(key, "")):
             raise PolicyError("Invalid recovery origin identity")
     prior, _ = http.request("GET", "/api/automations/" + owner + "/runs/" + identity["run_id"])
     data = prior.get("item", {}).get("event", {}).get("data") or {}
     allowed = data.get("action") == ("recovery-probe" if diagnostic else "deliver")
+    if not diagnostic and getattr(checkpoints, "namespace", "delivery") == "delivery":
+        allowed = allowed or (
+            data.get("action") == "epic"
+            and data.get("operation") in {"prepare", "import-jira", "tick", "pause", "resume"}
+        )
     if getattr(checkpoints, "namespace", "delivery") == "service":
         allowed = data in (
             {"action": "service-test", "mode": "run"},
@@ -604,12 +691,22 @@ def restore_checkpoint(
             for artifact, content in value["artifacts"].items():
                 if store.put(content) != artifact:
                     raise PolicyError("Recovery artifact digest differs")
-            workers = reconcile_workers(config, journal, http)
-            broker = None
-            if value["operation"]["kind"] == "broker":
-                broker = reconcile_broker(config, journal, github, value["operation"])
-            elif value["operation"]["kind"] not in {"session_create", "prompt", "tick"}:
+            operation = value["operation"]
+            root_profile(config, journal, operation["run_id"], None)
+            if operation["kind"] not in {"broker", "session_create", "prompt", "tick"}:
                 raise PolicyError("Unknown checkpoint effect type")
+            broker = None
+            if profiles is None:
+                workers = reconcile_workers(config, journal, http)
+                if operation["kind"] == "broker":
+                    broker = reconcile_broker(config, journal, github, operation)
+            else:
+                workers, brokers = _reconcile_effects(
+                    config, journal, http, github, profiles, checkpoint_operation=operation
+                )
+                workers = workers or []
+                if operation["kind"] == "broker":
+                    broker = brokers.get((operation["run_id"], operation["key"]))
             journal.record(
                 value["operation"]["run_id"],
                 "checkpoint_recovered",
@@ -661,10 +758,7 @@ def restore_checkpoint(
         return receipt
 
 
-def reconcile_existing(config, journal, http, github):
-    """Reconcile an adopted journal; return None when only a lost snapshot can help."""
-    from .config import config_digest
-
+def _reconcile_effects(config, journal, http, github, profiles, *, checkpoint_operation=None):
     pending = journal.connection.execute(
         "SELECT id FROM runs WHERE pending_intent IS NOT NULL"
     ).fetchall()
@@ -675,23 +769,47 @@ def reconcile_existing(config, journal, http, github):
         for e in events:
             if e["kind"] == "effect_attempt" and e["data"]["operation"]["kind"] == "broker":
                 operation = e["data"]["operation"]
+                if operation["run_id"] != row[0]:
+                    raise PolicyError("Broker recovery operation belongs to a different admission")
                 if operation["key"] not in done and operation not in unresolved:
                     unresolved.append(operation)
+    if (
+        checkpoint_operation
+        and checkpoint_operation["kind"] == "broker"
+        and checkpoint_operation not in unresolved
+    ):
+        unresolved.append(checkpoint_operation)
     if not pending and not unresolved:
-        return None
-    roots = {r[0] for r in pending} | {o["run_id"] for o in unresolved}
-    if any(journal.get(root)["config_digest"] != config_digest(config) for root in roots):
-        raise PolicyError("Existing recovery admission has a different frozen configuration")
-    workers = reconcile_workers(config, journal, http)
-    broker = []
+        return None, {}
+    roots = dict.fromkeys([row[0] for row in pending] + [op["run_id"] for op in unresolved])
+    admitted = {root: root_profile(config, journal, root, profiles) for root in roots}
+    worker_groups = {}
+    for (root,) in pending:
+        worker_groups.setdefault(config_digest(admitted[root]), set()).add(root)
+    workers = []
+    for run_ids in worker_groups.values():
+        profile = admitted[next(iter(run_ids))]
+        workers.extend(reconcile_workers(profile, journal, http, run_ids=run_ids))
+    broker = {}
     for operation in unresolved:
+        key = (operation["run_id"], operation["key"])
         if journal.effect_not_started(operation):
-            broker.append({"key": operation["key"], "not_started": True})
+            broker[key] = {"key": operation["key"], "not_started": True}
         else:
-            broker.append(reconcile_broker(config, journal, github, operation))
+            broker[key] = reconcile_broker(
+                admitted[operation["run_id"]], journal, github, operation
+            )
+    return workers, broker
+
+
+def reconcile_existing(config, journal, http, github, *, profiles=None):
+    """Reconcile an adopted journal; return None when only a lost snapshot can help."""
+    workers, broker = _reconcile_effects(config, journal, http, github, profiles)
+    if workers is None:
+        return None
     return {
         "mode": "adopted_journal",
         "workers": workers,
-        "broker": broker,
+        "broker": list(broker.values()),
         "external_mutations": 0,
     }

@@ -370,28 +370,10 @@
       "notify": "failures",
       "script": {
         "files": [
-          "controller/src/collegium_pipeline/__init__.py",
-          "controller/src/collegium_pipeline/__main__.py",
-          "controller/src/collegium_pipeline/adapters.py",
-          "controller/src/collegium_pipeline/artifacts.py",
-          "controller/src/collegium_pipeline/broker.py",
-          "controller/src/collegium_pipeline/ci.py",
-          "controller/src/collegium_pipeline/cli.py",
-          "controller/src/collegium_pipeline/config.py",
-          "controller/src/collegium_pipeline/credentials.py",
-          "controller/src/collegium_pipeline/delivery.py",
-          "controller/src/collegium_pipeline/delivery_workers.py",
-          "controller/src/collegium_pipeline/domain.py",
-          "controller/src/collegium_pipeline/effort.py",
-          "controller/src/collegium_pipeline/native_broker.py",
-          "controller/src/collegium_pipeline/platform.py",
-          "controller/src/collegium_pipeline/quality.py",
-          "controller/src/collegium_pipeline/recovery.py",
-          "controller/src/collegium_pipeline/service_test.py",
-          "controller/src/collegium_pipeline/store.py",
-          "controller/src/collegium_pipeline/transport.py",
+          "controller/runtime.b64",
           "controller/entry.py",
           "controller/settings.json",
+          "controller/epic-settings.json",
           "controller/integrations.json"
         ],
         "command": "python3 controller/entry.py",
@@ -401,6 +383,9 @@
         "size": "small",
         "secrets": [
           "PIPELINE_CONTROL_KEY"
+        ],
+        "mcp_servers": [
+          "atlassian-rovo"
         ]
       }
     },

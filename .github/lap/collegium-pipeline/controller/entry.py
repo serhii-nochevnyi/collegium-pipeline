@@ -5,6 +5,48 @@ import os
 import sys
 from pathlib import Path
 
+_BUNDLE_RUNTIME_SHA256 = "816e4945a9eb7ec364ca54dda217e88732938c5dc14c78c43a5b9d0c11d8886f"
+_BUNDLE_RUNTIME = None
+
+
+def activate_runtime(root):
+    """Load the exact bounded source archive; no downloads or extraction."""
+    global _BUNDLE_RUNTIME
+    archive = root / "runtime.b64"
+    import base64
+    import hashlib
+    import io
+    import re
+    import tempfile
+    import zipfile
+
+    try:
+        with archive.open("rb") as stream:
+            encoded = stream.read(2_000_001)
+    except FileNotFoundError as exc:
+        raise ValueError("Bundle runtime archive is required") from exc
+    if len(encoded) > 2_000_000:
+        raise ValueError("Oversized bundle runtime")
+    raw = base64.b64decode(encoded, validate=True)
+    if hashlib.sha256(raw).hexdigest() != _BUNDLE_RUNTIME_SHA256:
+        raise ValueError("Bundle runtime hash differs")
+    with zipfile.ZipFile(io.BytesIO(raw)) as value:
+        files = value.infolist()
+        if (
+            not 1 <= len(files) <= 64
+            or len({f.filename for f in files}) != len(files)
+            or sum(f.file_size for f in files) > 2_000_000
+            or any(not re.fullmatch(r"collegium_pipeline/[a-z_]+\.py", f.filename) for f in files)
+        ):
+            raise ValueError("Unexpected runtime members")
+        if value.testzip() is not None:
+            raise ValueError("Corrupt bundle runtime")
+    _BUNDLE_RUNTIME = tempfile.TemporaryDirectory(prefix="collegium-runtime-")
+    target = Path(_BUNDLE_RUNTIME.name) / "runtime.zip"
+    target.write_bytes(raw)
+    target.chmod(0o600)
+    sys.path.insert(0, str(target))
+
 
 def verify_control(config, integrations, http):
     """Authenticate with the controller's key; inspect only pinned, read-only metadata."""
@@ -81,7 +123,7 @@ def no_dispatch_accounted(prior, state, automation):
     return True
 
 
-def cloud_delivery(event, state, config, config_path, environ, http, controller):
+def cloud_delivery(event, state, config, config_path, environ, http, controller, *, profiles=None):
     from collegium_pipeline.domain import PolicyError
     from collegium_pipeline.transport import JsonHttp
 
@@ -97,8 +139,11 @@ def cloud_delivery(event, state, config, config_path, environ, http, controller)
                 "Bind PIPELINE_CONTROL_KEY in the project Vault before cloud dispatch"
             )
         http = http or JsonHttp(config["server"], {"X-Api-Key": key})
-        from collegium_pipeline.recovery import ExternalRecoveryRequired
+        from collegium_pipeline.recovery import ExternalRecoveryRequired, recovery_owner
 
+        identity = cloud_identity(environ)
+        if config.get("recovery_store"):
+            recovery_owner(config, identity)
         try:
             receipt_path, receipt = cloud_fence(event, state, environ, http)
         except ExternalRecoveryRequired:
@@ -108,7 +153,7 @@ def cloud_delivery(event, state, config, config_path, environ, http, controller)
                 and config.get("recovery_store")
             ):
                 raise
-            reconcile_controller(config, state, http, key)
+            reconcile_controller(config, state, http, key, profiles=profiles)
             # Recheck the complete history; recovery never grants a blanket bypass.
             receipt_path, receipt = cloud_fence(event, state, environ, http)
         if event.get("live") is not True:
@@ -117,6 +162,9 @@ def cloud_delivery(event, state, config, config_path, environ, http, controller)
             raise PolicyError("Cloud delivery is disabled")
         os.environ["LAP_SERVER"] = config["server"]
         os.environ["LAP_API_KEY"] = key
+        recovery = (http, key, identity)
+        if profiles is not None:
+            recovery += (profiles,)
         entered = True
         return controller(
             [
@@ -132,7 +180,7 @@ def cloud_delivery(event, state, config, config_path, environ, http, controller)
                 "--live",
                 "--once",
             ],
-            recovery=(http, key, cloud_identity(environ)),
+            recovery=recovery,
         )
     finally:
         if receipt is not None:
@@ -154,42 +202,45 @@ def cloud_delivery(event, state, config, config_path, environ, http, controller)
                 )
 
 
-def reconcile_controller(config, state, http, key, *, namespace="delivery"):
+def reconcile_controller(config, state, http, key, *, namespace="delivery", profiles=None):
     from collegium_pipeline.config import config_digest
     from collegium_pipeline.domain import Task
     from collegium_pipeline.native_broker import NativeGithubApp
     from collegium_pipeline.recovery import (
         Checkpoints,
         adopt_pending_head,
+        checkpoint_origin_profile,
         reconcile_existing,
         restore_checkpoint,
     )
     from collegium_pipeline.store import Journal
 
     state.mkdir(mode=0o700, parents=True, exist_ok=True)
+    checkpoints = Checkpoints(config, http, key, namespace=namespace)
+    head = checkpoints.head()
+    downloaded = checkpoints.get() if head else None
+    origin = checkpoint_origin_profile(config, downloaded, profiles) if downloaded else config
     scratch = Journal(state / "recovery-reads.sqlite3")
     try:
+        origin_digest = config_digest(origin)
         root = scratch.admit(
             Task(
                 "text",
-                "recovery-reads-v1",
-                config["repository"],
+                "recovery-reads-v1:" + origin_digest,
+                origin["repository"],
                 "Recovery observations",
                 "Read existing GitHub objects only",
             ),
-            config_digest(config),
+            origin_digest,
         )
-        github = NativeGithubApp(config, http, scratch, root)
-        checkpoints = Checkpoints(config, http, key, namespace=namespace)
-        head = checkpoints.head()
-        downloaded = checkpoints.get() if head else None
+        github = NativeGithubApp(origin, http, scratch, root)
         if downloaded and (state / "journal.sqlite3").is_file():
             current = Journal(state / "journal.sqlite3")
             try:
                 if adopt_pending_head(
-                    config, current, state / "artifacts", checkpoints, checkpoint_data=downloaded
+                    origin, current, state / "artifacts", checkpoints, checkpoint_data=downloaded
                 ):
-                    result = reconcile_existing(config, current, http, github)
+                    result = reconcile_existing(config, current, http, github, profiles=profiles)
                     return result or {"mode": "checkpoint_ack_reconciled", "external_mutations": 0}
             finally:
                 current.close()
@@ -202,13 +253,19 @@ def reconcile_controller(config, state, http, key, *, namespace="delivery"):
             # The adopted journal may still contain an older, confirmed pending job.
             # That does not account for the newer lost attempt: import its checkpoint first.
             return restore_checkpoint(
-                config, state, checkpoints, http, github, checkpoint_data=downloaded
+                origin,
+                state,
+                checkpoints,
+                http,
+                github,
+                checkpoint_data=downloaded,
+                profiles=profiles,
             )
         result = None
         if (state / "journal.sqlite3").is_file():
             journal = Journal(state / "journal.sqlite3")
             try:
-                result = reconcile_existing(config, journal, http, github)
+                result = reconcile_existing(config, journal, http, github, profiles=profiles)
             finally:
                 journal.close()
         if result is None:
@@ -320,6 +377,10 @@ def cloud_fence(event, state, environ, http, *, diagnostic=False, service=False)
                 )
                 if service
                 else data.get("action") == "deliver"
+                or (
+                    data.get("action") == "epic"
+                    and data.get("operation") not in {"status", "preflight"}
+                )
             )
         )
         if unsafe and not (
@@ -1065,7 +1126,10 @@ def recovery_probe(event, state, config, environ, http):
 def main(event=None, *, root=None, environ=None, http=None):
     environ = os.environ if environ is None else environ
     root = Path(root or Path(__file__).resolve().parent)
-    sys.path.insert(0, str(root / "src"))
+    if _BUNDLE_RUNTIME_SHA256:
+        activate_runtime(root)
+    else:
+        sys.path.insert(0, str(root / "src"))
     from collegium_pipeline.cli import main as controller
     from collegium_pipeline.config import load_config
     from collegium_pipeline.domain import PolicyError
@@ -1078,6 +1142,18 @@ def main(event=None, *, root=None, environ=None, http=None):
         raise PolicyError("Controller event data must be an object")
     action = event.get("action", "preflight")
     state = Path(environ.get("ARANARIUM_STATE_DIR", "/state")) / "collegium-pipeline"
+    if action in {"epic", "deliver", "reconcile"}:
+        from collegium_pipeline.recovery import recovery_profiles
+
+        epic_config = load_config(root / "epic-settings.json")
+        profiles = recovery_profiles(config, epic_config)
+    if action == "epic":
+        from collegium_pipeline.epic_cloud import dispatch
+        from collegium_pipeline.transport import JsonHttp
+
+        key = environ.get("PIPELINE_CONTROL_KEY")
+        http = http or (JsonHttp(epic_config["server"], {"X-Api-Key": key}) if key else None)
+        return dispatch(event, state, epic_config, environ, http, globals(), profiles=profiles)
     if action == "verify-control":
         if event != {"action": "verify-control"}:
             raise PolicyError("Control verification accepts no event parameters")
@@ -1134,7 +1210,7 @@ def main(event=None, *, root=None, environ=None, http=None):
         from collegium_pipeline.transport import JsonHttp
 
         http = http or JsonHttp(config["server"], {"X-Api-Key": key})
-        result = reconcile_controller(config, state, http, key)
+        result = reconcile_controller(config, state, http, key, profiles=profiles)
         print(json.dumps(result))
         return 0
     if action == "state-probe":
@@ -1176,7 +1252,9 @@ def main(event=None, *, root=None, environ=None, http=None):
         print(json.dumps(result))
         return 0
     if action == "deliver":
-        return cloud_delivery(event, state, config, config_path, environ, http, controller)
+        return cloud_delivery(
+            event, state, config, config_path, environ, http, controller, profiles=profiles
+        )
     run_id = event.get("run_id")
     if not isinstance(run_id, str) or not run_id:
         raise PolicyError("An existing run_id is required")

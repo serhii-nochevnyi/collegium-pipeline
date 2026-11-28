@@ -45,6 +45,8 @@ FIELDS = {
     "broker_reads",
     "broker_allow_paused_triggers",
     "broker_compress_requests",
+    "scheduling",
+    "epic",
 }
 
 
@@ -212,6 +214,52 @@ def load_config(path: str | Path) -> dict:
             raise PolicyError(
                 "Service test requires exact distinct fixture digests and CI diagnostic"
             )
+    if "scheduling" in config:
+        from .capacity import limits
+
+        limits(config)
+    if "epic" in config:
+        policy = config["epic"]
+        if not isinstance(policy, dict) or set(policy) != {
+            "max_tickets",
+            "max_total_tokens",
+            "integration_token_reserve",
+            "jira",
+            "scopes",
+        }:
+            raise PolicyError("Invalid epic settings")
+        if (
+            any(
+                type(policy[k]) is not int or policy[k] <= 0
+                for k in ("max_tickets", "max_total_tokens", "integration_token_reserve")
+            )
+            or policy["max_tickets"] > 100
+            or policy["integration_token_reserve"] >= policy["max_total_tokens"]
+        ):
+            raise PolicyError("Invalid epic budgets")
+        if not isinstance(policy["scopes"], dict):
+            raise PolicyError("Epic scopes must be an explicit issue-key mapping")
+        for scope in policy["scopes"].values():
+            from .capacity import checked_paths
+
+            if not isinstance(scope, dict) or set(scope) != {"paths", "resources"}:
+                raise PolicyError("Invalid Jira ticket scope")
+            checked_paths(scope["paths"], config["allowed_paths"])
+            if scope["resources"] is not None and (
+                not isinstance(scope["resources"], list)
+                or any(not isinstance(r, str) or not r for r in scope["resources"])
+            ):
+                raise PolicyError("Invalid Jira shared resource scope")
+        jira = policy["jira"]
+        if jira is not None and (
+            not isinstance(jira, dict)
+            or set(jira) != {"cloud_id", "epic_type_id", "blocks_link_type_id"}
+            or any(
+                not isinstance(v, str) or not re.fullmatch(r"[a-zA-Z0-9-]{1,100}", v)
+                for v in jira.values()
+            )
+        ):
+            raise PolicyError("Jira needs explicit cloud/type/block-link identities")
     return config
 
 

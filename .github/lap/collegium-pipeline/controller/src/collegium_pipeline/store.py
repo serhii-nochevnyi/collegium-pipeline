@@ -14,6 +14,10 @@ STAGES = ("planning", "plan_review", "implementing", "validating", "reviewing", 
 TERMINAL = {"ready_for_acceptance", "failed", "cancelled"}
 
 
+class CheckpointError(PolicyError):
+    """Persistence failed before an external effect; abort the entire dispatcher tick."""
+
+
 class Journal:
     def __init__(self, path: str | Path):
         self.before_effect = None
@@ -56,10 +60,10 @@ class Journal:
             self.record(operation["run_id"], "effect_attempt", {"operation": operation})
             try:
                 self.before_effect(operation)
-            except Exception:
+            except Exception as exc:
                 # The actual external call follows this hook and was never reached.
                 self.record(operation["run_id"], "effect_not_started", {"operation": operation})
-                raise
+                raise CheckpointError(str(exc)) from exc
 
     def effect_not_started(self, operation):
         events = [
@@ -75,6 +79,17 @@ class Journal:
 
     @contextmanager
     def transaction(self):
+        if self.connection.in_transaction:
+            name = "nested_" + uuid4().hex
+            self.connection.execute("SAVEPOINT " + name)
+            try:
+                yield
+            except BaseException:
+                self.connection.execute("ROLLBACK TO " + name)
+                raise
+            finally:
+                self.connection.execute("RELEASE " + name)
+            return
         self.connection.execute("BEGIN IMMEDIATE")
         try:
             yield
@@ -91,7 +106,7 @@ class Journal:
         )
 
     def admit(self, task: Task, config_digest: str, *, purpose="delivery") -> str:
-        if purpose not in {"delivery", "readiness", "calibration", "delivery_worker"}:
+        if purpose not in {"delivery", "readiness", "calibration", "delivery_worker", "epic"}:
             raise PolicyError("Unknown run purpose")
         with self.transaction():
             existing = self.connection.execute(
