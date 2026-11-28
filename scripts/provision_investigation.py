@@ -49,6 +49,19 @@ def main():
     if args.refresh:
         config = load_config(path)
         previous = json.loads(path.read_text())
+        environments, _ = http.request(
+            "GET", "/api/projects/" + base["project_id"] + "/environments"
+        )
+        defaults = [r for r in environments["environments"] if r["is_default"]]
+        if len(defaults) != 1 or any(
+            defaults[0].get(k) != v
+            for k, v in {
+                "runtime": "aranarium-aws",
+                "environment": None,
+                "size": "standard",
+            }.items()
+        ):
+            raise PolicyError("Installed project-default environment differs from reviewed plan")
         for binding in config["workers"].values():
             row, _ = http.request("GET", "/api/agents/" + binding["agent_id"])
             selection = binding["selection"]
@@ -59,10 +72,12 @@ def main():
                 or row.get("harness") != "claude-code"
                 or row.get("project_id") != base["project_id"]
                 or row.get("runtime") != binding["runtime"]
-                or row.get("environment") != "penv_abd958a7f24748afbd55ae6580112147"
-                or row.get("system")
-                != (ROOT / "agents/investigation-worker.md").read_text()
-                + f"\nYour fixed role is {selection['role']}.\n"
+                or row.get("environment") != "project-default"
+                or (row.get("system") or "").strip()
+                != (
+                    (ROOT / "agents/investigation-worker.md").read_text()
+                    + f"\nYour fixed role is {selection['role']}.\n"
+                ).strip()
                 or row.get("max_runtime_minutes") != 5
                 or row.get("status") != "paused"
                 or row.get("config", {}).get("repositories")
@@ -100,6 +115,13 @@ def main():
                 or row.get("provenance", {}).get("source_gone") is not False
             ):
                 raise PolicyError("Refresh cannot repin changed investigation authority or policy")
+            rules = row.get("references", {}).get("rules", [])
+            if len(rules) != 1 or rules[0].get("name") != "pipeline-investigation-quality":
+                raise PolicyError("Investigation rule identity differs")
+            rule, _ = http.request("GET", "/api/rules/" + rules[0]["id"])
+            expected_rule = ROOT / ".github/lap/collegium-pipeline/rules/investigation-quality.md"
+            if rule.get("content") != expected_rule.read_text().strip():
+                raise PolicyError("Investigation rule content differs")
             binding["approved_agent_digest"] = agent_digest(row)
         recovery = config["recovery_store"]
         row, _ = http.request("GET", "/api/automations/" + recovery["automation_id"])

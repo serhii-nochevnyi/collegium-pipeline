@@ -42,6 +42,9 @@ class InvestigationJobs(NativeJobs):
                 "Follow context.payload_contract exactly. Facts use registered source_id, "
                 "start/end line numbers and exact quote (join captured lines with newline). "
                 "Do not invent sources; external facts are assumptions or open questions. "
+                "Complexity rubric: 0 absent or trivial, 1 localized and understood, "
+                "2 crosses a boundary or has material uncertainty, 3 broad or irreversible. "
+                "Justify every dimension against the task and captured evidence. "
                 "Review the synthesis independently, including every research perspective. "
                 "Keep DEV/PROD distinctions. ADR and tickets remain proposals, not approval."
             ),

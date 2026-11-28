@@ -25,7 +25,7 @@
         "effort": "low",
         "reason": "investigation_policy/v1"
       },
-      "approved_agent_digest": "68548cdaf580a34ee340b30212a0baf894b0c38922e827efeeb00faa2f36757f",
+      "approved_agent_digest": "10107e61204f154aaa8f3aef364fb232c82d3020c0a382f6aca1d27d3fcf67f3",
       "harness": "claude-code",
       "model_connection_id": "mcn_699c8e51528e4438a359acfd4dced40f"
     },
@@ -41,7 +41,7 @@
         "effort": "low",
         "reason": "investigation_policy/v1"
       },
-      "approved_agent_digest": "caf1f472827632573e68b547411f7cf95384fc95e2711325680e19b3f3d75475",
+      "approved_agent_digest": "926ea8436c2629fe2e08755ba8e38459a752bf621b364efe1e491b51860697f8",
       "harness": "claude-code",
       "model_connection_id": "mcn_699c8e51528e4438a359acfd4dced40f"
     },
@@ -57,7 +57,7 @@
         "effort": "high",
         "reason": "investigation_policy/v1"
       },
-      "approved_agent_digest": "18b40dbd589474cd9100ada3088fe95ef7ea2ccbc40206b7344c466f89709cfe",
+      "approved_agent_digest": "aca29cdb317bf0e51a12e68e5192d4418b81eb81429832d784ee287e478331c6",
       "harness": "claude-code",
       "model_connection_id": "mcn_699c8e51528e4438a359acfd4dced40f"
     },
@@ -73,7 +73,7 @@
         "effort": "high",
         "reason": "investigation_policy/v1"
       },
-      "approved_agent_digest": "acff3fcb93407f4de8e01a97357d48ecf8dacb512b23b6f4489cef5c1e82561f",
+      "approved_agent_digest": "e5ca2adbf7db701ad2fade7b1408fcb3307a777729650258d0285503f94215c7",
       "harness": "claude-code",
       "model_connection_id": "mcn_699c8e51528e4438a359acfd4dced40f"
     },
@@ -89,7 +89,7 @@
         "effort": "max",
         "reason": "investigation_policy/v1"
       },
-      "approved_agent_digest": "7a48c1771b83dfd094afea1358702f19b0ebde26f3ca9bdb41647d25827493fe",
+      "approved_agent_digest": "7bfe056e3cddc811196553d20621c250f5e84bd5b6252c8d33216b3527aaeccc",
       "harness": "claude-code",
       "model_connection_id": "mcn_699c8e51528e4438a359acfd4dced40f"
     },
@@ -105,7 +105,7 @@
         "effort": "high",
         "reason": "investigation_policy/v1"
       },
-      "approved_agent_digest": "84fe1966ab5fc4f9ff20ab9f4b7b4b6cbb8c8206a7d32e85dc3bcf20d1520bad",
+      "approved_agent_digest": "6ddbce676f54206f6a64988f28cc5f9b821e5c857787876d635c9e46c6593916",
       "harness": "claude-code",
       "model_connection_id": "mcn_699c8e51528e4438a359acfd4dced40f"
     },
@@ -121,7 +121,7 @@
         "effort": "high",
         "reason": "investigation_policy/v1"
       },
-      "approved_agent_digest": "bccea08290e25ad200988212d097d705d617753137b1120030d9c129cc45953f",
+      "approved_agent_digest": "4daf32fd2cf790bc88a2811aa13420eddda70d802940786c2fd67fa88cb93e06",
       "harness": "claude-code",
       "model_connection_id": "mcn_699c8e51528e4438a359acfd4dced40f"
     },
@@ -137,7 +137,7 @@
         "effort": "max",
         "reason": "investigation_policy/v1"
       },
-      "approved_agent_digest": "cfb6aaa94393ce8af8fd52758723a77a1c98b0b368852f1fb39ca02f12059eb2",
+      "approved_agent_digest": "b86e15ddbb7bc9774d76cca32dda6568b1cec67bbb55568704fe47258b782a26",
       "harness": "claude-code",
       "model_connection_id": "mcn_699c8e51528e4438a359acfd4dced40f"
     },
@@ -153,7 +153,7 @@
         "effort": "high",
         "reason": "investigation_policy/v1"
       },
-      "approved_agent_digest": "9ed27f9cbacc4629fb5e94988252976d394cdb3bdc1907b0475dc7d321cb3ef9",
+      "approved_agent_digest": "2df363f2aae6a618be2c9a1af7162d5a470e5931251644c0a6c1dd72eea3d0d4",
       "harness": "claude-code",
       "model_connection_id": "mcn_699c8e51528e4438a359acfd4dced40f"
     },
@@ -169,7 +169,7 @@
         "effort": "max",
         "reason": "investigation_policy/v1"
       },
-      "approved_agent_digest": "3a40500f44fb4a87b7b4da19ccf062fd9ba450522cd955dfafb5c4d676d089fe",
+      "approved_agent_digest": "363dfa87ad24f364c9fd5e22f0bc18198c19cc64d23d1f486034fa76df1a048f",
       "harness": "claude-code",
       "model_connection_id": "mcn_699c8e51528e4438a359acfd4dced40f"
     }
@@ -228,7 +228,7 @@
   "recovery_store": {
     "automation_id": "aut_be700e7e2ba241e99dc611f6025db54d",
     "owner": "aut_3725cac20b4a46e398a005b0199da7bf",
-    "approved_digest": "a35637f5655748f31241191cf58da88a9f3d829f3f42efc87cba73edfe071b34"
+    "approved_digest": "72a79a648ae335ef09776b3cd698a5f1c582bf86cfe2852d255d938f5096247c"
   },
   "investigation": {
     "schema_version": "investigation-policy/v1",
