@@ -42,13 +42,17 @@ class JsonHttp:
         }
         if payload is not None:
             all_headers["Content-Type"] = "application/json"
-            values.append("data = " + json.dumps(json.dumps(payload)))
         for key, value in all_headers.items():
             if "\n" in key + value or "\r" in key + value:
                 raise ValueError("Invalid HTTP header")
             values.append("header = " + json.dumps(key + ": " + value))
         with tempfile.TemporaryDirectory(prefix="collegium-http-") as folder:
             header_file = Path(folder) / "headers"
+            if payload is not None:
+                body_file = Path(folder) / "body.json"
+                body_file.write_text(json.dumps(payload))
+                body_file.chmod(0o600)
+                values.append("data-binary = " + json.dumps("@" + str(body_file)))
             try:
                 response = subprocess.run(
                     [
