@@ -219,6 +219,7 @@ class WorkersHttp(FakeHttp):
                 "id": row["turn_id"],
                 "session_id": session_id,
                 "status": "completed",
+                "finished_at": "1970-01-01T00:03:20+00:00",
                 "cut_off": False,
                 "error": None,
                 "trace_id": "trace-id",
@@ -478,6 +479,7 @@ class DeliveryTests(unittest.TestCase):
         self.http.mutate = mutate
         result = self.until("plan_review")
         self.assertEqual(result["protocol_failures"], 1)
+        self.assertEqual(result["tokens"], 40)
         self.assertEqual(self.http.created, 2)
         self.assertEqual(self.github.writes, [])
         self.assertTrue(
@@ -493,6 +495,156 @@ class DeliveryTests(unittest.TestCase):
         self.assertEqual(result["protocol_failures"], 4)
         self.assertEqual(self.http.created, 4)
         self.assertEqual(self.github.writes, [])
+
+    def test_checkout_rejection_replays_usage_after_interrupted_delivery_save(self):
+        def mutate(packet, obs):
+            obs["events"][3]["input"]["command"] += " && echo changed"
+            obs["events"][-1]["usage"] = {"input_tokens": self.config["max_total_tokens"] + 1}
+
+        self.http.mutate = mutate
+        self.driver.step(self.run)
+        with patch.object(self.driver, "_save", side_effect=RuntimeError("save interrupted")):
+            with self.assertRaisesRegex(RuntimeError, "save interrupted"):
+                self.driver.step(self.run)
+        self.assertEqual(self.driver._load(self.run)["tokens"], 0)
+        tokens = self.config["max_total_tokens"] + 1
+        self.assertEqual(self.driver.workers.unaccepted_usage(self.run), tokens)
+        recovered = self.driver.step(self.run)
+        self.assertEqual(recovered["tokens"], tokens)
+        self.assertEqual(recovered["unaccepted_tokens"], tokens)
+        self.assertEqual(recovered["protocol_failures"], 1)
+        with self.assertRaisesRegex(PolicyError, "token admission budget exhausted"):
+            self.driver.step(self.run)
+        self.assertEqual(self.http.created, 1)
+        ledger = [e["data"] for e in self.journal.events(self.run) if e["kind"] == "rejected_usage"]
+        self.assertEqual(len(ledger), 1)
+        self.journal.record(self.run, "drain_usage", ledger[0])
+        self.assertEqual(self.driver.workers.drain(self.run)["tokens"], tokens)
+        doc = self.driver._load(self.run)
+        self.driver.account_usage(self.run, doc)
+        self.assertEqual(doc["tokens"], tokens)
+
+    def test_discarded_usage_requires_known_integer_counters(self):
+        for usage in ({}, {"unknown_tokens": 1}, {"input_tokens": True, "output_tokens": -1}):
+            with self.subTest(usage=usage):
+                observed = {"events": [{"type": "session.status_idle", "usage": usage}]}
+                self.assertEqual(
+                    self.driver.workers._worker_usage(observed),
+                    {"observed_tokens": self.config["max_total_tokens"], "usage_verified": False},
+                )
+        observed = {
+            "events": [
+                {"type": "session.status_idle", "usage": {"input_tokens": 0, "output_tokens": 0}}
+            ]
+        }
+        self.assertEqual(
+            self.driver.workers._worker_usage(observed),
+            {"observed_tokens": 0, "usage_verified": True},
+        )
+
+    def test_discarded_usage_includes_cache_and_keeps_partial_overrun(self):
+        usage = {
+            "input_tokens": 10,
+            "output_tokens": 20,
+            "cache_creation_input_tokens": 30,
+            "cache_read_input_tokens": 40,
+            "unknown_tokens": 900,
+        }
+        observed = {"events": [{"type": "session.status_idle", "usage": usage}]}
+        self.assertEqual(
+            self.driver.workers._worker_usage(observed),
+            {"observed_tokens": 100, "usage_verified": True},
+        )
+        large_input = self.config["max_total_tokens"] + 1
+        usage.update(input_tokens=large_input, output_tokens=-1)
+        self.assertEqual(
+            self.driver.workers._worker_usage(observed),
+            {"observed_tokens": large_input + 70, "usage_verified": False},
+        )
+        usage["input_tokens"] = 10
+        self.assertEqual(
+            self.driver.workers._worker_usage(observed),
+            {"observed_tokens": self.config["max_total_tokens"], "usage_verified": False},
+        )
+
+    def test_accepted_plan_without_usage_consumes_reservation(self):
+        def mutate(packet, observed):
+            observed["events"][-1].pop("usage")
+
+        self.http.mutate = mutate
+        self.driver.step(self.run)
+        result = self.driver.step(self.run)
+        self.assertEqual(result["state"], "plan_review")
+        self.assertEqual(result["tokens"], self.config["max_total_tokens"])
+        with self.assertRaisesRegex(PolicyError, "token admission budget exhausted"):
+            self.driver.step(self.run)
+        self.assertEqual(self.http.created, 1)
+
+    def test_accepted_results_settle_recognized_counters_once(self):
+        reservation = self.config["max_total_tokens"]
+        cases = (
+            ({"input_tokens": reservation + 1, "output_tokens": "bad"}, reservation + 1, False),
+            (
+                {
+                    "input_tokens": 10,
+                    "output_tokens": 20,
+                    "cache_creation_input_tokens": 30,
+                    "cache_read_input_tokens": 40,
+                    "unrelated_tokens": 900,
+                },
+                100,
+                True,
+            ),
+            ({"unrelated_tokens": 1}, reservation, False),
+        )
+        for index, (usage, tokens, verified) in enumerate(cases):
+            with self.subTest(usage=usage):
+
+                def mutate(packet, observed, usage=usage):
+                    observed["events"][-1]["usage"] = usage
+
+                self.http.mutate = mutate
+                args = (self.run, f"usage:{index}", "planning", BASE, BASE, {})
+                self.assertIsNone(self.driver.workers.step(*args))
+                result = self.driver.workers.step(*args)
+                self.assertEqual(result["observed_tokens"], tokens)
+                self.assertIs(result["usage_verified"], verified)
+                self.assertEqual(self.driver.workers.step(*args), result)
+                self.assertEqual(self.http.created, index + 1)
+
+    def test_accepted_result_waits_for_missing_idle_then_charges_reservation(self):
+        def mutate(packet, observed):
+            observed["turn"]["started_at"] = "1970-01-01T00:01:40+00:00"
+            observed["events"].pop()
+
+        self.http.mutate = mutate
+        args = (self.run, "usage:missing-idle", "planning", BASE, BASE, {})
+        self.assertIsNone(self.driver.workers.step(*args))
+        self.assertIsNone(self.driver.workers.step(*args))
+        self.now += 181
+        result = self.driver.workers.step(*args)
+        self.assertEqual(result["observed_tokens"], self.config["max_total_tokens"])
+        self.assertFalse(result["usage_verified"])
+        self.assertEqual(self.http.created, 1)
+
+    def test_malformed_worker_json_can_be_drained_and_charges_reservation(self):
+        def mutate(packet, obs):
+            obs["turn"]["answer"] = "not JSON"
+            obs["events"][-1]["usage"] = {}
+
+        self.http.mutate = mutate
+        self.driver.step(self.run)
+        with self.assertRaisesRegex(PolicyError, "Invalid worker result JSON"):
+            self.driver.step(self.run)
+        drained = self.driver.workers.drain(self.run)
+        self.assertEqual(drained["pending"], [])
+        self.assertEqual(len(drained["settled"]), 1)
+        self.assertEqual(drained["tokens"], self.config["max_total_tokens"])
+        doc = self.driver._load(self.run)
+        doc["tokens"] = drained["tokens"]
+        doc["drained_tokens"] = drained["tokens"]
+        self.driver.account_usage(self.run, doc)
+        self.assertEqual(doc["tokens"], drained["tokens"])
 
     def test_worker_runtime_budget_uses_actual_turn_start_after_long_admission_wait(self):
         def mutate(packet, observed):
@@ -527,6 +679,7 @@ class DeliveryTests(unittest.TestCase):
         )
         result = self.driver.step(self.run)
         self.assertEqual(result["protocol_failures"], 1)
+        self.assertEqual(result["tokens"], 20)
         self.assertEqual(result["plan_attempt"], 1)
         self.assertEqual(self.http.created, 1)
         self.http.mutate = lambda packet, observed: None

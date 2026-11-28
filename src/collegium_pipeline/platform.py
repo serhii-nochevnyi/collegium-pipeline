@@ -39,6 +39,28 @@ def agent_digest(agent: dict) -> str:
     return digest(snapshot)
 
 
+def confirmed_pending_launch(journal, run_id):
+    """Return the pending intent's exact session and turn if already launched."""
+    intent = journal.get(run_id)["pending_intent"]
+    if intent is None:
+        return None
+    events = [e for e in journal.events(run_id) if e["data"].get("intent") == intent]
+    launches = [e["data"] for e in events if e["kind"] == "launched"]
+    if not launches:
+        return None
+    if len(launches) != 1:
+        raise PolicyError("Pending launch identity is ambiguous")
+    launch = launches[0]
+    if any(
+        not isinstance(launch.get(key), str) or not launch[key] for key in ("session_id", "turn_id")
+    ):
+        raise PolicyError("Pending launch identity is incomplete")
+    sessions = [e["data"].get("session_id") for e in events if e["kind"] == "session_created"]
+    if sessions and sessions != [launch["session_id"]]:
+        raise PolicyError("Pending launch session differs from its receipt")
+    return launch
+
+
 class Collegium:
     def __init__(self, http):
         self.http = http

@@ -1,7 +1,11 @@
 """Build an installable Collegium bundle from this repository; no remote writes."""
 
 import argparse
+import base64
+import hashlib
+import io
 import json
+import zipfile
 from pathlib import Path
 
 from collegium_pipeline.config import load_config
@@ -110,15 +114,35 @@ def build(config_path, integrations_path, output=DEFAULT_OUTPUT):
         ),
     )
     script_files = []
+    runtime = io.BytesIO()
     local_only = {"controller.py", "doctor.py", "packets.py", "readiness.py", "runner.py"}
-    for source in sorted((ROOT / "src/collegium_pipeline").glob("*.py")):
-        name = "controller/src/collegium_pipeline/" + source.name
-        if source.name in local_only:
-            (output / name).unlink(missing_ok=True)
-            continue
-        write(name, source.read_text())
-        script_files.append(name)
-    write("controller/entry.py", (ROOT / "scripts/bundle_controller.py").read_text())
+    with zipfile.ZipFile(
+        runtime, "w", compression=zipfile.ZIP_DEFLATED, compresslevel=9
+    ) as archive:
+        for source in sorted((ROOT / "src/collegium_pipeline").glob("*.py")):
+            name = "controller/src/collegium_pipeline/" + source.name
+            if source.name in local_only:
+                (output / name).unlink(missing_ok=True)
+                continue
+            write(name, source.read_text())
+            member = zipfile.ZipInfo(
+                "collegium_pipeline/" + source.name, date_time=(1980, 1, 1, 0, 0, 0)
+            )
+            member.compress_type = zipfile.ZIP_DEFLATED
+            member.external_attr = 0o100600 << 16
+            archive.writestr(member, source.read_bytes(), compresslevel=9)
+    runtime_bytes = runtime.getvalue()
+    write("controller/runtime.b64", base64.b64encode(runtime_bytes).decode())
+    write(
+        "controller/entry.py",
+        (ROOT / "scripts/bundle_controller.py")
+        .read_text()
+        .replace(
+            '_BUNDLE_RUNTIME_SHA256 = ""',
+            '_BUNDLE_RUNTIME_SHA256 = "' + hashlib.sha256(runtime_bytes).hexdigest() + '"',
+            1,
+        ),
+    )
     settings = {
         **config,
         "execution_enabled": False,
@@ -129,6 +153,19 @@ def build(config_path, integrations_path, output=DEFAULT_OUTPUT):
     }
     # Generated runtime data stays compact within the executor's code.files ceiling.
     write("controller/settings.json", json.dumps(settings, sort_keys=True, separators=(",", ":")))
+    policy = json.loads((ROOT / "config/epic-policy.json").read_text())
+    if set(policy) != {"epic", "scheduling"}:
+        raise PolicyError("Epic policy cannot override worker, repository or execution authority")
+    epic_settings = {**settings, **policy}
+    epic_settings.pop("service_test", None)
+    epic_settings["validation_commands"] = config.get(
+        "repair_validation_commands", config["validation_commands"]
+    )
+    write(
+        "controller/epic-settings.json",
+        json.dumps(epic_settings, sort_keys=True, separators=(",", ":")),
+    )
+    load_config(output / "controller/epic-settings.json")
     runtime_integrations = {
         k: v
         for k, v in integrations.items()
@@ -143,8 +180,10 @@ def build(config_path, integrations_path, output=DEFAULT_OUTPUT):
         json.dumps(runtime_integrations, sort_keys=True, separators=(",", ":")),
     )
     script_files += [
+        "controller/runtime.b64",
         "controller/entry.py",
         "controller/settings.json",
+        "controller/epic-settings.json",
         "controller/integrations.json",
     ]
     write("native_github_broker.py", (ROOT / "scripts/native_github_broker.py").read_text())
@@ -193,6 +232,7 @@ def build(config_path, integrations_path, output=DEFAULT_OUTPUT):
                     "environment": "base",
                     "size": "small",
                     "secrets": ["PIPELINE_CONTROL_KEY"],
+                    "mcp_servers": ["atlassian-rovo"] if "atlassian-rovo" in active_needs else [],
                 },
             },
             {

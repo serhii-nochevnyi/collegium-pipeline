@@ -11,6 +11,40 @@ from .domain import PolicyError, digest
 from .transport import JsonHttp, RemoteError
 
 
+def broker_unstarted(journal, run_id, key, identity):
+    events = journal.events(run_id)
+    intents = [e for e in events if e["kind"] == "broker_intent" and e["data"]["key"] == key]
+    if not intents or intents[-1]["data"]["identity"] != identity:
+        return False
+    intent = intents[-1]
+    if any(
+        e["kind"] == "broker_not_started"
+        and e["data"].get("intent_sequence") == intent["sequence"]
+        and e["data"].get("identity") == identity
+        for e in events
+    ):
+        return True
+    attempts = [
+        e["data"]["operation"]
+        for e in events
+        if e["kind"] == "effect_attempt"
+        and e["sequence"] > intent["sequence"]
+        and e["data"]["operation"].get("kind") == "broker"
+        and e["data"]["operation"].get("key") == key
+    ]
+    if not attempts:
+        return False
+    attempt = attempts[-1]
+    return digest(
+        {
+            "run": run_id,
+            "key": key,
+            "operation": attempt["operation"],
+            "payload": attempt["payload"],
+        }
+    ) == identity and journal.effect_not_started(attempt)
+
+
 def changes_checked(changes, allowed):
     if not isinstance(changes, dict) or not changes or len(changes) > 100:
         raise PolicyError("Expected 1–100 changed text files")
@@ -84,8 +118,7 @@ class GithubApp(Github):
     def pr_evidence(self, number):
         pr = self.read(f"/pulls/{number}")
         head = pr["head"]["sha"]
-        checks = self.pages(f"/commits/{head}/check-runs?filter=all", "check_runs")
-        statuses = [{**s, "sha": head} for s in self.pages(f"/commits/{head}/statuses")]
+        checks, statuses = commit_evidence(self, head)
         for check in checks:
             if check.get("conclusion") in {"failure", "timed_out"}:
                 annotations = self.pages(f"/check-runs/{check['id']}/annotations")
@@ -166,7 +199,7 @@ class PRBroker:
         }
         if found is None:
             if self.observation_only or (
-                intents and not self.journal.effect_not_started(descriptor)
+                intents and not broker_unstarted(self.journal, run_id, key, identity)
             ):
                 raise PolicyError(
                     "Unresolved external action; observation only, no automatic replay"
@@ -174,16 +207,22 @@ class PRBroker:
             self.journal.record(
                 run_id, "broker_intent", {"key": key, "identity": identity, "operation": operation}
             )
-            self.github.scope()
-            self.journal.checkpoint(
-                {
-                    "kind": "broker",
-                    "run_id": run_id,
-                    "key": key,
-                    "operation": operation,
-                    "payload": payload,
-                }
-            )
+            sequence = self.journal.events(run_id)[-1]["sequence"]
+            try:
+                self.github.scope()
+                self.journal.checkpoint(descriptor)
+            except Exception:
+                self.journal.record(
+                    run_id,
+                    "broker_not_started",
+                    {
+                        "key": key,
+                        "identity": identity,
+                        "intent_sequence": sequence,
+                        "descriptor_digest": digest(descriptor),
+                    },
+                )
+                raise
             self.github.mutate(operation, payload)
             found = observe()
             if found is None:
@@ -352,3 +391,13 @@ class PRBroker:
             {"pullRequestId": node_id},
             observe,
         )
+
+
+def commit_evidence(github, head):
+    """Complete, exact-commit CI evidence shared by ticket and epic acceptance."""
+    if not isinstance(head, str) or not re.fullmatch(r"[a-f0-9]{40}", head):
+        raise PolicyError("CI evidence requires an exact commit")
+    return (
+        github.pages(f"/commits/{head}/check-runs?filter=all", "check_runs"),
+        [{**s, "sha": head} for s in github.pages(f"/commits/{head}/statuses")],
+    )

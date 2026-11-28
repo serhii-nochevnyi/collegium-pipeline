@@ -26,3 +26,11 @@ The local suite includes snapshot-loss recovery, lost session/prompt/commit/PR r
 - [Current state](.planning/STATE.md).
 
 Remote Sessions is outside this project's scope. No merge, release or deployment is performed by this prototype.
+
+## Epic DAG delivery
+
+The bundle includes a shared-capacity epic scheduler over the existing ticket engine:
+independent tickets may run concurrently, dependencies wait for verified prerequisite
+merges, and combined validation/review/CI gate epic acceptance. The current strategy is
+`direct_to_base` with human merges. See [epic protocol and configuration](docs/EPICS.md).
+Automations and both execution profiles remain disabled/paused; no pilot is selected.

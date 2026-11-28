@@ -1,25 +1,88 @@
-# Installed cloud CI repair — finalization pending
+# Epic implementation verified — installation pending
 
-PR4: initial red56a76e13, repaired green155133d0; exactly1PR/2servicecommits.
-Actual quality red46127307490/job140924650386 then green46127477065/job140925174307.
-The installed controller ran planner/plan review/executor/initial validator/reviewer,
-createdPR, verified actual red logs, admitted fixer and fresh full validator. Native
-final reviewer ses773e4e57601e4d04a04c063875fc83fe/turn76ef614cd45841cbaf7a642ba9fd6a69
-completed PASS at08:50:36UTC, but cloud8minute slice ended before collecting it.
-Root3600sec deadline is preserved; normal run MUST NOT resume and abort/replace it.
-Installed source2ff757/version14. Root6c6d499d-2fee-41fa-be0c-18660001cca2,
-frozen config48ffb7870672bfbac4a7a16c45d8bf4f570b19a61737334aa9ef57a560a056c3.
+2026-11-28: 248 tests PASS; third-review CR01–04 independently resolved
+(.planning/EPIC-REVIEW-3-RESOLVED.md). All earlier findings are regression-tested.
+Bundle validates with disabled single-ticket/epic execution profiles, 8 unchanged private
+Claude workers, and the existing read-only Atlassian connection granted to the script.
+Exact source publication and paused installation are the next operations; no pilot selected.
+Installed/CI evidence is recorded separately in reports/EPIC-DELIVERY.md when completed.
 
-Preparing explicit manual observation-only finalize. Requires confirmed existing review
-launch and existingPR/keep_ready. WorkerHTTP denies nonGET; Github denies mutations.
-Normal gates collect same review then check actual exact-head CI. No new job, repair,
-budget extension, config/task rebind or permission. Failed CI/review blocks instead of
-admitting repair. Same signed checkpoint/fence covers finalize and its lost receipts.
-Source b221bae preliminary; final source/check/review/install still pending. Never apply
-stale preliminary plan58cbc... before reviewing updated source. All9automations PAUSED,
-production flagsfalse. No pilot, Jira, merge/main changes or local service controller.
-Native source reviews/host App source publishing are separate authorized maintenance.
-Read-only final audit helper .local/verify-cloud-service.py; finalreport notwritten yet.
+Earlier chronological implementation notes follow; their pending-review statements are
+superseded by the verified state above.
+
+# Active epic implementation — NOT INSTALLED YET
+
+2026-11-28 continuation: implement dependencies/parallel tickets in Collegium bundle,
+all automations paused/no pilot. Source remains installed4489bd9/controller15 remotely;
+NO remote writes, source publication or installation performed in this turn yet.
+Current code is ticketless Shipyard bench + GSD review/fix, same shared dirty checkout.
+
+New modules capacity.py/epics.py/jira_epics.py/epic_cloud.py, shared Delivery claims,
+atomic nested Journal admission, separate disabled epic-settings profile, deterministic
+entry-hash-pinned runtime ZIP, read-only Atlassian script grant. Direct_to_base only:
+A/B parallel native stages, C after real prerequisite merges contained in one verified
+base snapshot; final integrated validation/independent review/exact-SHA CI, no auto merge.
+Legacy service profile hash48ff... preserved, all private Claude role bindings unchanged.
+
+Initial deep Codex Sol/high review .planning/EPIC-REVIEW.md found12blockers+2warnings.
+Fixes are implemented and regression-tested; RE-REVIEW PENDING, do NOT install before PASS.
+GSD fixer workers completed: fix_runtime_identity (CR10/11), fix_profile_recovery(CR4/5/WR2).
+Their .planning/EPIC-RUNTIME-FIX.md and EPIC-RECOVERY-FIX.md record changes. Agent
+/root/epic_review is idle after initial BLOCKED report; reuse for read-only re-review.
+Parent fixes: fresh single-head prerequisites and owner-bound claims, paginated normalized
+CI, pending/timeout CI, terminal read-only drain with charged usage, atomic pause ofroot
+andchildren, budgets checked after observed overruns, resource-only PR holds until merge,
+readiness replay avoids capacity queue. Intended configs resolve via trusted installed
+profile registry during mixed-profile checkpoint/unknown-effect reconciliation.
+
+make check226tests/Ruff/compile PASS: .local/epic-fix-final-check.log. Real lap validator
+running/last .local/epic-bundle-validate-final.json, observerexec27192. Generated bundle
+just rebuilt, source mirrors and packed ZIP match current code. Do not run services/pilots.
+Upcoming: re-review -> fixes if needed -> publish SAME sourcePR1 via narrow App helper
+with exact changed paths (existingv5 cannot write new files), show plan -> apply -> verify
+actual5installed codefiles/archive and real epic preflight only (Atlassian accessible sites,
+no issue/agent/admission), all automations paused. Do not create a new product PR/Jira.
+
+SourcePR1 branchcollegium/9d121af5-f676-4e7b-bb38-b5c571af87c3 at4489bd9 currently.
+Existing sourcepublisherv5 .local/recovery-publish-v5.json rootaa342... cycle18done,
+next19ONLYNEWpayload; v6 transportpublisher has2paths only. Prefer NEW helperv7 exact
+changedpaths in one atomic source commit to avoid half-built bundle. New helper must
+startpaused/no triggers/secrets/MCP, same native GitHubApp, never widen servicebroker.
+Will increase project automation count9->10 if created; finalaudit must reflect actual.
+
+--- Prior completed single-ticket acceptance below ---
+
+# Current verified result — installed cloud CI repair COMPLETE
+
+2026-11-28: reports/cloud-ci-repair-verification.json and reports/CLOUD-CI-REPAIR.md.
+Installed source4489bd9f806150c8fb06bb908ba64f444799b9ef, controller15,
+23files/255324bytes; planed3399724977e34a827dd1ea4f34bf3a25fbfec508f69092eabeb49050e95e77.
+Synced. Source CI46128366513/170tests/lint/compile/realbundlevalidator/nativev8review PASS.
+
+Cloud root6c6d499d-2fee-41fa-be0c-18660001cca2 READY_FOR_ACCEPTANCE/ci_green true,
+deliveredfalse, unchanged config48ffb7870672bfbac4a7a16c45d8bf4f570b19a61737334aa9ef57a560a056c3.
+PR4: red56a76e13 CI46127307490/job140924650386, green155133d0 CI46127477065/job140925174307.
+Same open non-draft/unmerged PR;2commits/1fixturefile; mainunchanged.
+Eight native accepted stages; official journal9jobs/9unique sessions includes1definitively
+aborted original executor, preserved and bounded retried. Do not claim8launched or nofailures.
+Original2accepted planner/reviewer and actual original rootstarted_at1795852195.9203036
+preserved through checkpoint/queuedRPC/HTTPbody/timer fixes. All observed models/effort
+and exact-head validation/independent review audited; native App owns CI reads/writes.
+
+The final reviewer completed after dispatchdeadline. New explicit manual finalize mode
+collects ONLY existing confirmed review/CI; readonlyHTTP/Github wrappers prohibit new
+launch/abort/repositorywrites, failedCI/review blocks; normaldeadline unchanged. Cloud
+runf79554854a5f4c0e91bfa9366910b45f accepted8stages; replayruna16eeaa411804257bd89493da3a59926
+SUCCEEDED same8workers/head/PR/tokens999776, no extra worker/commit/PR. Official cloud
+snapshot and SQLite read-only audit verify rootstate/config/time and4finalizationticks.
+No local service Delivery engine; host only RunNow/observe, source maintenance and final
+read-only audit. Independent native source reviewv8 PASSses58335fb304a0413ea3ab74826516338b.
+
+ALL9projectautomations PAUSED. Installed productionexecution/brokerfalse. No pilot/Jira,
+merge/release/deploy. Existing servicePR2/3 and sourcePR1 retained. Sourcepublisherv5cycle18
+completed4489bd9; next19ONLYNEWpayload. Narrow sourcepublisherv6 remainspaused2paths.
+Only676bytes runtime code.files headroom remains; build refuses overflow. Ticketless
+serial service acceptance complete; investigate/epicparallel remain future scope.
 
 --- Historical progress below (superseded by current header) ---
 

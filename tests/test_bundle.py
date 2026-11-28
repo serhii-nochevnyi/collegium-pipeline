@@ -1,7 +1,9 @@
 """The bundle carries the controller, preserves claims and starts with dispatch disabled."""
 
+import base64
 import contextlib
 import copy
+import hashlib
 import io
 import json
 import os
@@ -10,6 +12,7 @@ import subprocess
 import sys
 import tempfile
 import unittest
+import zipfile
 from pathlib import Path
 from unittest.mock import patch
 
@@ -23,6 +26,62 @@ ENTRY_MODULE = runpy.run_path(str(ROOT / "scripts/bundle_controller.py"))
 ENTRY = ENTRY_MODULE["main"]
 FENCE = ENTRY_MODULE["cloud_fence"]
 SAVE = ENTRY_MODULE["save_receipt"]
+
+
+class PackedRuntimeTests(unittest.TestCase):
+    def test_pinned_entry_requires_archive_and_ignores_conflicting_source(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            shadow = root / "src/collegium_pipeline"
+            shadow.mkdir(parents=True)
+            (shadow / "__init__.py").write_text("raise RuntimeError('source mirror imported')\n")
+            runtime = io.BytesIO()
+            with zipfile.ZipFile(runtime, "w") as archive:
+                archive.writestr("collegium_pipeline/__init__.py", "")
+                archive.writestr("collegium_pipeline/cli.py", "main = None\n")
+                archive.writestr(
+                    "collegium_pipeline/config.py",
+                    "def load_config(path):\n"
+                    "    return {'execution_enabled': False, 'workers': {'archive': {}}}\n",
+                )
+                archive.writestr("collegium_pipeline/domain.py", "PolicyError = ValueError\n")
+            raw = runtime.getvalue()
+            pin = hashlib.sha256(raw).hexdigest()
+            entry = root / "entry.py"
+            entry.write_text(
+                (ROOT / "scripts/bundle_controller.py")
+                .read_text()
+                .replace('_BUNDLE_RUNTIME_SHA256 = ""', f"_BUNDLE_RUNTIME_SHA256 = {pin!r}", 1)
+            )
+            program = (
+                "import runpy, sys; "
+                'runpy.run_path("entry.py")["main"]({"action": "preflight"}, '
+                'root=".", environ={"ARANARIUM_STATE_DIR": "."}); '
+                'assert "src" not in sys.path'
+            )
+            archive_path = root / "runtime.b64"
+            for encoded, expected_error in (
+                (None, "Bundle runtime archive is required"),
+                (base64.b64encode(b"corrupted ZIP"), "Bundle runtime hash differs"),
+                (base64.b64encode(raw), None),
+            ):
+                with self.subTest(expected_error=expected_error):
+                    if encoded is not None:
+                        archive_path.write_bytes(encoded)
+                    result = subprocess.run(
+                        [sys.executable, "-I", "-c", program],
+                        cwd=root,
+                        capture_output=True,
+                        text=True,
+                        timeout=20,
+                    )
+                    self.assertNotIn("source mirror imported", result.stderr)
+                    if expected_error:
+                        self.assertNotEqual(result.returncode, 0)
+                        self.assertIn(expected_error, result.stderr)
+                    else:
+                        self.assertEqual(result.returncode, 0, result.stderr)
+                        self.assertEqual(json.loads(result.stdout)["worker_count"], 1)
 
 
 class BundleTests(unittest.TestCase):
@@ -48,9 +107,7 @@ class BundleTests(unittest.TestCase):
             for name in automation["script"]["files"]:
                 self.assertTrue((self.path / name).is_file(), name)
         controller = self.manifest["automations"][0]
-        self.assertIn(
-            "controller/src/collegium_pipeline/delivery.py", controller["script"]["files"]
-        )
+        self.assertIn("controller/runtime.b64", controller["script"]["files"])
         self.assertEqual(controller["script"]["secrets"], ["PIPELINE_CONTROL_KEY"])
         for agent in self.manifest["agents"]:
             self.assertEqual(agent["harness"], "claude-code")
@@ -79,6 +136,69 @@ class BundleTests(unittest.TestCase):
         )
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertFalse(json.loads(result.stdout)["agent_started"])
+
+    def test_compressed_runtime_runs_without_source_mirrors_and_refuses_tampering(self):
+        files = self.manifest["automations"][0]["script"]["files"]
+        job = self.path / "isolated-job"
+        for name in files:
+            target = job / name
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_bytes((self.path / name).read_bytes())
+        self.assertFalse((job / "controller/src").exists())
+        archive = job / "controller/runtime.b64"
+        with zipfile.ZipFile(io.BytesIO(base64.b64decode(archive.read_bytes()))) as zipped:
+            self.assertEqual(
+                zipped.read("collegium_pipeline/epics.py"),
+                (ROOT / "src/collegium_pipeline/epics.py").read_bytes(),
+            )
+        program = (
+            "import runpy; m=runpy.run_path("
+            + repr(str(job / "controller/entry.py"))
+            + ");m['main']({'action':'preflight'},root="
+            + repr(str(job / "controller"))
+            + ",environ={})"
+        )
+        result = subprocess.run(
+            [sys.executable, "-I", "-c", program],
+            cwd=job,
+            capture_output=True,
+            text=True,
+            timeout=20,
+        )
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(json.loads(result.stdout)["worker_count"], 8)
+        archive.write_text(base64.b64encode(b"corrupt archive").decode())
+        failed = subprocess.run(
+            [sys.executable, "-I", "-c", program],
+            cwd=job,
+            capture_output=True,
+            text=True,
+            timeout=20,
+        )
+        self.assertNotEqual(failed.returncode, 0)
+        self.assertIn("hash differs", failed.stderr)
+
+    def test_epic_profile_is_separate_disabled_and_cannot_rewrite_service_identity(self):
+        from collegium_pipeline.config import config_digest
+
+        base = json.loads((self.path / "controller/settings.json").read_text())
+        epic = json.loads((self.path / "controller/epic-settings.json").read_text())
+        self.assertFalse(epic["execution_enabled"])
+        self.assertFalse(epic["broker_enabled"])
+        self.assertNotIn("service_test", epic)
+        self.assertNotIn("epic", base)
+        self.assertEqual(base["workers"], epic["workers"])
+        self.assertEqual(
+            config_digest(
+                {
+                    **base,
+                    "execution_enabled": True,
+                    "broker_enabled": True,
+                    "broker_reads": "native_script",
+                }
+            ),
+            "48ffb7870672bfbac4a7a16c45d8bf4f570b19a61737334aa9ef57a560a056c3",
+        )
 
     def test_cloud_service_rejects_scope_payload_before_any_network(self):
         config = json.loads((self.path / "controller/settings.json").read_text())
@@ -732,6 +852,11 @@ class BundleTests(unittest.TestCase):
 
         event, env, http = self.fence_fixture()
         root = self.path / "controller"
+        for profile in ("settings.json", "epic-settings.json"):
+            path = root / profile
+            settings = json.loads(path.read_text())
+            settings["recovery_store"]["owner"] = env["LAP_AUTOMATION_ID"]
+            path.write_text(json.dumps(settings))
         env.update(ARANARIUM_STATE_DIR=str(self.path / "state"), PIPELINE_CONTROL_KEY="fixture-key")
         checkpoint = self.path / "state/collegium-pipeline/cloud-fence.json"
         # Disabled delivery is rejected AFTER the fence; its harmless failure is accounted for.

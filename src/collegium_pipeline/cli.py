@@ -107,19 +107,21 @@ def main(argv=None, *, recovery=None):
                     journal = Journal(args.journal)
                     try:
                         if recovery is not None:
-                            from .recovery import Checkpoints, WriteAhead
+                            from .recovery import Checkpoints, WriteAhead, recovery_owner
 
-                            http, key, identity = recovery
-                            if identity["automation_id"] != config.get("recovery_store", {}).get(
-                                "owner"
-                            ):
-                                raise ValueError("Recovery owner differs from the cloud controller")
+                            if len(recovery) == 3:
+                                http, key, identity = recovery
+                                profiles = None
+                            else:
+                                http, key, identity, profiles = recovery
+                            recovery_owner(config, identity)
                             journal.before_effect = WriteAhead(
                                 config,
                                 journal,
                                 args.artifacts,
                                 Checkpoints(config, http, key),
                                 identity,
+                                profiles=profiles,
                             ).save
                         coordinator = Delivery(
                             config,
@@ -131,7 +133,9 @@ def main(argv=None, *, recovery=None):
                         if recovery is not None:
                             from .recovery import reconcile_existing
 
-                            reconcile_existing(config, journal, http, coordinator.broker.github)
+                            reconcile_existing(
+                                config, journal, http, coordinator.broker.github, profiles=profiles
+                            )
                             journal.before_effect({"kind": "tick", "run_id": args.run_id})
                         deadline = time.monotonic() + args.timeout
                         while time.monotonic() < deadline:

@@ -72,6 +72,13 @@ class Delivery:
                 "delivery_tick",
                 {"state": doc["state"], "cycle": doc["cycle"], "head": doc["head"]},
             )
+            if doc["state"] == "ready_for_acceptance":
+                from .capacity import Capacity
+
+                capacity = Capacity(self.journal, self.config)
+                claim = capacity.get(run_id)
+                if claim and claim["epic"]:
+                    capacity.hold_ready(run_id)
         return {"run_id": run_id, **doc}
 
     def _load(self, run_id):
@@ -251,7 +258,17 @@ class Delivery:
             self.journal._event(run_id, "delivery_validation_reconfigured", receipt)
         return {"run_id": run_id, **doc}
 
+    def account_usage(self, run_id, doc):
+        """Apply persisted discarded-turn usage to the delivery's token budget."""
+        total = self.workers.unaccepted_usage(run_id)
+        applied = doc.get("unaccepted_tokens", doc.get("drained_tokens", 0))
+        if total > applied:
+            doc["tokens"] += total - applied
+            doc["unaccepted_tokens"] = total
+            self._save(run_id, doc)
+
     def _worker(self, run_id, doc, stage, selection=None):
+        self.account_usage(run_id, doc)
         key = f"{doc['cycle']}:{stage}:{doc['plan_attempt']}"
         if key not in doc["job_keys"]:
             if len(doc["job_keys"]) >= self.config.get("max_worker_jobs", 24):
@@ -261,6 +278,11 @@ class Delivery:
             doc["job_keys"].append(key)
             self._save(run_id, doc)
         context = {k: doc[k] for k in ("plan", "candidate", "validation", "feedback")}
+        from .capacity import Capacity
+
+        claim = Capacity(self.journal, self.config).get(run_id)
+        if claim and (claim["epic"] or self.config.get("scheduling")):
+            context["ticket_scope"] = {k: claim[k] for k in ("paths", "resources")}
         if self.config.get("service_test"):
             context["service_red"] = doc.get("service_red")
         result = self.workers.step(run_id, key, stage, doc["head"], doc["base"], context, selection)
@@ -309,7 +331,45 @@ class Delivery:
             pr = doc["pr"]
             self.broker.draft(run_id, pr["number"], pr["node_id"], draft=True, cycle=doc["cycle"])
 
-    def step(self, run_id):
+    def step(self, run_id, *, epic_owner=None, expected_base=None):
+        from .capacity import Capacity
+
+        # Admission policy is checked before capacity can persist any claim.
+        if not self.config.get("execution_enabled") or not self.config.get("broker_enabled"):
+            return self._step(run_id)
+        if self.journal.get(run_id)["config_digest"] != config_digest(self.config):
+            raise PolicyError("Run configuration differs before capacity admission")
+        capacity = Capacity(self.journal, self.config)
+        doc = self._load(run_id)
+        claim = capacity.get(run_id)
+        if claim and claim["epic"] and claim["epic"] != epic_owner:
+            return {
+                "run_id": run_id,
+                **(doc or {"state": "queued"}),
+                "action": "managed_by_epic",
+                "epic_owner": claim["epic"],
+            }
+        observed_only = getattr(self, "_evidence_only", False)
+        terminal = doc and doc["state"] in {"blocked", "failed"}
+        if terminal:
+            self.workers.drain(run_id)
+            self.account_usage(run_id, doc)
+        if (
+            not terminal
+            and not observed_only
+            and not capacity.acquire(run_id, epic_owner=epic_owner)
+        ):
+            return {"run_id": run_id, **(doc or {"state": "queued"}), "action": "waiting_capacity"}
+        self.expected_base = expected_base
+        result = self._step(run_id)
+        if result["state"] in {"ready_for_acceptance", "blocked", "failed"}:
+            if result["state"] == "ready_for_acceptance" and claim and claim["epic"]:
+                capacity.hold_ready(run_id)
+            else:
+                capacity.release(run_id)
+        return result
+
+    def _step(self, run_id):
         config = self.config
         run = self.journal.get(run_id)
         if (
@@ -332,6 +392,8 @@ class Delivery:
             doc["state"] = "waiting_ci"
         self.github.scope()
         base = self.github.ref(config["base_branch"])
+        if getattr(self, "expected_base", None) is not None and base != self.expected_base:
+            raise PolicyError("Base changed after prerequisite verification; no dispatch")
         if not base:
             raise PolicyError("Configured base branch is unavailable")
         if doc is None:
@@ -414,6 +476,7 @@ class Delivery:
             try:
                 result = self._worker(run_id, doc, stage, selection)
             except CheckoutProtocolError as exc:
+                self.account_usage(run_id, doc)
                 if getattr(self, "_evidence_only", False):
                     doc.update(state="blocked", reason=str(exc))
                     return self._save(run_id, doc)
@@ -476,6 +539,11 @@ class Delivery:
                 doc.update(state="implementing")
             elif stage in {"implementing", "fixing"}:
                 changes_checked(result["payload"].get("changes"), config["allowed_paths"])
+                from .capacity import Capacity
+
+                claim = Capacity(self.journal, config).get(run_id)
+                if claim:
+                    changes_checked(result["payload"]["changes"], claim["paths"])
                 candidate_gate(config, doc, result["payload"]["changes"])
                 doc.update(candidate=result, validation=None, review=None, state="publishing")
             elif stage == "validating":

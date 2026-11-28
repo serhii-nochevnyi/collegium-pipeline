@@ -87,3 +87,8 @@ queued receipts before observing so loss of that read never causes another mutat
 Keep MAC/request/owner/namespace/status verification. Regression tests cover late queue
 claim, one submission, replay after failed observation and unchanged SQLite after a
 checkpoint policy failure. Put diagnostics outside SQLite to preserve exact tick adoption.
+
+Installed-cloud acceptance completed2026-11-28. PR4 red/fix/green and observation-only
+post-deadline finalization/replay verified from installedbundle15. No deadline extension,
+new task/config or local service controller. Official9-job/8accepted/1aborted audit and
+pausedflags in reports/cloud-ci-repair-verification.json.
