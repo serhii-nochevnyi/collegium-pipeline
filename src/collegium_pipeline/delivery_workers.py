@@ -165,8 +165,12 @@ class NativeJobs:
                 and stage == "planning"
                 and task.source_id
                 in {
-                    "epic-service:" + self.config["epic_service_test"]["suite_id"] + ":A",
-                    "epic-service:" + self.config["epic_service_test"]["suite_id"] + ":B",
+                    "epic-service:" + self.config["epic_service_test"]["suite_id"] + suffix
+                    for suffix in (
+                        (":v2:A", ":v2:B")
+                        if self.config["epic_service_test"].get("revision", 1) == 2
+                        else (":A", ":B")
+                    )
                 }
                 else 0
             ),

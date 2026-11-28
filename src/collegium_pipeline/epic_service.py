@@ -13,12 +13,19 @@ from .domain import PolicyError, Task, digest
 from .epic_cloud import summary
 from .epics import Epics
 from .native_broker import NativeGithubApp, ScriptTransport
-from .recovery import Checkpoints, ExternalRecoveryRequired, WriteAhead, mac, reconcile_existing
+from .recovery import (
+    Checkpoints,
+    ExternalRecoveryRequired,
+    WriteAhead,
+    mac,
+    reconcile_existing,
+    recovery_profiles,
+)
 from .store import Journal
 
 
-def fixtures():
-    return {
+def fixtures(revision=2):
+    values = {
         "A": (
             "import unittest\n\nVALUE_A = 19\n\nclass ServiceATests(unittest.TestCase):\n"
             "    def test_a(self):\n        self.assertEqual(VALUE_A, 19)\n"
@@ -32,6 +39,15 @@ def fixtures():
             "from test_epic_service_b import VALUE_B\n\nclass ServiceCTests(unittest.TestCase):\n"
             "    def test_combined(self):\n        self.assertEqual(VALUE_A + VALUE_B, 56)\n"
         ),
+    }
+
+    if revision == 1:
+        return values
+    return {
+        k: v.replace("import unittest\nfrom", "import unittest\n\nfrom").replace(
+            "\n\nclass ", "\n\n\nclass "
+        )
+        for k, v in values.items()
     }
 
 
@@ -164,7 +180,7 @@ def baseline(engine, root, key):
             if name == "C" and not {"A", "B"} <= applied:
                 raise PolicyError("Service integration history violated A/B before C")
             applied.add(name)
-            content = fixtures()[name].encode()
+            content = fixtures(spec.get("revision", 1))[name].encode()
             sha = hashlib.sha1(
                 b"blob " + str(len(content)).encode() + b"\0" + content, usedforsecurity=False
             ).hexdigest()
@@ -201,12 +217,14 @@ def observe_overlap(http, workers):
 
 def graph(config):
     suite = config["epic_service_test"]["suite_id"]
+    revision = config["epic_service_test"].get("revision", 1)
+    prefix = f"epic-service:{suite}" + (f":v{revision}" if revision > 1 else "")
 
     def task(key, requirements):
         return asdict(
             Task(
                 "text",
-                f"epic-service:{suite}:{key}",
+                f"{prefix}:{key}",
                 config["repository"],
                 f"SERVICE ONLY epic {key}",
                 requirements,
@@ -231,7 +249,7 @@ def graph(config):
                 "paths": [paths()[i]],
                 "resources": [],
             }
-            for i, (key, content) in enumerate(fixtures().items())
+            for i, (key, content) in enumerate(fixtures(revision).items())
         ],
     }
 
@@ -297,10 +315,76 @@ def inspect(engine, root):
     }
 
 
-def run(event, state, config, environ, http, hooks):
+def legacy_roots(journal, legacy):
+    if legacy is None:
+        return []
+    if not journal.connection.execute("SELECT 1 FROM sqlite_master WHERE name='epics'").fetchone():
+        return []
+    return [
+        row[0]
+        for row in journal.connection.execute(
+            "SELECT e.run_id FROM epics e JOIN runs r ON r.id=e.run_id WHERE r.config_digest=?",
+            (config_digest(legacy),),
+        )
+    ]
+
+
+def retire_legacy(journal, legacy, http, state):
+    if legacy is None:
+        raise PolicyError("No archived fixed service profile to retire")
+    engine = Epics(
+        legacy,
+        journal,
+        lambda root: NativeGithubApp(legacy, http, journal, root),
+        http,
+        state / "artifacts",
+    )
+    pending = []
+    roots = legacy_roots(journal, legacy)
+    for root in roots:
+        doc = engine.load(root)
+        if doc["graph_digest"] != digest(graph(legacy)):
+            raise PolicyError("Archive does not match the fixed rejected fixture graph")
+        for node in doc["nodes"].values():
+            child = node["run_id"]
+            driver = engine.driver(child)
+            pending.extend(driver.workers.drain(child)["pending"])
+            delivery = driver._load(child)
+            if delivery:
+                driver.account_usage(child, delivery)
+                delivery.update(
+                    state="blocked", reason="Rejected fixture formatting; explicit new revision"
+                )
+                driver._save(child, delivery)
+            if not engine.capacity.release(child):
+                pending.append(child)
+            node.update(state="blocked", reason="Explicit rejected-fixture retirement")
+        doc.update(
+            state="blocked",
+            paused=True,
+            reason="Retired fixture revision1 after terminal drain",
+            fixture_retired=not pending,
+        )
+        engine.save(root, doc)
+        if not engine.capacity.release(root):
+            pending.append(root)
+        doc["fixture_retired"] = not pending
+        engine.save(root, doc)
+        journal.checkpoint({"kind": "tick", "run_id": root})
+    return {
+        "state": "retiring" if pending else "retired",
+        "retired_roots": roots,
+        "pending": pending,
+        "pilot_selected": False,
+        "workers": [],
+        "nodes": {},
+    }
+
+
+def run(event, state, config, environ, http, hooks, *, legacy=None):
     guard = {}
     try:
-        return _run(event, state, config, environ, http, hooks, guard)
+        return _run(event, state, config, environ, http, hooks, guard, legacy)
     finally:
         if not guard.get("fenced") and event.get("mode") not in {"preflight", "inspect"}:
             try:
@@ -317,12 +401,13 @@ def run(event, state, config, environ, http, hooks):
                 hooks["save_receipt"](target, identity)
 
 
-def _run(event, state, config, environ, http, hooks, guard):
+def _run(event, state, config, environ, http, hooks, guard, legacy):
     if set(event) != {"action", "mode"} or event.get("mode") not in {
         "preflight",
         "run",
         "inspect",
         "crash",
+        "retire",
     }:
         raise PolicyError("Fixed epic service mode accepts no arbitrary event fields")
     if config["execution_enabled"] or config["broker_enabled"]:
@@ -356,21 +441,48 @@ def _run(event, state, config, environ, http, hooks, guard):
         )
         return 0
     scoped = {**config, "execution_enabled": True, "broker_enabled": True}
+    archived = {**legacy, "execution_enabled": True, "broker_enabled": True} if legacy else None
+    profiles = recovery_profiles(scoped, archived) if archived else None
     state.mkdir(mode=0o700, parents=True, exist_ok=True)
     fence = None
     try:
         try:
             fence, receipt = hooks["cloud_fence"](event, state, environ, http, epic_service=True)
         except ExternalRecoveryRequired:
-            hooks["reconcile_controller"](scoped, state, http, key)
+            hooks["reconcile_controller"](scoped, state, http, key, profiles=profiles)
             fence, receipt = hooks["cloud_fence"](event, state, environ, http, epic_service=True)
         guard["fenced"] = True
         with serial_lock(state / "journal.sqlite3"):
             journal = Journal(state / "journal.sqlite3")
             try:
+                writer = archived if event["mode"] == "retire" and archived else scoped
                 journal.before_effect = WriteAhead(
-                    scoped, journal, state / "artifacts", Checkpoints(scoped, http, key), identity
+                    writer,
+                    journal,
+                    state / "artifacts",
+                    Checkpoints(writer, http, key),
+                    identity,
+                    profiles=profiles,
                 ).save
+                if event["mode"] == "retire":
+                    reconcile_existing(
+                        scoped,
+                        journal,
+                        http,
+                        NativeGithubApp(scoped, http, journal, None),
+                        profiles=profiles,
+                    )
+                    result = retire_legacy(journal, archived, http, state)
+                    print("COLLEGIUM_EPIC_SERVICE_RESULT=" + json.dumps(result), flush=True)
+                    return 0
+                for previous in legacy_roots(journal, archived):
+                    prior = journal.connection.execute(
+                        "SELECT document FROM epics WHERE run_id=?", (previous,)
+                    ).fetchone()
+                    if not json.loads(prior[0]).get("fixture_retired"):
+                        raise PolicyError(
+                            "Retire the rejected fixed service revision before new work"
+                        )
                 engine = Epics(
                     scoped,
                     journal,
@@ -393,7 +505,11 @@ def _run(event, state, config, environ, http, hooks, guard):
                     )
                     return 0
                 reconcile_existing(
-                    scoped, journal, http, NativeGithubApp(scoped, http, journal, root)
+                    scoped,
+                    journal,
+                    http,
+                    NativeGithubApp(scoped, http, journal, root),
+                    profiles=profiles,
                 )
                 if event["mode"] == "crash" and inspect(engine, root)["workers"]:
                     raise PolicyError("Crash probe already started; resume original run")

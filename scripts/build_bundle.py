@@ -207,6 +207,7 @@ def build(config_path, integrations_path, output=DEFAULT_OUTPUT):
             epic_service_test={
                 "hold_seconds": 120,
                 **{k: service[k] for k in ("suite_id", "baseline", "main_sha", "expires_at")},
+                "revision": service.get("revision", 1),
             },
         )
         diagnostic["epic"]["jira"] = None
@@ -217,6 +218,11 @@ def build(config_path, integrations_path, output=DEFAULT_OUTPUT):
         )
         load_config(output / "controller/epic-service-settings.json")
         script_files.append("controller/epic-service-settings.json")
+        archived = ROOT / "config/epic-service-v1-settings.json"
+        if archived.exists():
+            write("controller/epic-service-v1-settings.json", archived.read_text())
+            load_config(output / "controller/epic-service-v1-settings.json")
+            script_files.append("controller/epic-service-v1-settings.json")
     runtime_integrations = {
         k: v
         for k, v in integrations.items()
@@ -392,7 +398,9 @@ def build(config_path, integrations_path, output=DEFAULT_OUTPUT):
             k: service[k]
             for k in ("suite_id", "base_branch", "baseline", "main_sha", "ci_probe", "expires_at")
         }
-        merge_policy["fixtures"] = dict(zip(paths(), fixtures().values(), strict=True))
+        merge_policy["fixtures"] = dict(
+            zip(paths(), fixtures(service.get("revision", 1)).values(), strict=True)
+        )
         from collegium_pipeline.epic_service import graph
 
         merge_policy["graph_digest"] = digest(graph(diagnostic))

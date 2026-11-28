@@ -496,3 +496,209 @@ class EpicServiceTests(unittest.TestCase):
                     self.scope, self.policy, pr, self.request["payload"]["acceptance"]
                 )
         self.assertFalse(any(c[1] == "push" or "merge" in c[1:] for c in calls))
+
+    def test_corrected_fixture_revision_passes_actual_ruff_gates(self):
+        import subprocess
+
+        with tempfile.TemporaryDirectory() as folder:
+            for path, content in zip(paths(), fixtures(2).values(), strict=True):
+                (Path(folder) / Path(path).name).write_text(content)
+            for args in (["check"], ["format", "--check"]):
+                result = subprocess.run(
+                    [
+                        sys.executable,
+                        "-m",
+                        "ruff",
+                        *args,
+                        "--config",
+                        str(ROOT / "pyproject.toml"),
+                        folder,
+                    ],
+                    capture_output=True,
+                    text=True,
+                )
+                self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+
+    def test_revision_changes_identity_without_rewriting_original_acceptance(self):
+        original = load_config(ROOT / "config/epic-service-v1-settings.json")
+        old = graph(original)
+        new = graph(self.config)
+        self.assertNotEqual(old["epic"]["source_id"], new["epic"]["source_id"])
+        self.assertNotEqual(digest(old), digest(new))
+        self.assertTrue(all(":v2:" in n["task"]["source_id"] for n in new["tickets"]))
+        self.assertNotEqual(fixtures(1)["A"], fixtures(2)["A"])
+
+    def test_retirement_retains_unknown_claims_and_only_releases_terminal_intents(self):
+        from collegium_pipeline.domain import Task
+        from collegium_pipeline.epic_service import retire_legacy
+        from collegium_pipeline.epics import Epics
+        from collegium_pipeline.store import Journal
+
+        legacy = load_config(ROOT / "config/epic-service-v1-settings.json")
+        legacy.update(execution_enabled=True, broker_enabled=True)
+        with tempfile.TemporaryDirectory() as folder:
+            state = Path(folder)
+            journal = Journal(state / "journal.sqlite3")
+            http = Mock()
+            try:
+                engine = Epics(legacy, journal, Mock(), http, state / "artifacts")
+                root = engine.admit(graph(legacy))["run_id"]
+                child = engine.load(root)["nodes"]["A"]["run_id"]
+                worker = journal.admit(
+                    Task(
+                        "text",
+                        child + ":0:planning:0",
+                        legacy["repository"],
+                        "Worker",
+                        "Unknown launch",
+                    ),
+                    config_digest(legacy),
+                    purpose="delivery_worker",
+                )
+                journal.begin_dispatch(worker, 0, {}, "immutable")
+                result = retire_legacy(journal, legacy, http, state)
+                self.assertEqual(result["state"], "retiring")
+                self.assertIn(worker, result["pending"])
+                self.assertFalse(engine.load(root)["fixture_retired"])
+                self.assertNotEqual(engine.capacity.get(child)["state"], "released")
+                http.request.assert_not_called()
+                journal.connection.execute(
+                    "UPDATE runs SET pending_intent=NULL,state='failed' WHERE id=?", (worker,)
+                )
+                self.assertEqual(retire_legacy(journal, legacy, http, state)["state"], "retired")
+                self.assertTrue(engine.load(root)["fixture_retired"])
+                self.assertEqual(engine.capacity.get(child)["state"], "released")
+            finally:
+                journal.close()
+
+    def test_retirement_cannot_hide_an_unknown_github_action(self):
+        from collegium_pipeline.epic_service import retire_legacy
+        from collegium_pipeline.epics import Epics
+        from collegium_pipeline.store import Journal
+
+        legacy = load_config(ROOT / "config/epic-service-v1-settings.json")
+        legacy.update(execution_enabled=True, broker_enabled=True)
+        with tempfile.TemporaryDirectory() as folder:
+            state = Path(folder)
+            journal = Journal(state / "journal.sqlite3")
+            try:
+                engine = Epics(legacy, journal, Mock(), Mock(), state / "artifacts")
+                root = engine.admit(graph(legacy))["run_id"]
+                child = engine.load(root)["nodes"]["A"]["run_id"]
+                journal.record(child, "broker_intent", {"key": "branch", "identity": "pending"})
+                result = retire_legacy(journal, legacy, Mock(), state)
+                self.assertEqual(result["state"], "retiring")
+                self.assertIn(child, result["pending"])
+                self.assertFalse(engine.load(root)["fixture_retired"])
+                journal.record(
+                    child, "broker_done", {"key": "branch", "identity": "pending", "result": {}}
+                )
+                self.assertEqual(retire_legacy(journal, legacy, Mock(), state)["state"], "retired")
+            finally:
+                journal.close()
+
+    def test_actual_signed_retire_then_revision2_admission_preserves_both_roots(self):
+        from dataclasses import asdict
+
+        from test_recovery import RecoveryTests
+
+        from collegium_pipeline.domain import Task
+        from collegium_pipeline.epic_service import legacy_roots
+        from collegium_pipeline.epics import Epics
+        from collegium_pipeline.platform import Collegium
+        from collegium_pipeline.recovery import WriteAhead
+        from collegium_pipeline.store import Journal
+
+        f = RecoveryTests()
+        f.setUp()
+        self.addCleanup(f.tearDown)
+        current = copy.deepcopy(self.config)
+        legacy = load_config(ROOT / "config/epic-service-v1-settings.json")
+        for cfg in (current, legacy):
+            cfg.update(
+                project_id="project",
+                repository="owner/repo",
+                repository_id=123,
+                workers={"executor": asdict(f.binding)},
+            )
+            cfg["recovery_store"]["owner"] = "aut_owner"
+        admitted = {**legacy, "execution_enabled": True, "broker_enabled": True}
+        identity = {**f.identity, "run_id": "run_retire", "attempt_id": "att_retire"}
+        with tempfile.TemporaryDirectory() as folder:
+            state = Path(folder)
+            journal = Journal(state / "journal.sqlite3")
+            self.assertEqual(legacy_roots(journal, admitted), [])
+            engine = Epics(admitted, journal, Mock(), f.http, state / "artifacts")
+            oldroot = engine.admit(graph(admitted))["run_id"]
+            child = engine.load(oldroot)["nodes"]["A"]["run_id"]
+            engine.driver(child)._save(
+                child,
+                {"state": "planning", "cycle": 0, "head": self.policy["baseline"], "tokens": 0},
+            )
+            worker = journal.admit(
+                Task("text", child + ":0:planning:0", "owner/repo", "Worker", "Same intent"),
+                config_digest(admitted),
+                purpose="delivery_worker",
+            )
+            Collegium(f.http).dispatch(
+                journal,
+                worker,
+                0,
+                binding=f.binding,
+                selection=f.selection,
+                prompt="Same intent",
+                execution_enabled=True,
+            )
+            f.http.turns[0].update(status="completed", finished_at="2026-11-28T00:00:00Z")
+            WriteAhead(admitted, journal, state / "artifacts", f.store, f.identity).save(
+                {"kind": "tick", "run_id": oldroot}
+            )
+            journal.close()
+            posts = len(f.http.posts)
+            hooks = {
+                "cloud_identity": lambda _: identity,
+                "cloud_fence": Mock(return_value=(state / "cloud-fence.json", identity)),
+                "save_receipt": runpy.run_path(str(ROOT / "scripts/bundle_controller.py"))[
+                    "save_receipt"
+                ],
+                "reconcile_controller": Mock(),
+            }
+            with patch("collegium_pipeline.epic_service.Checkpoints", return_value=f.store):
+                run(
+                    {"action": "epic-service", "mode": "retire"},
+                    state,
+                    current,
+                    {"PIPELINE_CONTROL_KEY": self.secret},
+                    f.http,
+                    hooks,
+                    legacy=legacy,
+                )
+            self.assertEqual(f.store.get()[1]["config_digest"], config_digest(admitted))
+            with (
+                patch("collegium_pipeline.epic_service.Checkpoints", return_value=f.store),
+                patch(
+                    "collegium_pipeline.epic_service.baseline", return_value=self.policy["baseline"]
+                ),
+                patch.object(Epics, "step", return_value={}),
+            ):
+                run(
+                    {"action": "epic-service", "mode": "run"},
+                    state,
+                    current,
+                    {"PIPELINE_CONTROL_KEY": self.secret},
+                    f.http,
+                    hooks,
+                    legacy=legacy,
+                )
+            self.assertEqual(len(f.http.posts), posts)
+            self.assertNotEqual(f.store.get()[1]["config_digest"], config_digest(admitted))
+            journal = Journal(state / "journal.sqlite3")
+            try:
+                rows = journal.connection.execute("SELECT run_id,document FROM epics").fetchall()
+                self.assertEqual(len(rows), 2)
+                old = next(json.loads(row[1]) for row in rows if row[0] == oldroot)
+                self.assertTrue(old["fixture_retired"])
+                self.assertEqual(old["state"], "blocked")
+                self.assertIsNone(journal.get(worker)["pending_intent"])
+            finally:
+                journal.close()

@@ -1170,7 +1170,11 @@ def main(event=None, *, root=None, environ=None, http=None):
             raise PolicyError("Epic service requires disabled production settings")
         key = environ.get("PIPELINE_CONTROL_KEY")
         http = http or (JsonHttp(diagnostic["server"], {"X-Api-Key": key}) if key else None)
-        return run(event, state / "cloud-epic-service", diagnostic, environ, http, globals())
+        archive = root / "epic-service-v1-settings.json"
+        legacy = load_config(archive) if archive.exists() else None
+        return run(
+            event, state / "cloud-epic-service", diagnostic, environ, http, globals(), legacy=legacy
+        )
     if action == "verify-control":
         if event != {"action": "verify-control"}:
             raise PolicyError("Control verification accepts no event parameters")

@@ -1,3 +1,21 @@
+# Live epic service revision2 replan pending — 2026-11-28
+
+Installed controller v18 source1c4bc82d6dbfb7f38a722f3215c2f54eacbecaec.
+Original graph root2bdb1491-88ca-4b82-8c95-e01e64d98759 proved realA/B running overlap,
+controller crash cancellation run_a6c4afa30e0a493482075314da24b620 and signed restore
+run_75c2662a0ec944ce95636d8d7dbae824, exactlysame2sessions/turns, C queued.
+Both original planners terminalcompleted; no candidate commits or ticket PRs.
+Original fixtures failed Ruff formatting. Explicit revision2 now fixes fixtures, new :v2:
+source identities, archived v18 settings config/epic-service-v1-settings.json exacthash1e63...
+Mode retire will drain/account original turns and release claims only after zero unknown
+worker OR GitHub effects, marking fixture_retired. New work refuses until that marker.
+Service broker v10 currentpolicyrevision2 pin04c341...; all16 automations paused. Do NOT
+run the oldv18 diagnostic now; pending source/bundle install updates its profile/binding.
+No product/Jira pilot. Base still ed79, main unchanged. CI probe PR5 never merge.
+Evidence .local/epic-live-controller-runs.json + .local/epic-live-crash-result.json.
+
+Earlier chronological notes follow; this active status supersedes old preparation notes.
+
 # Active installed-bundle live epic service verification — 2026-11-28
 
 Prepare fixed A/B -> C service, isolated base collegium/c5b7d3d9-9db7-4552-8e0e-fbfe99b27001

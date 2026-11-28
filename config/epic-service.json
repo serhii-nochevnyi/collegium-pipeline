@@ -11,7 +11,7 @@
   "broker_name": "pipeline-native-broker-1474663859-v10",
   "native_broker": {
     "automation_id": "aut_0631ecd7ec2b4ae9a166f9f9b2b9ed77",
-    "approved_digest": "1c7f0ad4dd81c0d6c4f2b199ae5ae99b21dd68d15cfd1081e6ed6cb6879a9946"
+    "approved_digest": "04c341be9d0a8d9c6078514ee52676176928b9bf210aa0603141537cad557877"
   },
   "recovery_name": "pipeline-epic-service-recovery-v1",
   "recovery_store": {
@@ -19,5 +19,6 @@
     "approved_digest": "8c92a7ea707234d9e9f6b2bce63f8b5103ddeedd8d66fca68defc71e6c9f22e4",
     "owner": "aut_2ea6d08b772f41d5a9fa236cb19f93d8"
   },
-  "expires_at": 1795961938
+  "expires_at": 1795961938,
+  "revision": 2
 }
